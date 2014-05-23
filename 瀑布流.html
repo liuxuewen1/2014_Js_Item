@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0}
+ul,li{list-style:none}
+div{width:620px; margin:10px auto;}
+ul{ float:left; margin-right:10px; width:200px;}
+ul li{ width:200px; font-size:36px;}
+</style>
+<script>
+window.onload=function(){
+	
+	var aUl=document.getElementsByTagName("ul");
+	
+	window.onscroll=function(){
+		var scrollTop=document.body.scrollTop||document.documentElement.scrollTop;
+		if(getMin().offsetHeight<scrollTop+document.documentElement.clientHeight){
+			fillUl();
+		}
+	}
+	
+	var iNow=1;
+	var bReady=false;
+	function fillUl(){
+		if(bReady) return;
+		bReady=true;
+		
+		var num=1;
+		var timer=setInterval(function(){
+			var oLi=createLi();
+			oLi.innerHTML=iNow++;
+			var minUl=getMin();
+			minUl.appendChild(oLi);
+			if(num==20) {
+				bReady=false;
+				clearInterval(timer);
+				return;
+			}
+			num++;
+			
+		},1);
+				
+	}
+	fillUl();
+	
+	//比较ul大小，取出最小的ul
+	function getMin(){
+		var minUl=aUl[0];
+		for(var i=0;i<aUl.length;i++){
+			if(minUl.offsetHeight>aUl[i].offsetHeight){
+				minUl=aUl[i];
+			}
+		}
+		
+		return minUl;
+	}
+	
+	function createLi(){
+		var oLi=document.createElement("li");
+		oLi.style.height=getRandom(100,300)+"px";
+		oLi.style.background="rgb("+getRandom(0,255)+","+getRandom(0,255)+","+getRandom(0,255)+")";
+		return oLi;
+	}
+	
+}
+
+function getRandom(m,n){
+	return parseInt(Math.random()*(n-m+1)+m);
+}
+</script>
+</head>
+
+<body>
+<div>
+	<ul></ul>
+	<ul></ul>
+	<ul style="margin-right:0;"></ul>
+</div>
+</body>
+</html>
