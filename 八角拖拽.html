@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0}
+#box{ width:300px; height:200px; position:absolute; left:50%; top:50%; margin:-100px 0 0 -150px; background:#ccc;}
+#box div{ position:absolute;}
+#box div.top{ width:300px; height:20px; top:0; left:0; background:#00f;}
+#box div.bottom{ width:300px; height:20px; bottom:0; left:0; background:#00f;}
+#box div.left{ width:20px; height:200px; left:0; top:0; background:#00f;}
+#box div.right{ width:20px; height:200px; right:0; top:0; background:#00f;}
+#box div.leftTop{ width:20px; height:20px; left:0; top:0; background:#f00;}
+#box div.leftBottom{ width:20px; height:20px; left:0; bottom:0; background:#f00;}
+#box div.rightTop{ width:20px; height:20px; right:0; top:0; background:#f00;}
+#box div.rightBottom{ width:20px; height:20px; right:0; bottom:0; background:#f00;}
+</style>
+<script>
+window.onload=function(){
+	var oBox=document.getElementById("box"),
+		oTop=oBox.children[0],
+		oBottom=oBox.children[1],
+		oLeft=oBox.children[2],
+		oRight=oBox.children[3],
+		oLeftTop=oBox.children[4],
+		oLeftBottom=oBox.children[5],
+		oRightTop=oBox.children[6],
+		oRightBottom=oBox.children[7];
+	
+	oTop.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var y=oEvent.clientY;
+		var height=parseInt(getAttr(oBox,"height"));
+		var top=parseInt(getAttr(oBox,"top"));
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var dy=y-oEvent.clientY;
+			oBox.style.height=height+dy+"px";
+			oBox.style.top=top-dy+"px";
+		}
+		document.onmouseup=function(){
+			document.onmousemove=null;
+		}
+	}
+	oBottom.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var y=oEvent.clientY;
+		var height=parseInt(getAttr(oBox,"height"));
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var dy=oEvent.clientY-y;
+			oBox.style.height=height+dy+"px";
+		}
+		document.onmouseup=function(){
+			document.onmousemove=null;
+		}
+	}
+	oLeft.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var x=oEvent.clientX;
+		var width=parseInt(getAttr(oBox,"width"));
+		var left=parseInt(getAttr(oBox,"left"));
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var dx=x-oEvent.clientX;
+			oBox.style.width=width+dx+"px";
+			oBox.style.left=left-dx+"px";
+		}
+		document.onmouseup=function(){
+			document.onmousemove=null;
+		}
+	}
+	oRight.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var x=oEvent.clientX;
+		var width=parseInt(getAttr(oBox,"width"));
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var dx=oEvent.clientX-x; 
+			oBox.style.width=width+dx+"px";
+		}
+		document.onmouseup=function(){
+			document.onmousemove=null;
+		}
+	}
+	
+	oLeftTop.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var oBase=getBase(oEvent, oBox);
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var dx=oEvent.clientX-oBase.X;
+			var dy=oEvent.clientY-oBase.Y;
+			oBox.style.width=oBase.Width-dx+"px";
+			oBox.style.left=oBase.Left+dx+"px";
+			oBox.style.height=oBase.Height-dy+"px";
+			oBox.style.top=oBase.Top+dy+"px";
+		}
+		document.onmouseup=function(){
+			document.onmousemove=null;
+		}
+	}
+	
+	oLeftBottom.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var oBase=getBase(oEvent, oBox);
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var dx=oEvent.clientX-oBase.X;
+			var dy=oEvent.clientY-oBase.Y;
+			oBox.style.height=oBase.Height+dy+"px";
+			oBox.style.width=oBase.Width-dx+"px";
+			oBox.style.left=oBase.Left+dx+"px";
+		}
+		document.onmouseup=function(){
+			document.onmousemove=null;
+		}
+	}
+	oRightTop.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var oBase=getBase(oEvent, oBox);
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var dx=oEvent.clientX-oBase.X;
+			var dy=oBase.Y-oEvent.clientY;
+			oBox.style.width=oBase.Width+dx+"px";
+			oBox.style.height=oBase.Height+dy+"px";
+			oBox.style.top=oBase.Top-dy+"px";
+		}
+		document.onmouseup=function(){
+			document.onmousemove=null;
+		}
+	}
+	oRightBottom.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var oBase=getBase(oEvent, oBox);
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var dx=oEvent.clientX-oBase.X;
+			var dy=oEvent.clientY-oBase.Y;
+			oBox.style.width=oBase.Width+dx+"px";
+			oBox.style.height=oBase.Height+dy+"px";
+		}
+		document.onmouseup=function(){
+			document.onmousemove=null;
+		}
+	}
+	
+	function getBase(oEvent, obj){
+		var x=oEvent.clientX;
+		var y=oEvent.clientY;
+		var width=parseInt(getAttr(obj,"width"));
+		var height=parseInt(getAttr(obj,"height"));
+		var top=parseInt(getAttr(obj,"top"));
+		var left=parseInt(getAttr(obj,"left"));
+		
+		return {X:x,Y:y,Width:width,Height:height,Top:top,Left:left};
+	}
+	 	
+	function getAttr(obj,attr){
+		return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];		
+	}
+	
+	//得到obj的定位距离
+	function getPos(obj){
+		var l=0,t=0;
+		while(obj){
+			l+=obj.offsetLeft;
+			t+=obj.offsetTop;
+			obj=obj.offsetParent;
+		}
+		return {left:l, top:t};
+	}
+	
+}
+</script>
+</head>
+
+<body>
+<div id="box">
+	<div class="top"></div>
+	<div class="bottom"></div>
+	<div class="left"></div>
+	<div class="right"></div>
+	<div class="leftTop"></div>
+	<div class="leftBottom"></div>
+	<div class="rightTop"></div>
+	<div class="rightBottom"></div>
+</div>
+</body>
+</html>
