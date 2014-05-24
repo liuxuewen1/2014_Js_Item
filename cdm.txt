@@ -1,0 +1,29 @@
+window.location.search:URL的问号及之后的字符串
+window.location.hash：URL的#号及之后的字符串
+
+createElement:可以任何浏览器通过createElement来创建自定义标签生成DOM，然后通过css标记样式。好处是隔离用户的代码，为了不和网站产生冲突，可以动态创建自定义标签。
+
+obj.parentNode:结构上的父级节点
+obj.offsetParent:定位上的父级节点
+
+document.body -> body
+document.documentElement -> html
+
+offsetLeft:距离上一个有定位父级的left距离
+offsetTop: ... ...		 top距离，如果求相对于body的位置用getPos()
+
+document.documentElement.clientHeight/clientWidth:可视区高度/宽度
+document.documentElement.scrollTop || document.body.scrollTop:纵向滚动条滚动距离
+document.documentElement.scrollLeft||document.body.scrollLeft:横向滚动条滚动距离
+
+事件绑定：
+obj.attachEvent(onclick,fn):
+obj.addEventListener(click,fn,false):
+
+oEvent.cancelBubble=true; 取消事件冒泡
+return false;	取消默认事件（如取消右键菜单的事件）
+document.oncontextmenu:鼠标点击右键事件
+
+document.onkeydown:键盘压下事件
+document.onkeyup 
+
