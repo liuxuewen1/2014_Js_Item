@@ -24,6 +24,11 @@ oEvent.cancelBubble=true; 取消事件冒泡
 return false;	取消默认事件（如取消右键菜单的事件）
 document.oncontextmenu:鼠标点击右键事件
 
+拖拽时：
+阻止选中文字（默认事件）：return false（非IE中）
+IE系中：阻止选中文字obj.setCapture() ，取消阻止 obj.releaseCapture()
+
+
 document.onkeydown:键盘压下事件
 document.onkeyup 
 
