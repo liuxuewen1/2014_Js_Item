@@ -21,7 +21,9 @@ window.onload=function(){
 	var posSmall=getPos(oSmall);
 	
 	oSmall.onmouseover=function(ev){
-		oPop.style.display=oBig.style.display="block";
+		var oEvent=ev||event;	
+		oPop.style.display=oBig.style.display="block";			
+		setPosition(oEvent);
 	}
 	
 	oSmall.onmousemove=function(ev){
