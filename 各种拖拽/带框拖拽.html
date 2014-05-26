@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0}
+#box{ width:200px; height:200px; position:absolute; background:red;}
+.dot{ position:absolute; border:2px dotted #666;}
+</style>
+<script>
+window.onload=function(){
+	var oBox=document.getElementById("box");
+	
+	oBox.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var dx=oEvent.clientX-oBox.offsetLeft;
+		var dy=oEvent.clientY-oBox.offsetTop;
+		var oDot=createDot(oBox);
+		
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var left=oEvent.clientX-dx;
+			var top=oEvent.clientY-dy;
+			left<0 && (left=0);
+			top<0 && (top=0);
+			var maxLeft=document.documentElement.clientWidth-oBox.offsetWidth;
+			left>maxLeft && (left=maxLeft);
+			var maxTop=document.documentElement.clientHeight-oBox.offsetHeight;
+			top>maxTop && (top=maxTop);
+			
+			oDot.style.left=left+"px";
+			oDot.style.top=top+'px';
+		}
+		document.onmouseup=function(){
+			oBox.style.left=oDot.style.left;
+			oBox.style.top=oDot.style.top;
+			document.body.removeChild(oDot);
+			oDot=null;
+			document.onmousemove=document.onmouseup=null;
+			
+			oBox.releaseCapture && oBox.releaseCapture(); //结束后，取消阻止 “选中” IE系中
+		}
+		oBox.setCapture && oBox.setCapture();	//阻止“选中”的默认事件 IE系中
+		return false;	//阻止“选中”的默认事件 非IE系
+	}
+	
+	function createDot(oParent){
+		var dot=document.createElement("div");
+		dot.className='dot';
+		dot.style.left=oParent.offsetLeft+'px';
+		dot.style.top=oParent.offsetTop+'px';
+		dot.style.width=oParent.offsetWidth-4+'px';	//-4:去掉border宽度
+		dot.style.height=oParent.offsetHeight-4+'px';
+		document.body.appendChild(dot);
+		return dot;
+	}
+}
+</script>
+</head>
+
+<body>
+<div id="box">按时打发的是</div>
+</body>
+</html>
