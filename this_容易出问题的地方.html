@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>this容易出问题的地方</title>
+<script>
+window.onload=function(){
+	var oBtn=document.getElementById("btn");
+	
+	//1、定时器中的this
+	/*oBtn.onclick=function(){
+		setTimeout(function(){
+			alert(this);	//this是window对象
+		},100);
+	}*/
+	
+	//2、多包一层的function
+	/*function show(){
+		alert(this);
+	}
+	oBtn.onclick=function(){
+		show();	//弹出window
+	};
+	//如果写成：oBtn.onclick=show;	//this会弹出是input对象
+	*/
+	
+	//3、attachEvent事件中的this
+	/*addEvent(oBtn,'click',function(){
+		alert(this);	//在IE8及以下弹出window，其他高级浏览器弹出input对象
+						//故表明，attachEvent中的this会出错，addEventListener不会
+	});*/
+	
+	//4、元素行间事件中的this
+	oBtn.style.display="none";
+	document.getElementById("btn2").style.display='block';
+}
+	function show2(){
+		alert(this);
+	}
+
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}	
+}
+</script>
+</head>
+
+<body>
+<input type="button" value="点击我" id="btn" />
+<input type="button" value="点击我2" id="btn2" onclick="show2()" style="display:none;" />
+</body>
+</html>
