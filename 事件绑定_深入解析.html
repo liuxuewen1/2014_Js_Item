@@ -1,15 +1,15 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
-<title>ÎŞ±êÌâÎÄµµ</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>æ— æ ‡é¢˜æ–‡æ¡£</title>
 <script>
 window.onload=function(){
 	var oDiv1=document.getElementById("div1"),
 		oDiv2=oDiv1.children[0],
 		oDiv3=oDiv2.children[0];
 	
-	//£¨1£©ÆÕÍ¨Ö±½Ó¸³ÓèÊÂ¼ş£ºÊÂ¼ş»áÃ°Åİ
+	//ï¼ˆ1ï¼‰æ™®é€šç›´æ¥èµ‹äºˆäº‹ä»¶ï¼šäº‹ä»¶ä¼šå†’æ³¡
 	/*oDiv1.onclick=function(){
 		alert("red");
 	}
@@ -20,7 +20,7 @@ window.onload=function(){
 		alert("blue");
 	}*/
 	
-	//£¨2£©°ó¶¨ÊÂ¼ş£¨×îºóÒ»¸ö²ÎÊıÎªfalse£©£ºÊÂ¼şÒ²»áÃ°Åİ£¨´Ó×Ô¼ºµ½¸¸¼¶£©
+	//ï¼ˆ2ï¼‰ç»‘å®šäº‹ä»¶ï¼ˆæœ€åä¸€ä¸ªå‚æ•°ä¸ºfalseï¼‰ï¼šäº‹ä»¶ä¹Ÿä¼šå†’æ³¡ï¼ˆä»è‡ªå·±åˆ°çˆ¶çº§ï¼‰
 	/*oDiv1.addEventListener("click",function(){
 		alert("red");
 	},false);
@@ -31,7 +31,7 @@ window.onload=function(){
 		alert('blue');
 	},false);*/
 	
-	//£¨3£©°ó¶¨ÊÂ¼ş£¨×îºóÒ»¸ö²ÎÊıÎªtrue£©£ºÊÂ¼ş»á²¶»ñ£¨´Ó¸¸¼¶µ½×Ô¼º£©
+	//ï¼ˆ3ï¼‰ç»‘å®šäº‹ä»¶ï¼ˆæœ€åä¸€ä¸ªå‚æ•°ä¸ºtrueï¼‰ï¼šäº‹ä»¶ä¼šæ•è·ï¼ˆä»çˆ¶çº§åˆ°è‡ªå·±ï¼‰
 	/*oDiv1.addEventListener("click",function(){
 		alert("red");
 	},true);
@@ -42,30 +42,30 @@ window.onload=function(){
 		alert('blue');
 	},true);*/
 	
-	/*×¢£ºÉÏÃæ£¨2£©£¨3£©ÖĞ¶ÔaddEventListener()·½·¨×îºóÒ»¸ö²ÎÊıµÄÇø±ğ£º
-	*a¡¢×îºóÒ»¸ö²ÎÊıµÄÒâË¼£ºÊÇ·ñÊÂ¼ş²¶»ñ£¬true-ÊÇ£»false-·ñ
-	*b¡¢µ±ÎªtrueÊ±£¬ÎªÊÂ¼ş²¶»ñ£¬´Ó¸¸¼¶µÄÏàÍ¬ÊÂ¼şÏò×Ô¼ºµÄÊÂ¼ş²¶»ñ
-	*c¡¢µ±ÎªfalseÊ±£¬ÊÂ¼ş²»²¶»ñ£¬ÔòÎªÃ°Åİ£¬´Ó×Ô¼ºµÄÊÂ¼şÏò¸¸¼¶µÄÏàÍ¬ÊÂ¼şÃ°Åİ
-	*d¡¢Ã°ÅİºÍÊÂ¼ş²¶»ñµÄË³ĞòÕıºÃÏà·´
-	*e¡¢ÓÉÓÚattachEvent()·½·¨ÖĞ£¬Ã»ÓĞµÚÈı¸ö²ÎÊı£¬ËùÒÔ´Ó¼æÈİĞÔ¿¼ÂÇ£¬Õâ¸öaddEventListener()ÖĞµÄ×îºóÒ»¸ö²ÎÊıÊÇÃ»ÓĞÒâÒåµÄ£¬Ò»°ãÇé¿öÏÂĞ´³Éfalse¼´¿É
+	/*æ³¨ï¼šä¸Šé¢ï¼ˆ2ï¼‰ï¼ˆ3ï¼‰ä¸­å¯¹addEventListener()æ–¹æ³•æœ€åä¸€ä¸ªå‚æ•°çš„åŒºåˆ«ï¼š
+	*aã€æœ€åä¸€ä¸ªå‚æ•°çš„æ„æ€ï¼šæ˜¯å¦äº‹ä»¶æ•è·ï¼Œtrue-æ˜¯ï¼›false-å¦
+	*bã€å½“ä¸ºtrueæ—¶ï¼Œä¸ºäº‹ä»¶æ•è·ï¼Œä»çˆ¶çº§çš„ç›¸åŒäº‹ä»¶å‘è‡ªå·±çš„äº‹ä»¶æ•è·
+	*cã€å½“ä¸ºfalseæ—¶ï¼Œäº‹ä»¶ä¸æ•è·ï¼Œåˆ™ä¸ºå†’æ³¡ï¼Œä»è‡ªå·±çš„äº‹ä»¶å‘çˆ¶çº§çš„ç›¸åŒäº‹ä»¶å†’æ³¡
+	*dã€å†’æ³¡å’Œäº‹ä»¶æ•è·çš„é¡ºåºæ­£å¥½ç›¸å
+	*eã€ç”±äºattachEvent()æ–¹æ³•ä¸­ï¼Œæ²¡æœ‰ç¬¬ä¸‰ä¸ªå‚æ•°ï¼Œæ‰€ä»¥ä»å…¼å®¹æ€§è€ƒè™‘ï¼Œè¿™ä¸ªaddEventListener()ä¸­çš„æœ€åä¸€ä¸ªå‚æ•°æ˜¯æ²¡æœ‰æ„ä¹‰çš„ï¼Œä¸€èˆ¬æƒ…å†µä¸‹å†™æˆfalseå³å¯
 	*/
 }
 
-//°ó¶¨ÊÂ¼ş¼æÈİĞÔĞ´·¨
+//ç»‘å®šäº‹ä»¶å…¼å®¹æ€§å†™æ³•
 function addEvent(obj, sEv, fn){
 	if(obj.attachEvent){
-		obj.attachEvent('on'+sEv,fn);		//IE8 ¼°ÒÔÏÂ
+		obj.attachEvent('on'+sEv,fn);		//IE8 åŠä»¥ä¸‹
 	}else{
-		obj.addEventListener(sEv,fn,false);	//ÆäËû
+		obj.addEventListener(sEv,fn,false);	//å…¶ä»–
 	}
 }
 
-//½â°óÊÂ¼ş¼æÈİĞÔĞ´·¨
+//è§£ç»‘äº‹ä»¶å…¼å®¹æ€§å†™æ³•
 function removeEvent(obj, sEv, fn){
 	if(obj.detachEvent){
-		obj.detachEvent('on'+sEv,fn);			//IE8 ¼°ÒÔÏÂ
+		obj.detachEvent('on'+sEv,fn);			//IE8 åŠä»¥ä¸‹
 	}else{
-		obj.removeEventListener(sEv,fn,false);	//ÆäËû
+		obj.removeEventListener(sEv,fn,false);	//å…¶ä»–
 	}
 }
 </script>
