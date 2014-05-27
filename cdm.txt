@@ -36,3 +36,9 @@ IE系中：阻止选中文字obj.setCapture() ，取消阻止 obj.releaseCapture()
 document.onkeydown:键盘压下事件
 document.onkeyup 
 
+
+this容易出问题的地方：——切记
+1、定时器
+2、多包一层的function中：oBtn.onclick=function(){ show(); }
+3、attachEvent(sEv,function(){ alert(this) });	//addEventListener()中this没问题
+4、行间事件中 <input type='button' onclick='show()'/>  function show(){ alert(this) };	//弹出window
