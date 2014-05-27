@@ -17,8 +17,12 @@ document.documentElement.scrollTop || document.body.scrollTop:纵向滚动条滚动距离
 document.documentElement.scrollLeft||document.body.scrollLeft:横向滚动条滚动距离
 
 事件绑定：
-obj.attachEvent(onclick,fn):
-obj.addEventListener(click,fn,false):
+1）obj.attachEvent(onclick,fn): 兼容IE8及以下
+2）obj.addEventListener(click,fn,false): 兼容IE9+ FF Chrome
+第2条中的最后一个参数表示是否捕获事件：
+true-捕获，从父级的相同事件向自己的事件捕获
+false-不捕获，相当于冒泡，从自己的事件向父级相同的事件冒泡
+两者的过程正好相反，由于attachEvent没有这个参数，所以根据兼容性考虑，这个参数没有意义，一般情况下写成false即可
 
 oEvent.cancelBubble=true; 取消事件冒泡
 return false;	取消默认事件（如取消右键菜单的事件）
