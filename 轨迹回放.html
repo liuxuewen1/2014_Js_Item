@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0}
+#box{ width:100px; height:100px; position:absolute; left:20px; top:20px; background:blue;}
+</style>
+<script>
+window.onload=function(){
+	var oBox=document.getElementById("box");
+	var oBtn=document.getElementById("btn");
+	var oRoute=[];
+	
+	oBox.onmousedown=function(ev){
+		oRoute=[];
+		
+		var oEvent=ev||event;
+		var dx=oEvent.clientX-oBox.offsetLeft;
+		var dy=oEvent.clientY-oBox.offsetTop;
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var left=oEvent.clientX-dx;
+			var top=oEvent.clientY-dy;
+			left<0 && (left=0);
+			top<0 && (top=0);
+			var maxLeft=document.documentElement.clientWidth-oBox.offsetWidth;
+			var maxTop=document.documentElement.clientHeight-oBox.offsetHeight;
+			left>maxLeft && (left=maxLeft);
+			top>maxTop && (top=maxTop);
+			
+			oBox.style.left=left+'px';
+			oBox.style.top=top+'px';
+			oRoute.push([left,top]);
+		}
+		document.onmouseup=function(){
+			document.onmousemove=document.onmouseup=null;
+			oBox.releaseCapture && oBox.releaseCapture();
+		}
+		oBox.setCapture && oBox.setCapture();
+		return false;
+	}
+	oBtn.onclick=function(){
+		if(!oRoute) return;
+		
+		for(var i=0,len=oRoute.length;i<len;i++){
+			(function(idx){
+				setTimeout(function(){
+					oBox.style.left=oRoute[idx][0]+'px';
+					oBox.style.top=oRoute[idx][1]+'px';
+				},30*idx);
+			})(i);
+		}
+	}
+	
+}
+</script>
+</head>
+
+<body>
+<input type="button" id="btn" value="轨迹回放" />
+<div id="box"></div>
+</body>
+</html>
