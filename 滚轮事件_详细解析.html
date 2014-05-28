@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0;}
+#box{ width:100px; height:100px; background:green;}
+</style>
+<script>
+window.onload=function(){
+	var oBox=document.getElementById('box');
+	
+	mouseWheel(oBox, function(bDown){
+		bDown?alert("下"):alert("上");
+	});
+}
+
+//鼠标滚轮事件
+function mouseWheel(obj,fn){
+	if(navigator.userAgent.toLowerCase().indexOf("firefox")!=-1){
+	
+		//FF中的滚轮事件是DOMMouseScroll，这是一个DOM事件，而DOM事件必须绑定才能使用
+		//oEvent.detail：>0 向下滚动；<0 向上滚动	跟onmousewheel中的wheelDelta正好相反
+		addEvent(obj,'DOMMouseScroll',function(ev){
+			var oEvent=ev||event;
+			var bDown=oEvent.detail>0?true:false;
+			fn && fn(bDown);
+		});
+		
+	}else{
+		//onmousewheel兼容Chrome、IE	
+		//oEvent.wheelDelta：>0 向上滚动；<0 向下滚动
+		addEvent(obj,'mousewheel',function(ev){
+			var oEvent=ev||event;
+			var bDown=oEvent.wheelDelta>0?false:true;
+			fn && fn(bDown);
+		});
+		
+	}
+	
+}
+
+//绑定事件
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+</script>
+</head>
+
+<body>
+<div id='box'></div>
+</body>
+</html>
