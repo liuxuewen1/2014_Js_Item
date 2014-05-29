@@ -1,4 +1,26 @@
 
+//domReady事件
+function domReady(fn){
+	if(document.addEventListener){
+		//FF Chrome IE9+
+		document.addEventListener('DOMContentLoaded',function(){
+			fn && fn();												  
+		},false);
+		
+	}else{
+		//IE8及以下
+		document.write("<script id='lxw_IE_Ready' defer><\/script>");
+		var oScript=document.getElementById('lxw_IE_Ready');
+		oScript.onreadystatechange=function(){
+			if(oScript.readyState=='complete'){
+				fn && fn();
+			}
+		}
+		
+	}
+	
+}
+
 //鼠标滚轮事件
 function mouseWheel(obj,fn){
 	if(navigator.userAgent.toLowerCase().indexOf("firefox")!=-1){
