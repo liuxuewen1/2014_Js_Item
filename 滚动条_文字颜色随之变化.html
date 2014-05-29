@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0}
+#bar{ width:400px; height:100px; position:relative; margin:30px auto;}
+#top{ width:60px; height:30px; position:absolute; left:0; top:0; background:red;}
+#load{ width:400px; height:40px; position:absolute; left:0; top:60px; background:#ccc; text-align:center; line-height:40px; font-weight:bold;}
+#load div{ width:0; height:40px; overflow:hidden; position:absolute; left:0; top:0;}
+#load div p{ width:400px; height:40px; background:#00f; text-align:center; color:#fff; position:absolute; left:0; top:0;}
+</style>
+<script>
+window.onload=function(){
+	var oBar=document.getElementById('bar'),
+		oTop=document.getElementById('top'),
+		oLoad=document.getElementById('load'),
+		oSpan=oLoad.children[0],
+		oP=oLoad.children[1].children[0];
+		
+	oTop.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var dx=oEvent.clientX-oTop.offsetLeft;
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var left=oEvent.clientX-dx;
+			
+			setLoad(left);
+		}
+		document.onmouseup=function(){
+			document.onmousemove=document.onmouseup=null;
+			oTop.releaseCapture && oTop.releaseCapture();
+		}
+		
+		oTop.setCapture && oTop.setCapture();
+		return false;
+	}
+	
+	function setLoad(left){
+		left<0 && (left=0);
+		var maxLeft=oBar.offsetWidth-oTop.offsetWidth;
+		left>maxLeft && (left=maxLeft);			
+		oTop.style.left=left+'px';
+		
+		var bili=left/maxLeft;
+		oP.parentNode.style.width=oBar.offsetWidth*bili+'px';
+		
+		oP.innerHTML=oSpan.innerHTML=Math.ceil(bili*100)+'%';
+	}
+	
+	mouseWheel(oBar,function(bDown){
+		var speed;
+		bDown?speed=10:speed=-10;
+		setLoad(oTop.offsetLeft+speed);
+	});
+}
+
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+function mouseWheel(obj,fn){
+	if(navigator.userAgent.toLowerCase().indexOf('firefox')!=-1){
+		addEvent(obj,'DOMMouseScroll',function(ev){
+			var oEvent=ev||event;
+			var bDown=oEvent.detail>0?true:false;
+			fn && fn(bDown);
+		});
+	}else{
+		addEvent(obj,'mousewheel',function(ev){
+			var oEvent=ev||event;
+			var bDown=oEvent.wheelDelta>0?false:true;
+			fn && fn(bDown);
+		});
+	}
+}
+</script>
+</head>
+
+<body>
+
+<div id="bar">
+	<div id="top"></div>
+
+	<div id="load">
+		<span>0%</span>
+		<div>
+			<p>0%</p>
+		</div>		
+	</div>
+</div>
+	
+</body>
+</html>
