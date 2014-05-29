@@ -17,8 +17,8 @@ document.documentElement.scrollTop || document.body.scrollTop:纵向滚动条滚动距离
 document.documentElement.scrollLeft||document.body.scrollLeft:横向滚动条滚动距离
 
 事件绑定：
-1）obj.attachEvent(onclick,fn): 兼容IE8及以下
-2）obj.addEventListener(click,fn,false): 兼容IE9+ FF Chrome
+1）obj.attachEvent(onclick,fn): 兼容IE8及以下（删除绑定 detachEvent(onclick,fn)）
+2）obj.addEventListener(click,fn,false): 兼容IE9+ FF Chrome（删除绑定 removeEventListener(click,fn,false)）
 第2条中的最后一个参数表示是否捕获事件：
 true-捕获，从父级的相同事件向自己的事件捕获
 false-不捕获，相当于冒泡，从自己的事件向父级相同的事件冒泡
@@ -42,3 +42,32 @@ this容易出问题的地方：——切记
 2、多包一层的function中：oBtn.onclick=function(){ show(); }
 3、attachEvent(sEv,function(){ alert(this) });	//addEventListener()中this没问题
 4、行间事件中 <input type='button' onclick='show()'/>  function show(){ alert(this) };	//弹出window
+
+兄弟节点：obj.nextsibling || obj.nextElementsibling
+obj.previoussibling || obj.previousElementsibling
+
+鼠标滚轮事件：
+Chrome、IE系：onmousewheel事件，oEvent.wheelDelta >0 向上滚动；oEvent.wheelDelta<0 向上滚动 wheelDelta每次滚动值是120、-120
+Firefox：DOMMouseScroll事件，这是一个DOM事件，必须通过绑定addEventListener才能使用，oEvent.detail>0 向下；oEvent.detail<0 向上，跟上面正好相反 每次滚动值 3、-3
+
+微博字数统计：使用oninput、onpropertychange事件来兼容，但在ie9删除文字时不好使存在bug，做法时 ie9下聚焦时开启定时器来计数，失去焦点再关闭计时器
+
+
+oEvent小结：
+oEvent.clientX/clientY
+oEvent.keyCode
+oEvent.cancelBubble=true
+oEvent.detail/wheelDelta
+oEvent.preventDefault()	//FF阻止默认事件
+
+
+页面的加载顺序：
+1）dom加载完成	-》
+FF、Chrome、IE9+ 对应事件 DOMContentLoaded ； 
+IE 通过defer特殊标签 <script defer>..</script>
+IE中如果要动态创建script标签，判断加载完成的事件是onreadystatechange，其中的readyState属性为 complete 则完成可以执行事件
+动态创建script标签 还可以改成 document.write('<script ..><\/script>') 比创建DOM更快
+2）图片加载完成  -》图片的onload事件触发
+3）onload最后加载完成	-》最后才是onload
+综上，onload太慢了，因为加载图片非常不靠谱，所以一般事件放在dom加载完就可以做
+
