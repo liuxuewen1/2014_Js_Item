@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0;}
+ul{ height:500px; list-style:none;}
+#div{ width:100%; height:100px; background:#0f0;}
+#div2{ width:100%; height:100px; background:#0f0; display:none;}
+</style>
+<script>
+//domReady事件
+function domReady(fn){
+	if(document.addEventListener){
+		addEvent(document,'DOMContentLoaded',function(){ fn && fn(); });
+	}else{
+		document.write('<script id="lxw_IE_Ready" defer><\/script>');
+		var oScript=document.getElementById('lxw_IE_Ready');
+		addEvent(document,'readystatechange',function(){ fn && fn(); });
+	}
+}
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+</script>
+<script>
+domReady(function(){
+	var oDiv=document.getElementById('div'),
+		oDiv2=document.getElementById('div2'),
+		iTop=getPos(oDiv).top;
+		
+	addEvent(window,'scroll',function(){
+		var scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
+		if(scrollTop>=iTop){
+			oDiv.style.position='fixed';
+			oDiv.style.top='0px';
+			//由于div设置成fixed后，元素飘起来 所以在页面不占位置，此时需要拿一个相同的元素顶着，否则后面的元素会往上走，会突然消失
+			oDiv2.style.display='block';	
+		}else{
+			oDiv.style.position='';
+			oDiv2.style.display='none';
+		}
+		
+	});
+});
+//定位距离
+function getPos(obj){
+	var l=0,t=0;
+	while(obj){
+		l+=obj.offsetLeft;
+		t+=obj.offsetTop;
+		obj=obj.offsetParent;
+	}
+	return {left:l,top:t};
+}
+</script>
+</head>
+
+<body style="height:2000px;">
+<ul>
+<li></li>
+</ul>
+adadfasdadsfasdf<br/>
+adadfasdadsfasdf<br/>
+adadfasdadsfasdf<br/>
+adadfasdadsfasdf<br/>
+<div id='div'></div>
+<div id='div2'></div>
+adadfasdadsfasdf<br/>
+adadfasdadsfasdf<br/>
+adadfasdadsfasdf<br/>
+adadfasdadsfasdf<br/>
+adadfasdadsfasdf<br/>
+</body>
+</html>

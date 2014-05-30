@@ -1,6 +1,8 @@
 window.location.search:URL的问号及之后的字符串
 window.location.hash：URL的#号及之后的字符串
 
+document.creatDocumentFragment();	//创建文档碎片节点
+
 createElement:可以任何浏览器通过createElement来创建自定义标签生成DOM，然后通过css标记样式。好处是隔离用户的代码，为了不和网站产生冲突，可以动态创建自定义标签。
 
 obj.parentNode:结构上的父级节点
@@ -71,3 +73,4 @@ IE中如果要动态创建script标签，判断加载完成的事件是onreadystatechange，其中的read
 3）onload最后加载完成	-》最后才是onload
 综上，onload太慢了，因为加载图片非常不靠谱，所以一般事件放在dom加载完就可以做
 
+position:fixed：相对于浏览器窗口定位，设置top left bottom right，无论怎么滚动 元素都会留在那个位置
