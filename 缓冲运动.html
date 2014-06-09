@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0}
+#box{width:100px; height:100px; background:#0f0; position:absolute;}
+</style>
+<script>
+window.onload=function(){	
+	var oBox=document.getElementById('box');
+	var oBtn=document.getElementById('btn');
+	var timer=null;
+	oBtn.onclick=function(){
+		startMove(oBox,{top:200,left:160,opacity:20},function(){
+			alert('over');
+		});
+	};
+	
+	function startMove(obj,json,fn){
+		clearInterval(timer);
+		timer=setInterval(function(){
+			var isOver=true;
+			for(var attr in json){
+				var target=json[attr];
+				if(attr=='opacity'){
+					//如果opacity未给初始值，IE下默认为undefined，乘100后变成NaN
+					var val=getStyle(obj,attr)*100;
+					isNaN(val) && (val=100);
+				}else{
+					//如果top、left、right、bottom在css中未给初始值，IE下默认为auto，此时parseInt(getStyle(...))方法得到auto，所以需要给val一个默认值 0
+					var val=parseInt(getStyle(obj,attr)) || 0;
+				}
+				
+				var speed=(target-val)/8;
+				speed=speed>0?Math.ceil(speed):Math.floor(speed);
+				var nowVal=val+speed;
+				if(Math.abs(target-nowVal)<=Math.abs(speed)){
+					nowVal=target;
+				}else{
+					isOver=false;
+				}
+				
+				if(attr=='opacity'){
+					obj.style[attr]=nowVal/100;
+					obj.style['filter']='alpha(opacity:'+nowVal+')';
+				}else{
+					obj.style[attr]=nowVal+'px';
+				}
+			}
+			
+			if(isOver){
+				clearInterval(timer);
+				fn && fn();
+			}
+		},30);
+	}
+	
+	function getStyle(obj,attr){
+		return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+	}
+}
+</script>
+</head>
+
+<body>
+
+<input type="button" id='btn' value="运动" />
+<div id='box'></div>
+</body>
+</html>
