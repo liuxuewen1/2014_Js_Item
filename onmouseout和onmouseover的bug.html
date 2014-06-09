@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0}
+#box{ width:200px; height:200px; position:relative; background:#ccc; margin:100px auto;}
+#box div{ width:200px; height:20px; position:absolute; left:0; top:0; background:red;}
+</style>
+<script>
+window.onload=function(){
+	var oBox=document.getElementById('box');
+	
+	//bug：如果移入自己的子级元素，也被认为是移出
+	/*oBox.onmouseout=function(){
+		alert('out');
+	};*/
+	
+	oBox.onmouseout=function(ev){
+		var oEvent=ev||event;
+		//var toElement：移到哪个元素
+		//oEvent.toElement：兼容IE系、Chrome
+		//oEvent.relatedTarget：兼容Firefox
+		var toElement=oEvent.toElement||oEvent.relatedTarget;
+		
+		if(!isChild(oBox,toElement)){
+			//如果不是oBox的子级元素，则弹出out
+			alert('out');
+		}
+	};
+	
+	//判断obj是否是oParent元素的子级
+	function isChild(oParent,obj){
+		while(obj){
+			if(obj===oParent) return true;
+			obj=obj.parentNode;
+		}
+		return false;
+	}
+	
+	
+	//同理，onmouseover也存在类似的bug
+	oBox.onmouseover=function(ev){
+		var oEvent=ev||event;
+		//oEvent.fromElement：从哪个元素移过来，兼容IE系、Chrome
+		//oEvent.relatedTarget：兼容Firefox
+		var fromElement=oEvent.fromElement||oEvent.relatedTarget;
+		
+		if(!isChild(oBox,fromElement)){
+			alert('over');
+		}
+	}
+}
+</script>
+</head>
+
+<body>
+<div id='box'>
+	<div></div>
+</div>
+</body>
+</html>
