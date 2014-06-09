@@ -9,7 +9,8 @@
 </style>
 <script>
 function domReady(fn){
-	if(navigator.userAgent.toLowerCase().indexOf('firefox')!=-1){
+	if(document.addEventListener){
+		//DOMContentLoaded事件支持IE9+、FF、Chrome
 		addEvent(document,'DOMContentLoaded',function(){
 			fn && fn();
 		});
