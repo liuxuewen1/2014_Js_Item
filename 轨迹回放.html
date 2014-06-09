@@ -1,14 +1,38 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
-<title>�ޱ����ĵ�</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
 <style>
 *{margin:0; padding:0}
-#box{ width:100px; height:100px; position:absolute; left:20px; top:20px; background:blue;}
+#box{ width:100px; height:100px; position:absolute; right:0px; top:0px; background:blue;}
 </style>
 <script>
-window.onload=function(){
+function domReady(fn){
+	if(navigator.userAgent.toLowerCase().indexOf('firefox')!=-1){
+		addEvent(document,'DOMContentLoaded',function(){
+			fn && fn();
+		});
+	}else{
+		document.write('<script id="lxw_Ready_IE" defer><\/script>');
+		var oScript=document.getElementById('lxw_Ready_IE');
+		addEvent(oScript,'readystatechange',function(){
+			if(oScript.readyState=='complete'){
+				fn && fn();
+			}
+		});
+	}
+}
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		return obj.attachEvent('on'+sEv,fn);
+	}else{
+		return obj.addEventListener(sEv,fn,false);
+	}
+}
+</script>
+<script>
+domReady(function(){
 	var oBox=document.getElementById("box");
 	var oBtn=document.getElementById("btn");
 	var oRoute=[];
@@ -19,6 +43,9 @@ window.onload=function(){
 		var oEvent=ev||event;
 		var dx=oEvent.clientX-oBox.offsetLeft;
 		var dy=oEvent.clientY-oBox.offsetTop;
+		//因为移动过程中记录的位置点不一定能把起始位置记录下来，在回放时就不能达到起点，所以刚开始先记录下起始点
+		oRoute.push([oBox.offsetLeft,oBox.offsetTop]);
+			
 		document.onmousemove=function(ev){
 			var oEvent=ev||event;
 			var left=oEvent.clientX-dx;
@@ -33,33 +60,31 @@ window.onload=function(){
 			oBox.style.left=left+'px';
 			oBox.style.top=top+'px';
 			oRoute.push([left,top]);
-		}
+		};
 		document.onmouseup=function(){
 			document.onmousemove=document.onmouseup=null;
 			oBox.releaseCapture && oBox.releaseCapture();
-		}
+		};
 		oBox.setCapture && oBox.setCapture();
 		return false;
-	}
-	oBtn.onclick=function(){
-		if(!oRoute) return;
-		
-		for(var i=0,len=oRoute.length;i<len;i++){
-			(function(idx){
-				setTimeout(function(){
-					oBox.style.left=oRoute[idx][0]+'px';
-					oBox.style.top=oRoute[idx][1]+'px';
-				},30*idx);
-			})(i);
-		}
-	}
-	
-}
+	};
+	oBtn.onclick=function(){		
+		var timer=setInterval(function(){
+			if(oRoute.length==0) {
+				clearInterval(timer);
+			}else{
+				var obj=oRoute.pop();
+				oBox.style.left=obj[0]+'px';
+				oBox.style.top=obj[1]+'px';
+			}
+		},30);
+	};
+})
 </script>
 </head>
 
 <body>
-<input type="button" id="btn" value="�켣�ط�" />
+<input type="button" id="btn" value="轨迹回放" />
 <div id="box"></div>
 </body>
 </html>
