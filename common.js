@@ -1,4 +1,24 @@
 
+//查询obj是否是oParent的子级元素
+function isChild(oParent,obj){
+	while(obj){
+		if(obj===oParent) return true;
+		obj=obj.parentNode;
+	}
+	return false;
+}
+
+//addEvent绑定事件
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		//兼容IE8及以下
+		return obj.attachEvent('on'+sEv,fn);
+	}else{
+		//兼容IE9+、FF、Chrome
+		return obj.addEventListener(sEv,fn,false);
+	}
+}
+
 //domReady事件
 function domReady(fn){
 	if(document.addEventListener){
@@ -11,11 +31,11 @@ function domReady(fn){
 		//IE8及以下
 		document.write("<script id='lxw_IE_Ready' defer><\/script>");
 		var oScript=document.getElementById('lxw_IE_Ready');
-		oScript.onreadystatechange=function(){
+		addEvent(oScript,'readystatechange',function(){
 			if(oScript.readyState=='complete'){
 				fn && fn();
-			}
-		}
+			}										 
+		});
 		
 	}
 	
@@ -44,15 +64,6 @@ function mouseWheel(obj,fn){
 		
 	}
 	
-}
-
-//绑定事件
-function addEvent(obj,sEv,fn){
-	if(obj.attachEvent){
-		obj.attachEvent('on'+sEv,fn);
-	}else{
-		obj.addEventListener(sEv,fn,false);
-	}
 }
 
 //得到属性值（可能带px）
