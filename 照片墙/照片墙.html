@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0}
+ul{list-style:none} 
+#ul1{ width:630px; margin:20px auto;}
+#ul1 li{ width:200px; height:200px; margin-left:10px; margin-bottom:10px; float:left;}
+#ul1 li img{ width:200px; height:200px;}
+</style>
+<script>
+function domReady(fn){
+	if(document.addEventListener){
+		addEvent(document,'DOMContentLoaded',function(){
+			fn && fn();
+		});
+	}else{
+		document.write('<script id="lxw_Ready_IE" defer><\/script>');
+		var oReady=document.getElementById('lxw_Ready_IE');
+		addEvent(oReady,'readystatechange',function(){
+			if(oReady.readyState=='complete'){
+				fn && fn();
+			}
+		});
+	}
+}
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		return obj.attachEvent('on'+sEv,fn);
+	}else{
+		return obj.addEventListener(sEv,fn,false);
+	}
+}
+</script>
+<script>
+domReady(function(){
+	 var oUl=document.getElementById('ul1');
+	 var aLi=oUl.children;
+	 var aImg=oUl.getElementsByTagName('img');
+	 
+	 for(var i=0,len=aLi.length;i<len;i++){
+	 	aLi[i].style.left=aLi[i].offsetLeft+'px';
+		aLi[i].style.top=aLi[i].offsetTop+'px';
+	 }
+	 for(var i=0,len=aLi.length;i<len;i++){
+		aLi[i].style.position='absolute';
+	 }
+	 
+	 addEvent(oUl,'mousedown',function(ev){
+	 	var oEvent=ev||event;
+		var target=oEvent.srcElement||oEvent.target;
+		
+		if(target.tagName!='LI') return;
+		
+		var disX=oEvent.clientX-target.offsetLeft;
+		var disY=oEvent.clientY-target.offsetTop;alert(target.offsetLeft+' '+target.offsetTop);
+		addEvent(document,'mousemove',function(ev){
+			var oEvent=ev||event;
+			var l=oEvent.clientX-disX;
+			var t=oEvent.clientY-disY;
+			target.style.left=l+'px';
+			target.style.top=t+'px';
+			
+		});
+		addEvent(document,'mouseout',function(){
+			document.onmouseout=document.onmouseover=null;
+		});
+	 });
+});
+</script>
+</head>
+
+<body>
+	<ul id='ul1'>
+		<li><img src="1.jpg" /></li>
+		<li><img src="2.jpg" /></li>
+		<li><img src="3.jpg" /></li>
+		<li><img src="4.jpg" /></li>
+		<li><img src="5.jpg" /></li>
+		<li><img src="6.jpg" /></li>
+		<li><img src="7.jpg" /></li>
+		<li><img src="8.jpg" /></li>
+		<li><img src="9.jpg" /></li>
+	</ul>
+</body>
+</html>
