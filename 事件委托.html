@@ -5,7 +5,8 @@
 <title>无标题文档</title>
 <script>
 function domReady(fn){
-	if(navigator.userAgent.toLowerCase().indexOf('firefox')!=-1){
+	if(document.addEventListener){
+		//DOMContentLoaded事件兼容IE9+、FF、Chrome
 		addEvent(document,'DOMContentLoaded',function(){
 			fn && fn();
 		});
