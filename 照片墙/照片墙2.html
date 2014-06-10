@@ -144,7 +144,7 @@ domReady(function(){
 					}
 				}
 				function mouseUp(){
-					aLi[nearIdx].className='';
+					nearIdx!=-1 && (aLi[nearIdx].className='');
 					removeEvent(document,'mousemove',mouseMove);
 					removeEvent(document,'mouseup',mouseUp);					
 					oLi.releaseCapture && oLi.releaseCapture();
