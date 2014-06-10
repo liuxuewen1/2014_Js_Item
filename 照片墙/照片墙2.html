@@ -88,9 +88,21 @@ function startMove(obj,json,fn){
 </script>
 <script>
 domReady(function(){
+	var oBtn=document.getElementById('btn');
 	var oUl1=document.getElementById('ul1');
 	var aLi=oUl1.children;
 	var arrPos=[];
+	
+	//图片随机变化
+	addEvent(oBtn,'click',function(){
+		arrPos.sort(function(){
+			return Math.random()-0.5;
+		});
+		
+		for(var i=0;i<aLi.length;i++){
+			startMove(aLi[i],arrPos[i]);
+		}
+	});
 	
 	for(var i=0;i<aLi.length;i++){
 		arrPos.push({left:aLi[i].offsetLeft,top:aLi[i].offsetTop});
@@ -150,7 +162,8 @@ domReady(function(){
 				addEvent(document,'mousemove',mouseMove);
 				addEvent(document,'mouseup',mouseUp);
 				
-				oLi.preventDefault && oLi.preventDefault();
+				//oEvent.preventDefault：Chrome浏览器阻止默认事件，只有事件在绑定时使用
+				oEvent.preventDefault && oEvent.preventDefault();
 				oLi.setCapture && oLi.setCapture();
 				return false;
 			});
@@ -203,6 +216,7 @@ domReady(function(){
 </head>
 
 <body>
+<input type="button" id='btn' value="随机" />
 <ul id='ul1'>
 	<li><img src="1.jpg" /></li>
 	<li><img src="2.jpg" /></li>
