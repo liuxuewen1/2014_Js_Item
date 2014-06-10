@@ -1,14 +1,15 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
-<title>�ޱ����ĵ�</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
 <style>
 *{margin:0;padding:0}
 ul{list-style:none} 
 #ul1{ width:630px; margin:20px auto;}
-#ul1 li{ width:200px; height:200px; margin-left:10px; margin-bottom:10px; float:left;}
+#ul1 li{ width:200px; height:200px; margin-right:10px; margin-bottom:10px; float:left;}
 #ul1 li img{ width:200px; height:200px;}
+#ul1 li.box{ border:2px dotted #000;}
 </style>
 <script>
 function domReady(fn){
@@ -33,7 +34,68 @@ function addEvent(obj,sEv,fn){
 		return obj.addEventListener(sEv,fn,false);
 	}
 }
+
+function removeEvent(obj,sEv,fn){
+	if(obj.detachEvent){
+		return obj.detachEvent('on'+sEv,fn);
+	}else{
+		return obj.removeEventListener(sEv,fn,false);
+	}
+}
+function getPos(obj){
+	var l=0,t=0;
+	while(obj){
+		l+=obj.offsetLeft;
+		t+=obj.offsetTop;
+		obj=obj.offsetParent;
+	}
+	return {left:l,top:t};
+}
+function isChild(oParent,obj){
+	while(obj){
+		if(obj===oParent) return true;
+		obj=obj.parentNode;
+	}
+	return false;
+}
 </script>
+
+<script>
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+}
+function startMove(obj,json,fn){
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		var isOver=true;
+		for(var attr in json){
+			var target=json[attr];
+			if(attr=='opacity'){
+				var iCur=getStyle(obj,attr)*100;
+				if(isNaN(nowVal)) iCur=100;
+			}else{
+				var iCur=parseInt(getStyle(obj,attr)) || 0;			
+			}
+			var speed=(target-iCur)/8;
+			speed=speed>0?Math.ceil(speed):Math.floor(speed);
+			if(iCur!=target){
+				isOver=false;
+			}
+			if(attr=='opacity'){
+				obj.style[attr]=((iCur+speed)/100).toFixed(1);
+				obj.style['filter']='alpha(opacity:'+(iCur+speed)+')';
+			}else{
+				obj.style[attr]=iCur+speed+'px';
+			}
+		}
+		if(isOver){
+			clearInterval(obj.timer);
+			fn && fn();
+		}
+	},30);
+}
+</script>
+
 <script>
 domReady(function(){
 	 var oUl=document.getElementById('ul1');
@@ -41,33 +103,120 @@ domReady(function(){
 	 var aImg=oUl.getElementsByTagName('img');
 	 
 	 for(var i=0,len=aLi.length;i<len;i++){
-	 	aLi[i].style.left=aLi[i].offsetLeft+'px';
-		aLi[i].style.top=aLi[i].offsetTop+'px';
+	 	var pos=getPos(aLi[i]);
+	 	aLi[i].style.left=pos.left+'px';
+		aLi[i].style.top=pos.top+'px';
 	 }
 	 for(var i=0,len=aLi.length;i<len;i++){
+	 	//单独用一个循环的原因是：如果放在上面的循环中，每次将li修改成固定定位时，就不会占位置，后面的li因为是float:left浮动，导致后面的一个li会浮动到第一个的位置，所以 最后所有的li会重叠在一起
 		aLi[i].style.position='absolute';
 	 }
 	 
-	 addEvent(oUl,'mousedown',function(ev){
-	 	var oEvent=ev||event;
-		var target=oEvent.srcElement||oEvent.target;
-		
-		if(target.tagName!='LI') return;
-		
-		var disX=oEvent.clientX-target.offsetLeft;
-		var disY=oEvent.clientY-target.offsetTop;alert(target.offsetLeft+' '+target.offsetTop);
-		addEvent(document,'mousemove',function(ev){
-			var oEvent=ev||event;
-			var l=oEvent.clientX-disX;
-			var t=oEvent.clientY-disY;
-			target.style.left=l+'px';
-			target.style.top=t+'px';
+	 var zIndex=1;
+	 for(var i=0,len=aLi.length;i<len;i++){
+	 	(function(idx){
 			
-		});
-		addEvent(document,'mouseout',function(){
-			document.onmouseout=document.onmouseover=null;
-		});
-	 });
+			addEvent(aLi[idx],'mousedown',function(ev){	
+				var oLi=aLi[idx];	
+				var pos=getPos(oLi);
+				oLi.style.zIndex=++zIndex;
+					
+				var oEvent=ev||event;
+				var liLeft=pos.left;
+				var liTop=pos.top;
+				var disX=oEvent.clientX-liLeft;
+				var disY=oEvent.clientY-liTop;
+				var hitLi=null;
+				
+				addEvent(document,'mousemove',mouseMove);				
+				addEvent(document,'mouseup',mouseUp);
+				
+				function mouseMove(ev){
+					var oEvent=ev||event;
+					var l=oEvent.clientX-disX;
+					var t=oEvent.clientY-disY;
+					oLi.style.left=l+'px';
+					oLi.style.top=t+'px';
+					
+					hitLi=getNearestLi(oLi);
+					if(hitLi){
+						for(var i=0;i<aLi.length;i++){
+							aLi[i].className='';
+						}
+						hitLi.className='box';
+					}
+				}
+				function mouseUp(){
+					removeEvent(document,'mousemove',mouseMove);
+					removeEvent(document,'mouseup',mouseUp);
+					oLi.releaseCapture && oLi.releaseCapture();
+					
+					//判断是否有碰撞，如果有则交换位置，如果没有 则回到原位置
+					if(hitLi){
+						var l=liLeft;
+						var t=liTop;
+						var hitPos=getPos(hitLi);
+						startMove(oLi,{left:hitPos.left,top:hitPos.top});
+						startMove(hitLi,{left:l,top:t});
+						hitLi.className='';
+					}else{
+						startMove(oLi,{left:liLeft,top:liTop});
+					}
+				}
+	 
+				oLi.preventDefault && oLi.preventDefault();
+				oLi.setCapture && oLi.setCapture();
+				return false;
+							
+			});
+			
+		})(i);
+	 	
+	 }
+	 
+	 //检测碰撞，如果有碰撞则返回碰撞到最近的li
+	 function getNearestLi(obj){
+	 	var hitLi=null;
+	 	var arrLi=[];
+		
+		var objPos=getPos(obj);
+		var l1=objPos.left+obj.offsetWidth;
+		var r1=objPos.left;
+		var t1=objPos.top+obj.offsetHeight;
+		var b1=objPos.top;
+		
+	 	for(var i=0,len=aLi.length;i<len;i++){
+			if(obj===aLi[i]) continue;
+			
+			var liPos=getPos(aLi[i]);
+			var l2=liPos.left;
+			var r2=liPos.left+aLi[i].offsetWidth;
+			var t2=liPos.top;
+			var b2=liPos.top+aLi[i].offsetHeight;
+			if(!(l1<l2 || r1>r2 || t1<t2 || b1>b2)){
+				arrLi.push(aLi[i]);
+			}
+		}
+		
+		if(arrLi.length>0){
+			//找到最近的li
+			var minLi=arrLi[0];
+			var minPos=getPos(minLi);
+			for(var i=1,len=arrLi.length;i<len;i++){
+				var liPos=getPos(arrLi[i]);
+				var minL=Math.abs(minPos.left-objPos.left);
+				var minT=Math.abs(minPos.top-objPos.top);
+				var left=Math.abs(liPos.left-objPos.left);
+				var top=Math.abs(liPos.top-objPos.top);
+				if(left*left+top*top<minL*minL+minT*minT){
+					minLi=arrLi[i];
+				}
+			}
+			hitLi=minLi;
+		}
+		return hitLi;
+	 }
+	 
 });
 </script>
 </head>
