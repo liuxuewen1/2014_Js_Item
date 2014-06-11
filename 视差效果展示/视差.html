@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0; list-style:none;}
+body{background:#33FFFF; height:3000px;}
+#ul1{ width:600px; height:500px; position:fixed; border:1px solid #000; background:#CCFFCC; left:100px; top:100px;}
+#ul1 li{ width:150px; height:150px; position:absolute;}
+#ul1 li img{width:150px; height:150px;}
+</style>
+<script> 
+function domReady(fn){
+	if(document.addEventListener){
+		document.addEventListener('DOMContentLoaded',fn,false);
+	}else{
+		document.write('<script id="lxw_Ready_IE" defer><\/script>');
+		var oReady=document.getElementById('lxw_Ready_IE');
+		addEvent(document,'readystatechange',fn);
+	}
+}
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+</script>
+<script>
+domReady(function(){
+	var oUl=document.getElementById('ul1');
+	var aLi=oUl.children;
+});
+function getRandom(m,n){
+	return Math.random()*(n-m-1)+m;
+}
+</script>
+</head>
+
+<body>
+ <ul id='ul1'>
+	<li style="left:30px; top:100px;"><img src="1.jpg" /></li>
+	<li style="left:220px; top:100px;"><img src="2.jpg" /></li>
+	<li style="left:420px; top:100px;"><img src="3.jpg" /></li>
+	<li style="left:40px; top:230px;"><img src="4.jpg" /></li>
+	<li style="left:180px; top:200px;"><img src="5.jpg" /></li>
+	<li style="left:350px; top:200px;"><img src="6.jpg" /></li>
+	<li style="left:260px; top:260px;"><img src="7.jpg" /></li> 
+ </ul>
+</body>
+</html>
