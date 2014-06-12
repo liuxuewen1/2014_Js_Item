@@ -95,6 +95,7 @@ domReady(function(){
 		var target=oEvent.srcElement||oEvent.target;
 		if(target.tagName!='LI') return;
 		
+		//如何让一个物体中间放大：margin-left:-放大宽度/2; margin-top:-放大高度/2
 		startMove(target,{width:width*2,height:height*2,marginLeft:-width/2,marginTop:-height/2});
 		target.style.zIndex=++zIndex;
 		
