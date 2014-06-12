@@ -49,10 +49,10 @@ function startMove(obj,json,fn){
 			if(iTarget!=iVal){
 				isOver=false;
 				if(attr=='opacity'){
-					obj.style[attr]=(iTarget+speed)/100;
-					obj.style['filter']='alpha(opacity:'+(iTarget+speed)+')';
+					obj.style[attr]=(iVal+speed)/100;
+					obj.style['filter']='alpha(opacity:'+(iVal+speed)+')';
 				}else{
-					obj.style[attr]=(iTarget+speed)+'px';
+					obj.style[attr]=(iVal+speed)+'px';
 				}
 			}
 		}
