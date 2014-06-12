@@ -75,6 +75,7 @@ window.onload=function(){
 	}
 	
 	addEvent(oTop,'click',function(){
+		clearInterval(oTop.timer);
 		isIE6 && removeEvent(window,'scroll',scrollByIE6);
 		oTop.timer=setInterval(function(){
 			var scrollTop=document.documentElement.scrollTop || document.body.scrollTop;
