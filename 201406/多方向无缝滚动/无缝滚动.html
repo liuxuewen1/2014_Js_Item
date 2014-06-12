@@ -6,12 +6,20 @@
 <style>
 *{margin:0;padding:0;}
 ul{list-style:none;}
-#box{ width:670px; height:240px; margin:100px auto; position:relative; overflow:hidden;}
+#box,#box2{ width:670px; height:240px; margin:40px auto; position:relative; overflow:hidden;}
 #ul1{ width:670px; position:relative;}
-#ul1 li{ width:670px; height:240px;}
+#ul1 li,#ul3 li{ width:670px; height:240px;}
 #ul2{ position:absolute; right:10px; bottom:10px;}
 #ul2 li{width:14px; height:20px; margin-right:6px; float:left; background:#ccc; line-height:20px; text-align:center;}
 #ul2 li:hover{cursor:pointer;}
+
+#box2{ margin:40px auto;}
+#ul3{ width:3350px; height:240px; position:relative;}
+#ul3 li{ float:left;}
+#box2 span{position:absolute; top:100px; z-index:2; color:#fff; width:30px; height:30px; line-height:30px;}
+#box2 span.left{ left:20px;}
+#box2 span.right{ right:20px;}
+#box2 span:hover{ cursor:pointer;}
 </style>
 <script>
 function getStyle(obj,attr){
@@ -29,7 +37,7 @@ function startMove(obj,json,fn){
 				var iNow=parseInt(getStyle(obj,attr)) || 0;
 			}
 			var iTarget=json[attr];
-			var iSpeed=(iTarget-iNow)/20;
+			var iSpeed=(iTarget-iNow)/8;
 			iSpeed=iSpeed>0?Math.ceil(iSpeed):Math.floor(iSpeed);
 			if(iTarget!=iNow){
 				isOver=false;
@@ -50,8 +58,10 @@ function startMove(obj,json,fn){
 </script>
 <script>
 window.onload=function(){
+	//纵向滚动
 	var oUl1=document.getElementById('ul1');
 	var aLi1=oUl1.children;
+	var iWidth=aLi1[0].offsetWidth;
 	var iHeight=aLi1[0].offsetHeight;
 	var oUl2=document.getElementById('ul2');
 	var aLi2=oUl2.children;
@@ -72,9 +82,44 @@ window.onload=function(){
 		if(target.tagName!='LI') return;
 	
 		var top=oUl1.offsetTop;
-		oUl1.style.top=-target.index*iHeight+'px';
-		oUl1.style.opacity='0';
-		startMove(oUl1,{opacity:100});
+		startMove(oUl1,{top:-target.index*iHeight});
+	}
+	
+	//横向滚动
+	var oUl3=document.getElementById('ul3');
+	var oBox2=document.getElementById('box2');
+	var aLi3=oUl3.children;
+	
+	for(var i=0,len=aLi3.length;i<len;i++){
+		aLi3[i].style.left=aLi3[i].offsetLeft+'px';
+		aLi3[i].style.top=aLi3[i].offsetTop+'px';
+	}
+	for(var i=0,len=aLi3.length;i<len;i++){
+		aLi3[i].style.position='absolute';
+	}
+	var idx=0;
+	oBox2.onclick=function(ev){
+		var oEvent=ev||event;
+		var target=oEvent.srcElement||oEvent.target;
+		if(target.tagName!='SPAN') return;
+		
+		if(target.className.toLowerCase()=='left'){
+			++idx;
+			if(idx>=aLi3.length) {
+				idx--;
+				return;
+			}else{
+				startMove(oUl3,{left:-iWidth*idx});			
+			}
+		}else{
+			--idx;
+			if(idx<=-1) {
+				idx++;
+				return;
+			}else{
+				startMove(oUl3,{left:-iWidth*idx});
+			}
+		}
 	}
 }
 </script>
@@ -97,6 +142,18 @@ window.onload=function(){
 	<li>5</li>
 </ul>
 
+</div>
+
+<div id='box2'>
+	<span class="left">《</span>
+	<span class="right">》</span>
+	<ul id='ul3'>
+		<li><img src="1.jpg" /></li>
+		<li><img src="2.jpg" /></li>
+		<li><img src="3.jpg" /></li>
+		<li><img src="4.jpg" /></li>
+		<li><img src="5.jpg" /></li>
+	</ul>
 </div>
 </body>
 </html>
