@@ -66,6 +66,7 @@ window.onload=function(){
 	var oUl2=document.getElementById('ul2');
 	var aLi2=oUl2.children;
 	
+	//布局转换
 	for(var i=0,len=aLi1.length;i<len;i++){
 		aLi1[i].style.left=aLi1[i].offsetLeft+'px';
 		aLi1[i].style.top=aLi1[i].offsetTop+'px';
@@ -90,6 +91,13 @@ window.onload=function(){
 	var oBox2=document.getElementById('box2');
 	var aLi3=oUl3.children;
 	
+	//增加一个跟第一个li相同的li
+	var newLi=document.createElement('li');
+	newLi.innerHTML=aLi3[0].innerHTML;
+	oUl3.appendChild(newLi);
+	oUl3.style.width=iWidth*aLi3.length+'px';
+	
+	//布局转换
 	for(var i=0,len=aLi3.length;i<len;i++){
 		aLi3[i].style.left=aLi3[i].offsetLeft+'px';
 		aLi3[i].style.top=aLi3[i].offsetTop+'px';
@@ -98,29 +106,51 @@ window.onload=function(){
 		aLi3[i].style.position='absolute';
 	}
 	var idx=0;
+	var turn='left';
 	oBox2.onclick=function(ev){
 		var oEvent=ev||event;
 		var target=oEvent.srcElement||oEvent.target;
 		if(target.tagName!='SPAN') return;
 		
 		if(target.className.toLowerCase()=='left'){
-			++idx;
-			if(idx>=aLi3.length) {
-				idx--;
-				return;
-			}else{
-				startMove(oUl3,{left:-iWidth*idx});			
-			}
+			leftMove();
+			turn='left';
 		}else{
-			--idx;
-			if(idx<=-1) {
-				idx++;
-				return;
-			}else{
-				startMove(oUl3,{left:-iWidth*idx});
-			}
+			rightMove();
+			turn='right';	
 		}
 	}
+	
+	//向左拉
+	function leftMove(){
+		++idx;
+		//当拉到最后一个时 拉到开始的位置
+		if(idx>=aLi3.length) {
+			idx=1;
+			oUl3.style.left=0;
+		}
+		startMove(oUl3,{left:-iWidth*idx});
+	}
+	//向右拉
+	function rightMove(){
+		--idx;
+		//当拉到第一个时 拉到最后一个的位置
+		if(idx==-1) {
+			idx=aLi3.length-2;
+			oUl3.style.left=-(aLi3.length-1)*iWidth+'px';
+		}			
+		startMove(oUl3,{left:-iWidth*idx});
+	}
+	
+	//横向滚动定时
+	var timer=null;
+	oBox2.onmouseover=function(){
+		clearInterval(timer);
+	}
+	oBox2.onmouseout=function(){
+		timer=turn=='left'?setInterval(leftMove,2000):setInterval(rightMove,2000);
+	}
+	timer=setInterval(leftMove,2000);
 }
 </script>
 </head>
