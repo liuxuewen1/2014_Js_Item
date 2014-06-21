@@ -81,3 +81,83 @@ function getPos(obj){
 	}
 	return {left:l, top:t};
 }
+
+//2014-6-15 对cookie的操作
+function addCookie(name,value,iDay){
+	if(!iDay) return;
+	
+	var oDate=new Date();
+	oDate.setDate(oDate.getDate()+iDay);
+	document.cookie=name+'='+value+';path=/;expires='+oDate;
+}
+function getCookie(name){
+	var cookies=document.cookie.split('; ');
+	for(var i=0,len=cookies.length;i<len;i++){
+		var arr=cookies[i].split('=');
+		if(arr[0]==name) return arr[1];
+	}
+	return '';
+}
+functioin delCookie(name){
+	addCookie(name,'',-1);
+}
+
+//2014-6-20 原生态Ajax写法
+function ajax(obj){
+	//建立Ajax对象
+	if(window.XMLHttpRequest){
+		var oAjax=new XMLHttpRequest();
+	}else{
+		var oAjax=new ActionXObject("Microsoft.XMLHTTP");
+	}
+	//打开连接、发送消息
+	switch(obj.type.toLowerCase()){
+		case "get":
+			oAjax.open("GET",obj.url+'?'+jsonToURL(obj.data),true);
+			oAjax.send();
+			break;
+		case "post":
+			oAjax.open("GET",obj.url,true);
+			oAjax.setRequestHeader("content-type","application/x-www-form-urlencoded");
+			oAjax.send(jsonToURL(obj.data));
+			break;
+	}
+	//通讯信息
+	oAjax.onreadystatechange=function(){
+		//0：准备 1：Ajax对象准备完毕 2：接收完成，数据-编码-加密 3：解析数据 4：完成
+		if(oAjax.readyState!=4) return;
+		//200~300：成功 304：未修改
+		if(oAjax.status>=200 && oAjax.status<300 || oAjax.status==304){
+			obj.succFn && obj.succFn(oAjax.responseText);
+		}else{
+			obj.failFn && obj.failFn(oAjax.status);
+		}
+		clearTimeout(timer);
+	}
+	
+	//超时
+	!obj.timeout && (obj.timeout==3000);
+	var timer=setTimeout(function(){
+		alert("网络超时");
+		oAjax.onreadystatechange=null;
+	},obj.timeout*1000);
+}
+function jsonToURL(json){
+	var arr=[];
+	json.t=Math.random();
+	for(var key in json){
+		arr.push(key+'='+json[key]);
+	}
+	return arr.join('&');
+}
+
+
+
+
+
+
+
+
+
+
+
