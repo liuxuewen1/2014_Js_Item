@@ -1,0 +1,243 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>微博ajax接口测试 </title>
+<link href="style/weibo.css" rel="stylesheet" type="text/css" />
+<script>
+//ajax
+function ajax(obj){
+	obj=obj || {};
+	if(!obj.url){
+		alert('参数错误');
+		return;
+	}
+	obj.type=obj.type || 'Get';
+	obj.data=obj.data || {};
+	obj.timeout=obj.timeout || 3;
+	
+	if(window.XMLHttpRequest){
+		var oAjax=new XMLHttpRequest();
+	}else{
+		var oAjax=new ActiveXObject('Microsoft.XMLHTTP');
+	}
+	switch(obj.type.toLowerCase()){
+		case 'get':
+			oAjax.open('GET',obj.url+'?'+jsonToURL(obj.data),true);
+			oAjax.send();
+			break;
+		case 'post':
+			oAjax.open('POST',obj.url,true);
+			oAjax.setRequestHeader('content-type','application/x-www-form-urlencoded');
+			oAjax.send(jsonToURL(obj.data));
+			break;
+	}
+	
+	obj.loadingFn && obj.loadingFn();
+	
+	oAjax.onreadystatechange=function(){
+		if(oAjax.readyState!=4) return;
+		
+		obj.completeFn && obj.completeFn();
+		
+		if(oAjax.status>=200 && oAjax.status<300 || oAjax.status==304){
+			clearTimeout(timer);
+			obj.succFn && obj.succFn(oAjax.responseText);
+		}else{
+			clearTimeout(timer);
+			obj.failFn && obj.failFn(oAjax.status);
+		}
+	}
+	
+	var timer=setTimeout(function(){
+		oAjax.onreadystatechange=null;
+		alert('网络超时');
+	},obj.timeout*1000);
+}
+function jsonToURL(json){
+	json.t=Math.random();
+	var arr=[];
+	for(var key in json){
+		arr.push(key+'='+json[key]);
+	}
+	return arr.join('&');
+}
+</script>
+<script>
+//事件绑定与解绑
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,true);
+	}
+}
+function removeEvent(obj,sEv,fn){
+	if(obj.detachEvent){
+		obj.detachEvent('on'+sEv,fn);
+	}else{
+		obj.removeEventListener(sEv,fn,true);
+	}
+}
+</script>
+<script>
+function getById(id){
+	return document.getElementById(id);
+}
+window.onload=function(){
+	var oMsg=getById('divMsg');
+	var oPage=getById('pageControl');
+	var aPage=oPage.children;
+	var oTxt=getById('tijiaoText');
+	var oBtn=getById('btn');
+	var URL='weibo.php';
+	
+	var hash=window.location.hash;
+	var idx=hash.length>1?hash.substring(1):1;	//如果有hash锚点，直接跳到当页否则默认到第一页
+	getContent(idx);
+	function getContent(page){
+		oMsg.innerHTML='';
+		ajax({
+			url:URL,
+			data:{act:'get',page:page},
+			succFn:function(data){
+				var arrData=eval('('+data+')');
+				
+				//循环拼接回复内容
+				for(var i=0;i<arrData.length;i++){
+					var oDiv=document.createElement('div');
+					oDiv.className='reply';
+					var html='';
+					html='<p class="replyContent">'+arrData[i].content+'</p>';
+						html+='<p class="operation">';
+							html+='<span class="replyTime">2011-09-08 16:37:60</span>';
+							html+='<span class="handle">';
+								html+='<a href="javascript:;" class="top">'+arrData[i].acc+'</a>';
+								html+='<a href="javascript:;" class="down_icon">'+arrData[i].ref+'</a>';
+								html+='<a href="javascript:;" class="cut">删除</a>';
+							html+='</span>';
+						html+='</p>';
+					oDiv.innerHTML=html;
+					oMsg.appendChild(oDiv);
+					(function(id){
+						oDiv.onclick=function(ev){
+							contentClick(ev,id);
+						};
+					})(arrData[i].id);
+					
+				}
+				
+			}
+		});
+		setPageControl(function(){
+			aPage[page-1].className='active';
+		});		
+	}
+	
+	//获取总页数 且 拼接分页控件
+	function setPageControl(afterFn){
+		oPage.innerHTML='';
+		ajax({
+			url:URL,
+			data:{act:'get_page_count'},
+			succFn:function(data){
+				var jsonData=eval('('+data+')');
+				for(var i=0;i<jsonData.count;i++){
+					var oA=document.createElement('a');
+					oA.href='javascript:;';
+					oA.innerHTML=i+1;
+					oPage.appendChild(oA);
+					oA.onclick=function(){
+						getContent(parseInt(oA.innerHTML));
+						//每次分页后，给url加上hash锚点，这样F5或者刷新页面时都会自动将显示当前页的数据
+						window.location.hash=oA.innerHTML;
+					};
+				}
+				afterFn();
+			}
+		});
+	}
+	
+	//回复内容div的内部事件委托
+	function contentClick(ev,id){
+		var oEvent=ev||event;
+		var target=oEvent.srcElement||oEvent.target;
+		if(target.tagName=='A'){
+			switch(target.className.toLowerCase()){
+				case 'top':upDownFn(target,id,'acc');
+					break;
+				case 'down_icon':upDownFn(target,id,'ref');
+					break;
+				case 'cut':
+					break;
+			}
+		}
+	}
+	
+	//顶 act:'acc' //踩 act:'ref'
+	function upDownFn(obj,id,act){
+		ajax({
+			url:URL,
+			data:{act:act,id:id},
+			succFn:function(data){console.log(data);
+				var jsonData=eval('('+data+')');
+				if(!jsonData.error){
+					obj.innerHTML=parseInt(obj.innerHTML)+1;
+				}
+			}
+		});
+	}
+	
+	//提交
+	oBtn.onclick=function(){
+		ajax({
+			url:URL,
+			data:{act:'add',content:encodeURIComponent(oTxt.value)},
+			succFn:function(data){
+				oTxt.value='';
+				getContent(1);
+			},
+			failFn:function(status){
+				alert('失败:'+status);
+			}
+		});
+	}
+}
+</script>
+</head>
+
+<body>
+<div class="znsArea">
+<!--留言-->
+     <div class="takeComment">
+        <textarea name="textarea" class="takeTextField" id="tijiaoText"></textarea>
+        <div class="takeSbmComment">
+            <input type="button" class="inputs" value="" id="btn" />
+            <span>(可按 Enter 回复)</span>
+        </div>
+    </div>
+<!--已留-->
+    <div class="commentOn">
+        <!--<div class="noContent">暂无留言</div>-->
+        <div class="messList" id="divMsg">
+        	<!--<div class="reply">
+                <p class="replyContent">卫士，新款卫士将推出总共14种车身式样。其中， XS旅行款车型售价为32295英镑(约33.6万元)。</p>
+                <p class="operation">
+                    <span class="replyTime">2011-09-08 16:37:60</span>
+                    <span class="handle">
+                    	<a href="javascript:;" class="top">0</a>
+                        <a href="javascript:;" class="down_icon">0</a>
+                        <a href="javascript:;" class="cut">删除</a>
+                    </span>
+                </p>
+            </div>-->
+        </div>
+        <div class="page" id="pageControl">
+        	<!--<a href="javascript:;" class="active">1</a>
+        	<a href="javascript:;">2</a>
+        	<a href="javascript:;">3</a>-->
+        </div>
+    </div>
+</div>
+</body>
+</html>
