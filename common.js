@@ -12,10 +12,19 @@ function isChild(oParent,obj){
 function addEvent(obj,sEv,fn){
 	if(obj.attachEvent){
 		//兼容IE8及以下
-		return obj.attachEvent('on'+sEv,fn);
+		obj.attachEvent('on'+sEv,fn);
 	}else{
 		//兼容IE9+、FF、Chrome
-		return obj.addEventListener(sEv,fn,false);
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+
+//解绑事件
+function removeEvent(obj,sEv,fn){
+	if(obj.detachEvent){
+		obj.detachEvent('on'+sEv,fn);
+	}else{
+		obj.removeEventListener(sEv,fn,true);
 	}
 }
 
@@ -104,6 +113,15 @@ functioin delCookie(name){
 
 //2014-6-20 原生态Ajax写法
 function ajax(obj){
+	obj=obj || {};
+	if(!obj.url){
+		alert('URL为必填参数，请填写');
+		return;
+	}
+	obj.type=obj.type || 'Get';
+	obj.data=obj.data || {};
+	obj.timeout=obj.timeout || 3;
+	
 	//建立Ajax对象
 	if(window.XMLHttpRequest){
 		var oAjax=new XMLHttpRequest();
@@ -122,21 +140,27 @@ function ajax(obj){
 			oAjax.send(jsonToURL(obj.data));
 			break;
 	}
+	
+	obj.loadingFn && obj.loadingFn();	//请求完成后执行
+	
 	//通讯信息
 	oAjax.onreadystatechange=function(){
 		//0：准备 1：Ajax对象准备完毕 2：接收完成，数据-编码-加密 3：解析数据 4：完成
 		if(oAjax.readyState!=4) return;
+		
+		obj.completeFn && obj.completeFn();//接收完成时执行
+		
 		//200~300：成功 304：未修改
 		if(oAjax.status>=200 && oAjax.status<300 || oAjax.status==304){
+			clearTimeout(timer);
 			obj.succFn && obj.succFn(oAjax.responseText);
 		}else{
+			clearTimeout(timer);
 			obj.failFn && obj.failFn(oAjax.status);
 		}
-		clearTimeout(timer);
 	}
 	
 	//超时
-	!obj.timeout && (obj.timeout==3000);
 	var timer=setTimeout(function(){
 		alert("网络超时");
 		oAjax.onreadystatechange=null;
@@ -151,6 +175,12 @@ function jsonToURL(json){
 	return arr.join('&');
 }
 
+//2014-06-24 跨域请求jsonp
+function jsonp(url){
+	var oS=document.createElement('script');
+	oS.src=url;
+	document.getElementsByTagName('head')[0].appendChild(oS);
+}
 
 
 
