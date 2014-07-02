@@ -82,8 +82,36 @@ function move(obj,json,succFn){
 }
 </script>
 <script>
-function jsonp(){
+function jsonp(obj){
+	obj=obj || {};
+	if(!obj.url){
+		alert('错误：缺少必填参数URL');
+		return;
+	}
+	obj.jsonpCallback=obj.jsonpCallback || ('jsonp_'+Math.random()).replace('.','');
+	obj.timeout=obj.timeout || 3;
+	obj.data=obj.data || {};
+	obj.data.t=Math.random();
 	
+	obj.cbName && (obj.data[obj.cbName]=obj.jsonpCallback);
+	window[obj.jsonpCallback]=function(json){
+		clearTimeout(timer);
+		obj.succFn && obj.succFn(json);
+		oHead.removeChild(oS);
+	};
+	var oHead=document.getElementsByTagName('head')[0];
+	var oS=document.createElement('script');
+	var arr=[];
+	for(var key in obj.data){
+		arr.push(key+'='+obj.data[key]);
+	}
+	oS.src=obj.url+'?'+arr.join('&');
+	oHead.appendChild(oS);
+	
+	var timer=setTimeout(function(){
+		window[obj.jsonpCallback]=null;
+		obj.timeoutFn && obj.timeoutFn();
+	},obj.timeout*1000);
 }
 </script>
 <script>
@@ -97,6 +125,7 @@ window.onload=function(){
 	var oWord=$('txtWord');
 	var oClear=$('btnClear');
 	var oContent=$('content');
+	var oContentUl=oContent.children[0];
 	var oMiddle=$('middle');
 	var oUlFace=$('ulFace');
 	var oAFace=$('aTagFace');
@@ -117,15 +146,15 @@ window.onload=function(){
 	oBox.style.left=(winX-oBox.offsetWidth)/2+'px';
 	oBox.style.top=(winY-oBox.offsetHeight)/2+'px';
 	oBig.onclick=function(){
-		var cW=200,cH=200;
+		var cW=100,cH=100;
 		move(oBox,{width:oBox.offsetWidth+cW,height:oBox.offsetHeight+cH,left:oBox.offsetLeft-cW/2,top:oBox.offsetTop-cH/2});
 	}
 	
 	//设置conetent下面单双行样式
-	var aContentLi=oContent.getElementsByTagName('li');
+	/*var aContentLi=oContent.getElementsByTagName('li');
 	for(var i=0,len=aContentLi.length;i<len;i++){
 		aContentLi[i].className+=(i+1)%2?' single':' double';
-	}
+	}*/
 	
 	//绑定字体Ul点击事件
 	oAFont.onclick=function(ev){
@@ -166,6 +195,44 @@ window.onload=function(){
 		oUlFont.style.display='none';
 		oUlFace.style.display='none';
 	}
+	
+	//登录
+	var URL='http://zhinengshe.com/exercise/im/api.php';
+	var token='';
+	jsonp({
+		url:URL,
+		data:{a:'lgn',user:'pp',pass:'pp'},
+		cbName:'cb',
+		succFn:function(json){
+			token=json.token;
+			getContent();
+		}
+	});
+	//请求内容列表
+	function getContent(){
+		jsonp({
+			url:URL,
+			data:{a:'get_msg',token:token},
+			cbName:'cb',
+			succFn:function(json){
+				var arrData=json.data;console.log(json);
+				for(var i=0;i<arrData.length;i++){
+					var oLi=createLi(arrData[i].ID);
+					oLi.className='single';
+					var oLi1=createLi(arrData[i].content);
+					oLi1.className='double';
+					oContentUl.appendChild(oLi);
+					oContentUl.appendChild(oLi1);
+				}
+				
+			}
+		});
+	}
+}
+function createLi(html){
+	var oLi=document.createElement('li');
+	oLi.innerHTML=html;
+	return oLi;
 }
 </script>
 </head>
@@ -183,10 +250,10 @@ window.onload=function(){
 	<div id='left'>
 		<div id='content'>
 			<ul>
-				<li>内容1</li>
+				<!--<li>内容1</li>
 				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
 				<li>内容3</li>
-				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
+				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>-->
 			</ul>
 		</div>
 		<div id='middle'>
