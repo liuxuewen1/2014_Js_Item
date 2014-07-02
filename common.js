@@ -107,7 +107,7 @@ function getCookie(name){
 	}
 	return '';
 }
-functioin delCookie(name){
+function delCookie(name){
 	addCookie(name,'',-1);
 }
 
@@ -192,10 +192,45 @@ function jsonToURL(json){
 }
 
 //2014-06-24 跨域请求jsonp
-function jsonp(url){
+//jsonpCallback({a:1,b:2,...});	执行这种数据格式的jsonp函数
+function jsonp(obj){
+	obj=obj || {};
+	if(!obj.url){
+		alert('错误：url为必填参数');
+		return;
+	}
+	obj.data=obj.data || {};
+	obj.timeout=obj.timeout || 3;	//默认超时时间3s
+	
+	//回调函数名，如果没有生成一个随机函数名
+	obj.jsonpCallback=obj.jsonpCallback || ('jsonp_'+Math.random()).replace('.','');
+	//将一会需要执行的函数封装到全局中
+	window[obj.jsonpCallback]=function(json){
+		clearInterval(timer);
+		//成功，则回调函数
+		obj.succFn && obj.succFn(json);
+		//删除script
+		oHead.removeChild(oS);
+	};
+	//为接口中的函数名参数赋值
+	obj.data[obj.cbName]=obj.jsonpCallback;
+	//将传过来的json格式参数解析成 a=1&b=2形式
+	obj.data.t=Math.random();
+	var arr=[];
+	for(var key in obj.data){
+		arr.push(key+'='+obj.data[key]);
+	}
+	
+	var oHead=document.head || document.getElementsByTagName('head')[0];
 	var oS=document.createElement('script');
-	oS.src=url;
-	document.getElementsByTagName('head')[0].appendChild(oS);
+	oS.src=obj.url+'?'+arr.join('&');
+	oHead.appendChild(oS);
+	
+	var timer=setTimeout(function(){
+		//超时执行timeoutFn()函数
+		obj.timeoutFn && obj.timeoutFn();
+		window[obj.jsonpCallback]=null;
+	},obj.timeout*1000);
 }
 
 

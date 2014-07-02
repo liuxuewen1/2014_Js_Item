@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0}
+ul{list-style:none;}
+ul li{ height:20px; line-height:20px;}
+img{border:none;}
+#box{ width:500px; height:500px; border:1px solid #000; position:absolute; left:0; top:0; font-size:12px; font-family:Arial, Helvetica, sans-serif;}
+#box div{ position:absolute;}
+
+#top{ width:100%; height:10%;}
+#resize{ right:2px; top:4px; height:80%;}
+#big{ width:15px; height:12px;}
+#close{ width:12px; height:12px;}
+#topBorder{ width:100%; height:20%; background:#ccc; top:80%;}
+
+#left{width:64%; height:90%; top:10%;}
+#left div{ width:100%;}
+#content{height:65%; border-bottom:1px solid #000; left:0; top:0;}
+#content li.single{ color:#00f;}
+#content li.double{ color:#000; padding-left:10px;}
+#middle{ height:5%; background:#ccc; left:0; bottom:30%;}
+#aTagFont{ margin-left:4px;}
+#middle a img{ margin-top:2px;}
+#middle ul{ width:78px; border:1px solid #000; padding:2px; position:absolute; left:2px; top:-78px; z-index:99; display:none;}
+#middle ul li{ float:left; margin:2px;}
+#middle ul li:hover{ cursor:pointer;}
+#middle #ulFont { top:20px; background:#DDD;}
+#middle #ulFont li{ float:none; border-bottom:1px dotted #666;}
+#entry{ height:20%; left:0; bottom:10%;}
+#submit{ height:10%; right:0; bottom:0; border-top:1px solid #000;}
+#submit input{float:right;}
+#entry textarea{width:98%; height:98%; border:none; margin:2px; font-size:12px; font-family:Arial, Helvetica, sans-serif;}
+
+#right{ width:36%; height:90%; right:0; top:10%;}
+#member{ width:100%; height:100%; border-left:1px solid #000; right:0; top:0;}
+
+#box .font9{ font-size:9px;}
+#box .font12{ font-size:12px;}
+#box .font14{ font-size:14px;}
+#box .font16{ font-size:16px;}
+#box .colorRed{ color:red;}
+#box .colorBlue{ color:blue;}
+#box .colorYellow{ color:yellow;}
+#box .colorGray{ color:gray;}
+</style>
+<script>
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+}
+function move(obj,json,succFn){
+	clearInterval(obj.timer);
+	var isOver=false;	
+	obj.timer=setInterval(function(){
+		for(var attr in json){
+			if(name=='opacity'){
+				var nowValue=parseFloat(getStyle(obj,attr)*100);
+				if(isNaN(nowValue)){
+					nowValue=100;
+				}
+			}else{
+				var nowValue=parseInt(getStyle(obj,attr)) || 0;
+			}
+			var target=json[attr];
+			var speed=(target-nowValue)/8;
+			speed=speed>0?Math.ceil(speed):Math.floor(speed);
+			if(Math.abs(target-nowValue)>Math.abs(speed)){
+				isOver=false;
+				obj.style[attr]=nowValue+speed+'px';
+			}else{
+				obj.style[attr]=target+'px';
+			}
+		}
+		if(isOver){
+			clearInterval(obj.timer);
+			succFn && succFn();
+		}
+	},30);	
+}
+</script>
+<script>
+function jsonp(){
+	
+}
+</script>
+<script>
+function $(id){
+	return document.getElementById(id);
+}
+window.onload=function(){
+	var oBox=$('box');
+	var oBig=$('big');
+	var oClose=$('close');
+	var oWord=$('txtWord');
+	var oClear=$('btnClear');
+	var oContent=$('content');
+	var oMiddle=$('middle');
+	var oUlFace=$('ulFace');
+	var oAFace=$('aTagFace');
+	var aImgFace=oUlFace.getElementsByTagName('img');
+	var oSubmit=$('btnSubmit');
+	var oUlFont=$('ulFont');
+	var oAFont=$('aTagFont');
+	var aLiFont=oUlFont.children;
+	
+	//清空回复内容
+	oClear.onclick=function(){
+		oWord.innerHTML='';
+	}
+	
+	//计算窗口大小
+	var winX=document.documentElement.clientWidth;
+	var winY=document.documentElement.clientHeight;
+	oBox.style.left=(winX-oBox.offsetWidth)/2+'px';
+	oBox.style.top=(winY-oBox.offsetHeight)/2+'px';
+	oBig.onclick=function(){
+		var cW=200,cH=200;
+		move(oBox,{width:oBox.offsetWidth+cW,height:oBox.offsetHeight+cH,left:oBox.offsetLeft-cW/2,top:oBox.offsetTop-cH/2});
+	}
+	
+	//设置conetent下面单双行样式
+	var aContentLi=oContent.getElementsByTagName('li');
+	for(var i=0,len=aContentLi.length;i<len;i++){
+		aContentLi[i].className+=(i+1)%2?' single':' double';
+	}
+	
+	//绑定字体Ul点击事件
+	oAFont.onclick=function(ev){
+		var oEvent=ev||event;
+		oUlFont.style.display=oUlFont.style.display=='block'?'none':'block';
+		oEvent.cancelBubble=true;
+	}
+	//绑定每个字体点击事件
+	for(var i=0,len=aLiFont.length;i<len;i++){
+		aLiFont[i].onclick=function(){
+			oWord.className+=' '+this.className;
+		};
+	}
+	//绑定表情点击事件
+	oAFace.onclick=function(ev){
+		var oEvent=ev||event;
+		oUlFace.style.display=oUlFace.style.display=='block'?'none':'block';
+		oEvent.cancelBubble=true;
+	};
+	//绑定每张face点击事件
+	for(var i=0,len=aImgFace.length;i<len;i++){
+		aImgFace[i].onclick=function(){
+			oWord.innerHTML+='['+this.alt+']';
+		}
+	}
+	
+	//点击发送触发事件
+	oSubmit.onclick=function(){
+		var value=oWord.value;
+		var arrReg=[[/</g,'&lt;'],[/>/g,'&gt;']];
+		var newValue='';
+		for(var i=0;i<arrReg.length;i++){
+			newValue=value.replace(arrReg[i][0],arrReg[i][1]);
+		}
+		alert(newValue);
+	}
+	document.onclick=function(){
+		oUlFont.style.display='none';
+		oUlFace.style.display='none';
+	}
+}
+</script>
+</head>
+
+<body>
+<div id='box'>
+	<div id='top'>
+		<div id='resize'>
+			<a href="javascript:;" id='close'><img src='images/close.png'/></a>
+			<a href="javascript:;" id='big'><img src='images/bigSize.png'/></a>
+		</div>
+		<div id='topBorder'></div>
+	</div>
+	
+	<div id='left'>
+		<div id='content'>
+			<ul>
+				<li>内容1</li>
+				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
+				<li>内容3</li>
+				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
+			</ul>
+		</div>
+		<div id='middle'>
+			<a href="javascript:;" id='aTagFont'><img src="images/font.png" /></a>
+			<a href="javascript:;" id='aTagColor'></a>
+			<a href="javascript:;" id='aTagFace'><img src="images/expression.png" /></a>
+			<ul id='ulFont'>
+				<li class='font9'>9px</li>
+				<li class='font12'>12px</li>
+				<li class='font14'>14px</li>
+				<li class='font16'>16px</li>
+			</ul>
+			<ul id='ulColor'>
+				<li class='colorRed'>9px</li>
+				<li class='colorBlue'>12px</li>
+				<li class='colorYellow'>14px</li>
+				<li class='colorGray'>16px</li>
+			</ul>
+			<ul id='ulFace'>
+				<li><img key="baobao" alt="抱抱" src="images/face/baobao.gif"  /></li>
+				<li><img key="haixiu" alt="害羞" src="images/face/haixiu.gif" /></li>
+				<li><img key="zhuakuang" alt="抓狂" src="images/face/zhuakuang.gif" /></li>
+				<li><img key="huaxin" alt="花心" src="images/face/huaxin.gif" /></li>
+				<li><img key="jiyan" alt="挤眼" src="images/face/jiyan.gif" /></li>
+				<li><img key="ku" alt="酷" src="images/face/ku.gif" /></li>
+				<li><img key="qian" alt="钱" src="images/face/qian.gif" /></li>
+				<li><img key="taikaixin" alt="太开心" src="images/face/taikaixin.gif" /></li>
+				<li><img key="touxiao" alt="偷笑" src="images/face/touxiao.gif" /></li>
+			</ul>
+		</div>
+		<div id='entry'>
+			<textarea id='txtWord'></textarea>
+		</div>
+		<div id='submit'>
+			<input type="button" id='btnSubmit' value="发送" />
+			<input type="button" id='btnClear' value="清空" />
+		</div>
+	</div>
+	
+	<div id='right'>
+		<div id='member'>
+			<ul>
+				<li>人员1</li>
+				<li>人员2</li>
+				<li>人员3</li>
+			</ul>
+		</div>
+	</div> 
+	
+</div>
+</body>
+</html>
