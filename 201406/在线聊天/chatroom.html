@@ -19,9 +19,12 @@ img{border:none;}
 
 #left{width:64%; height:90%; top:10%;}
 #left div{ width:100%;}
-#content{height:65%; border-bottom:1px solid #000; left:0; top:0;}
+#content{height:65%; border-bottom:1px solid #000; left:0; top:0; overflow:hidden; }
+#content ul{ width:98%; position:absolute; left:0; top:0;}
 #content li.single{ color:#00f;}
 #content li.double{ color:#000; padding-left:10px;}
+#content #scroll,#m_scroll{ width:2%; height:99%; background:#ccc; top:2px; right:2px;}
+#scroll #bar,#m_bar{ width:100%; height:4%; background:#00f;}
 #middle{ height:5%; background:#ccc; left:0; bottom:30%;}
 #aTagFont{ margin-left:4px;}
 #middle a img{ margin-top:2px;}
@@ -36,7 +39,10 @@ img{border:none;}
 #entry textarea{width:98%; height:98%; border:none; margin:2px; font-size:12px; font-family:Arial, Helvetica, sans-serif;}
 
 #right{ width:36%; height:90%; right:0; top:10%;}
-#member{ width:100%; height:100%; border-left:1px solid #000; right:0; top:0;}
+#member{ width:100%; height:100%; border-left:1px solid #000; right:0; top:0; overflow:hidden;}
+#member ul{ width:98%; position:absolute; left:0; top:0;}
+<!--#m_scroll{ width:2%; height:99%; background:#ccc; top:2px; right:2px;}-->
+<!--#m_bar{ width:100%; height:4%; background:#00f;}-->
 
 #box .font9{ font-size:9px;}
 #box .font12{ font-size:12px;}
@@ -53,8 +59,8 @@ function getStyle(obj,attr){
 }
 function move(obj,json,succFn){
 	clearInterval(obj.timer);
-	var isOver=false;	
 	obj.timer=setInterval(function(){
+		var isOver=true;	
 		for(var attr in json){
 			if(name=='opacity'){
 				var nowValue=parseFloat(getStyle(obj,attr)*100);
@@ -67,11 +73,11 @@ function move(obj,json,succFn){
 			var target=json[attr];
 			var speed=(target-nowValue)/8;
 			speed=speed>0?Math.ceil(speed):Math.floor(speed);
-			if(Math.abs(target-nowValue)>Math.abs(speed)){
+			if(target==nowValue){
+				obj.style[attr]=target+'px';
+			}else{
 				isOver=false;
 				obj.style[attr]=nowValue+speed+'px';
-			}else{
-				obj.style[attr]=target+'px';
 			}
 		}
 		if(isOver){
@@ -134,6 +140,12 @@ window.onload=function(){
 	var oUlFont=$('ulFont');
 	var oAFont=$('aTagFont');
 	var aLiFont=oUlFont.children;
+	var oMember=$('member');
+	var oMemberUl=oMember.children[0];
+	var oScroll=$('scroll');
+	var oBar=$('bar');
+	var oMemberScroll=$('m_scroll');
+	var oMemberBar=$('m_bar');
 	
 	//清空回复内容
 	oClear.onclick=function(){
@@ -147,7 +159,7 @@ window.onload=function(){
 	oBox.style.top=(winY-oBox.offsetHeight)/2+'px';
 	oBig.onclick=function(){
 		var cW=100,cH=100;
-		move(oBox,{width:oBox.offsetWidth+cW,height:oBox.offsetHeight+cH,left:oBox.offsetLeft-cW/2,top:oBox.offsetTop-cH/2});
+		move(oBox,{width:oBox.offsetWidth+cW,height:oBox.offsetHeight+cH,left:oBox.offsetLeft-cW/2,top:oBox.offsetTop-cH/2},bindScroll);
 	}
 	
 	//设置conetent下面单双行样式
@@ -214,8 +226,8 @@ window.onload=function(){
 			url:URL,
 			data:{a:'get_msg',token:token},
 			cbName:'cb',
-			succFn:function(json){
-				var arrData=json.data;console.log(json);
+			succFn:function(json){console.log(json);
+				var arrData=json.data;
 				for(var i=0;i<arrData.length;i++){
 					var oLi=createLi(arrData[i].ID);
 					oLi.className='single';
@@ -224,10 +236,47 @@ window.onload=function(){
 					oContentUl.appendChild(oLi);
 					oContentUl.appendChild(oLi1);
 				}
-				
+				bindScroll();
 			}
 		});
 	}
+	
+	function bindScroll(){
+		//内容滚动条
+		setScroll(oBar,oScroll,oContentUl,oContent.offsetHeight);
+		//人员列表滚动条
+		setScroll(oMemberBar,oMemberScroll,oMemberUl,oMember.offsetHeight);
+	}	
+	
+}
+
+//滚动条公用方法
+function setScroll(obj,oParent,oMove,iMaxHeight){
+	obj.style.top=oMove.style.top=0;
+	//根据内容高度设置滚动条的高度
+	obj.style.height=(iMaxHeight/oParent.offsetHeight)*oMove.offsetHeight/100+'%';
+	oMove.offsetHeight<oParent.offsetHeight && (obj.style.height=0);
+	//绑定滚动事件
+	obj.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var disY=oEvent.clientY-obj.offsetTop;
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var y=oEvent.clientY-disY;
+			var maxT=oParent.offsetHeight-obj.offsetHeight;
+			y<0 && (y=0);
+			y>maxT && (y=maxT);
+			obj.style.top=y+'px';
+			var bili=y/maxT;
+			oMove.style.top=-(oMove.offsetHeight-iMaxHeight)*bili+'px';
+		};
+		document.onmouseup=function(){
+			document.onmousemove=document.onmouseup=null;
+			obj.releaseCapture && obj.releaseCapture();
+		}
+		obj.setCapture && obj.setCapture();
+		return false;
+	};
 }
 function createLi(html){
 	var oLi=document.createElement('li');
@@ -250,11 +299,42 @@ function createLi(html){
 	<div id='left'>
 		<div id='content'>
 			<ul>
-				<!--<li>内容1</li>
+				<!--<li>0000内容1</li>
 				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
 				<li>内容3</li>
-				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>-->
+				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
+				<li>内容1</li>
+				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
+				<li>内容3</li>
+				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
+				<li>内容1</li>
+				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
+				<li>内容3</li>
+				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
+				<li>内容1</li>
+				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
+				<li>内容3</li>
+				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
+				<li>内容1</li>
+				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
+				<li>1111内容3</li>
+				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
+				<li>2222内容1</li>
+				<li>3333&lt;br/&gt;ddd&lt;br/&gt;</li>
+				<li>4444内容3</li>
+				<li class="font16">55555内容等等顶顶顶顶顶顶顶顶顶顶4</li>
+				<li>66666内容1</li>
+				<li>77777&lt;br/&gt;ddd&lt;br/&gt;</li>
+				<li>8888内容3</li>
+				<li class="font16">99999内容等等顶顶顶顶顶顶顶顶顶顶4</li>
+				<li>00000内容1</li>
+				<li>11111&lt;br/&gt;ddd&lt;br/&gt;</li>
+				<li>222222内容3</li>
+				<li class="font16">3333内容等等顶顶顶顶顶顶顶顶顶顶4</li>-->
 			</ul>
+			<div id='scroll'>
+				<div id='bar'></div>
+			</div>
 		</div>
 		<div id='middle'>
 			<a href="javascript:;" id='aTagFont'><img src="images/font.png" /></a>
@@ -296,10 +376,13 @@ function createLi(html){
 	<div id='right'>
 		<div id='member'>
 			<ul>
-				<li>人员1</li>
-				<li>人员2</li>
-				<li>人员3</li>
+				<li>0000内容1</li>
+				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
+				<li>内容3</li>
 			</ul>
+			<div id='m_scroll'>
+				<div id='m_bar'></div>
+			</div>
 		</div>
 	</div> 
 	
