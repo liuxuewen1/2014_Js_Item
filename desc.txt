@@ -1,0 +1,80 @@
+轨迹回放：
+原理1：能拖拽的div
+原理2：移动过程中需要记录运动路径的位置点，在onmousemove中记录保存到数组
+原理3：回放：是设置一个定时器setInterval定时赋值数组中位置给div，回放即从后往前执行，arr.pop()取出元素
+注意点：onmousemove里，不一定能把起始位置点记录下来，所以在onmousedown中先插入起始点位置
+
+
+事件委托：将子元素需要执行的任务委托给父级
+原理1：事件冒泡。点击内部的元素时，会向上触发父级相同的事件。根据此原理，才把内部元素要执行的方法绑定到父级元素
+原理2：如何判断点击的内部元素是需要执行某任务的元素，根据来源元素判断：oEvent.srcElement（兼容IE系、Chrome）、oEvent.target（兼容Firefox）
+原理3：拿到来源元素，根据标签名或者ID甚至class都可以去判断是否是需要执行任务的元素
+作用：减少子元素for循环绑定事件；给未来新增元素绑定事件，不用再处理，特别是动态增加的元素
+
+ceiling.html
+模拟淘宝吸顶条：
+原理1：设置滚动事件onscroll，判断如果滚动距离大于吸顶条的绝对top时，将吸顶条的position设为fixed（如想兼容IE6，需要运动来做但有点抖动，所以淘宝、腾讯都不考虑IE6不兼容fixed的问题，我这也不做处理）
+原理2：获取吸顶条的绝对top，需要通过循环取得吸顶条所有父级最后到body的top，才是他的绝对定位距离，offsetParent 元素定位上的父级
+原理3：吸顶条需要做2个，另一个隐藏，只有在吸顶条设置为fixed时才出来，否则吸顶条会飘起来，导致后面的元素向上顶
+
+
+domReady.html
+探究domReady加载顺序：关于window.onload、dom加载完成、img加载完成的先后顺序
+原理1：dom加载完成：Firefox、Chrome、IE9+中支持dom事件DOMContentLoaded来判断；IE8-只能用<script>标签并且需要将该脚本设置成defer（延迟执行：即在dom加载完全后执行里面的脚本），怎么判断script加载完成：通过onreadystatechange事件判断，当oS.readyState=='complete'时（有时可能捕获不到，再加oS.readyState=='loaded'）表示script执行完成，也就是dom加载完成。
+原理2：所有的DOM事件需要通过事件绑定才能生效，在Firefox、Chrome、IE9+高级浏览器支持 addEventListener ，用这个方法绑定DOMContentLoaded事件
+原理3：img加载完成也有一个onload事件可以捕获
+测试顺序结果：dom加载完成、img加载完成、window.onload捕获
+可以将dom加载完成封装在domReady函数中，所以在不影响dom加载的情况下，将代码写在domReady(fn)中是最快的
+
+
+event.html
+事件绑定、解绑详解：
+原理1：事件绑定：Firefox、Chrome、IE9+支持 obj.addEventListener(sEv,fn,是否捕获)，是否捕获：true，表示捕获（即从父级捕获相同的事件到自己的事件），false，表示不捕获（即事件冒泡，从自己冒泡到父级元素）；IE8及以下版本：支持obj.attachEvent('on'+sEv,fn)。这两个方法attachEvent事件名前面带on，如'onscroll'、'onload'，而addEventListener事件名不带on，只能写成'scroll'、'load'
+原理2：注意事件冒泡的顺序和事件捕获的顺序截然相反，而且由于只有addEventListener支持捕获，如果想写成兼容的方法，捕获这个参数没有意义，所以一般为false
+原理3：事件解绑：跟事件绑定类似，Firefox、Chrome、IE9+支持 obj.removeEventListener(sEv,fn,是否捕获)；IE8及以下版本支持：obj.detachEvent('on'+sEv,fn)。需要注意的是，解绑的函数必须跟绑定函数是同一个，否则不生效
+
+
+mouseWheel.html
+滚轮事件详解：
+原理1：Chrome、IE中onmousewheel事件捕获滚轮信息，其中oEvent.wheelDelta>0：向上滚动，oEvent.wheelDelta<0：向下滚动（默认一次滚动距离120）
+原理2：Firefox中只能通过DOMMouseScroll事件捕获滚轮信息，其中捕获向下向上的属性不一样，且大小方向判断正好相反
+oEvent.detail>0：向下滚动，oEvent.detail<0：向上滚动；（默认一次滚动距离3）
+原理3：兼容型写法，需要通过navigator.userAgent判断浏览器，如果是firefox执行...其他执行...
+注意：DOM事件的绑定需要通过事件绑定来处理
+
+weiboWord.html
+微博字数统计：
+原理1：onkeydown：键盘按下去之后触发，此时文字未进入文本框中；onkeyup：键盘起来才会触发，如果连着按无法计数；onchange：失去焦点才触发
+原理2：上面的几个事件对于微博计数都不行，oninput：是HTML5的标准事件，当textarea、input:text、input:password、input:search中文本框内容发生改变时即刻触发的事件，但只兼容：Firefox、Chrome、IE9+等高级浏览器；IE中用他的专属事件onpropertychange事件来监听，作用跟oninput一样
+原理3：IE9下oninput和onpropertychange事件都有一个bug，即在删除、剪切时不触发这两个事件。所以只有在IE9浏览器下时，需要设置一个定时器setInterval来实时计算，当焦点离开清除定时器，当聚焦时再启动定时器
+
+scrollBar.html
+原理1：滚动条可移动，拖拽原理，注意控制上下不能超出的范围
+原理2：滚动条移动时，根据高度比例，计算控制内容框的top值
+原理3：滚动条长度的大小，需要根据内容长度等比例变化，这样内容多 滚动条长度就小，内容少 滚动条长度就大
+原理4：鼠标在内容区域上下滚动时，内容需要跟着滚动，判断出向上向下的方向，设定一个速度，即每次滚动走的距离
+注意：getStyle(obj,'height');可以捕获高度，但是在没有定义高度时，IE8及以下，只能通过offsetHeight来获取obj元素的高度
+
+
+loadImgBar.html
+原理1：img有onload监听图片加载完成的事件，当图片加载完成立即执行到onload内部
+原理2：在onload中根据图片完成个数，来计算加载进度，显示进度条
+原理3：在最后一张图片加载完成之后，开启定时器setInterval，此时定时修改显示在页面上图片的地址（此时获取的图片是从缓存中读取，所以速度很快）
+
+aboutThis.html
+this：最重要的是能理清this所引用的对象是哪个。简单说，this所在函数是被哪个对象调用的，该对象就是this所引用的对象。还要记住：javascript的变量作用域有一条规则“全局变量都是window对象的属性”
+调用形式       this
+普通函数   -》 全局对象window
+对象的方法 -》 该对象
+构造函数   -》 新构造的对象
+关于this容易出错的几个地方：
+1）定时器中的this 是window对象
+2）多包一层的function，内部的this 是window对象
+3）IE8及以下的事件绑定方法attachEvent中的this 是window对象
+4）元素行间事件中调用的函数，函数内部使用的this 是window对象
+this容易出问题的几处地方：
+
+
+mouseover_mouseout_bug.html
+关于onmouseover和onmouseout的bug：
+bug：
