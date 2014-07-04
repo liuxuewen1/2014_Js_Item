@@ -226,12 +226,16 @@ window.onload=function(){
 			url:URL,
 			data:{a:'get_msg',token:token},
 			cbName:'cb',
-			succFn:function(json){console.log(json);
+			succFn:function(json){
 				var arrData=json.data;
 				for(var i=0;i<arrData.length;i++){
-					var oLi=createLi(arrData[i].ID);
+					var data=arrData[i];
+					var oDate=new Date();
+					oDate.setTime(data.post_time*1000);
+					var time=(oDate.getFullYear()+'-'+addZero(oDate.getMonth()+1)+'-'+addZero(oDate.getDate())+' '+addZero(oDate.getHours())+':'+addZero(oDate.getMinutes())+':'+addZero(oDate.getSeconds()));
+					var oLi=createLi(data.username+' '+time);
 					oLi.className='single';
-					var oLi1=createLi(arrData[i].content);
+					var oLi1=createLi(data.content);
 					oLi1.className='double';
 					oContentUl.appendChild(oLi);
 					oContentUl.appendChild(oLi1);
@@ -246,11 +250,21 @@ window.onload=function(){
 		setScroll(oBar,oScroll,oContentUl,oContent.offsetHeight);
 		//人员列表滚动条
 		setScroll(oMemberBar,oMemberScroll,oMemberUl,oMember.offsetHeight);
-	}	
+	}
+	//鼠标滚动时控制内容也滚动
+	mouseWheel(oContentUl,function(bDown){
+		c_speed=bDown?Math.abs(c_speed):-Math.abs(c_speed);
+		mouseMove(oBar,oScroll,oContentUl,oContent.offsetHeight);
+	});
+	mouseWheel(oMemberUl,function(bDown){
+		c_speed=bDown?Math.abs(c_speed):-Math.abs(c_speed);
+		mouseMove(oMemberBar,oMemberScroll,oMemberUl,oMember.offsetHeight);
+	});
 	
 }
 
 //滚动条公用方法
+var c_speed=5;
 function setScroll(obj,oParent,oMove,iMaxHeight){
 	obj.style.top=oMove.style.top=0;
 	//根据内容高度设置滚动条的高度
@@ -278,6 +292,47 @@ function setScroll(obj,oParent,oMove,iMaxHeight){
 		return false;
 	};
 }
+
+//鼠标滚动时移动内容框
+function mouseMove(obj,oParent,oMove,iMaxHeight){
+	var maxT=oParent.offsetHeight-obj.offsetHeight;
+	var y=obj.offsetTop+c_speed;
+	y<0 && (y=0);
+	y>maxT && (y=maxT);
+	obj.style.top=y+'px';
+	var bili=y/maxT;
+	oMove.style.top=-(oMove.offsetHeight-iMaxHeight)*bili+'px';
+}
+
+//鼠标滚动事件
+function mouseWheel(obj,fn){
+	if(navigator.userAgent.toLowerCase().indexOf('firefox')!=-1){
+		addEvent(obj,'DOMMouseScroll',function(ev){
+			var oEvent=ev||event;
+			var isDown=oEvent.detail>0?true:false;
+			fn && fn(isDown);
+		});
+	}else{
+		addEvent(obj,'mousewheel',function(ev){
+			var oEvent=ev||event;
+			var isDown=oEvent.wheelDelta>0?false:true;
+			fn && fn(isDown);
+		});
+	}
+}
+
+function addZero(n){
+	return n<10?'0'+n:n;
+}
+
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+
 function createLi(html){
 	var oLi=document.createElement('li');
 	oLi.innerHTML=html;
