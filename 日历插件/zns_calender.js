@@ -12,26 +12,26 @@ var zns_Calender=function(id){
 	
 	var oCalender=null;
 	
-	//Éú³Éhtml´úÂë
+	//ç”Ÿæˆhtmlä»£ç 
 	function createHTML(){
 		oCalender=document.createElement("div");
 		oCalender.className="zns_calender";
 		var html="";
 		html+="<ul class='ulPage'>";
 			html+="<li>";
-				html+="<a href='javascript:;' class='pre'>ÉÏÒ³</a>";
+				html+="<a href='javascript:;' class='pre'>ä¸Šé¡µ</a>";
 				html+="<span></span>";
-				html+="<a href='javascript:;' class='next'>ÏÂÒ³</a>";
+				html+="<a href='javascript:;' class='next'>ä¸‹é¡µ</a>";
 			html+="</li>";
 		html+="</ul>";
 		html+="<ul class='ulWeek'>";
-			html+="<li>Ò»</li>";
-			html+="<li>¶ş</li>";
-			html+="<li>Èı</li>";
-			html+="<li>ËÄ</li>";
-			html+="<li>Îå</li>";
-			html+="<li>Áù</li>";
-			html+="<li>ÈÕ</li>";
+			html+="<li>ä¸€</li>";
+			html+="<li>äºŒ</li>";
+			html+="<li>ä¸‰</li>";
+			html+="<li>å››</li>";
+			html+="<li>äº”</li>";
+			html+="<li>å…­</li>";
+			html+="<li>æ—¥</li>";
 		html+="</ul>";
 		html+="<ul class='ulDate'></ul>";
 		oCalender.innerHTML=html;
@@ -76,41 +76,41 @@ var zns_Calender=function(id){
 			tMonth=(new Date()).getMonth();
 		firstDay=firstDay==0?7:firstDay;
 		
-		//Ìî³äÔÂ·İµÚÒ»ÌìÖ®Ç°µÄ¿Õ°×
+		//å¡«å……æœˆä»½ç¬¬ä¸€å¤©ä¹‹å‰çš„ç©ºç™½
 		for(var i=1;i<firstDay;i++){
 			oUlDate.appendChild(createLi(''));
 		}
 		
-		//ÉèÖÃ¸ÃÔÂÃ¿Ò»ÌìµÄÈÕÆÚ
+		//è®¾ç½®è¯¥æœˆæ¯ä¸€å¤©çš„æ—¥æœŸ
 		for(var i=0;i<dateNum;i++){
 			var day=i+1;
 			var oLi=createLi(day);
 			oUlDate.appendChild(oLi);
 			
-			if(iMonth>tMonth){				//µ±ÔÂÖ®ºó
+			if(iMonth>tMonth){				//å½“æœˆä¹‹å
 				showAfterDay(oLi, day);
 			}
-			else if(iMonth<tMonth){			//µ±ÔÂÖ®Ç°
+			else if(iMonth<tMonth){			//å½“æœˆä¹‹å‰
 				oLi.className="gray";
 			}
-			else if(iMonth==tMonth){		//µ±ÔÂ
+			else if(iMonth==tMonth){		//å½“æœˆ
 				if(day<tday){
-					oLi.className="gray";	//µ±ÌìÖ®Ç°
+					oLi.className="gray";	//å½“å¤©ä¹‹å‰
 				}
 				else{
-					showAfterDay(oLi, day);	//µ±Ìì¼°Ö®ºó
+					showAfterDay(oLi, day);	//å½“å¤©åŠä¹‹å
 				}
 			}
 			
 		}
 		
-		//µ±Ìì¼°Ö®ºóµÄÈÕÆÚÏÔÊ¾ÑùÊ½
+		//å½“å¤©åŠä¹‹åçš„æ—¥æœŸæ˜¾ç¤ºæ ·å¼
 		function showAfterDay(oLi, day){
-			//ÉèÖÃµ½µ±Ç°Ìì£¬¼ÆËã³öÊÇĞÇÆÚ¼¸
+			//è®¾ç½®åˆ°å½“å‰å¤©ï¼Œè®¡ç®—å‡ºæ˜¯æ˜ŸæœŸå‡ 
 			oDate.setDate(day);
 			var weekDay=oDate.getDay();
 			weekDay=weekDay==0?7:weekDay;
-			//ÅĞ¶ÏÊÇ·ñÊÇÖÜÄ©
+			//åˆ¤æ–­æ˜¯å¦æ˜¯å‘¨æœ«
 			if(weekDay%6==0 || weekDay%7==0){
 				oLi.className="red";
 			}
@@ -128,45 +128,45 @@ var zns_Calender=function(id){
 			
 		}
 		
-		//ÏÔÊ¾ÄêÔÂ
-		oShow.innerHTML=oDate.getFullYear()+"Äê"+(oDate.getMonth()+1)+"ÔÂ";
+		//æ˜¾ç¤ºå¹´æœˆ
+		oShow.innerHTML=oDate.getFullYear()+"å¹´"+(oDate.getMonth()+1)+"æœˆ";
 		
 	}
 	setDateToUl(oDate);
 	
-	//°ó¶¨ÉÏÒ³
+	//ç»‘å®šä¸Šé¡µ
 	oPrev.onclick=function(){
 		var oD=new Date();
 		oD.setMonth(--iMonth);
 		setDateToUl(oD);
 	}
 	
-	//°ó¶¨ÏÂÒ³
+	//ç»‘å®šä¸‹é¡µ
 	oNext.onclick=function(){
 		var oD=new Date();
 		oD.setMonth(++iMonth);
 		setDateToUl(oD);
 	}
 	
-	//´´½¨ÈÕÆÚli
+	//åˆ›å»ºæ—¥æœŸli
 	function createLi(text){
 		var oLi=document.createElement("li");
 		oLi.innerHTML=text;
 		return oLi;
 	}
 	
-	//¼ÆËãÄ³¸öÊ±¼äµÄÔÂ·İ¹²¶àÉÙÌì
+	//è®¡ç®—æŸä¸ªæ—¶é—´çš„æœˆä»½å…±å¤šå°‘å¤©
 	function getDateNum(oDate){
 		oDate.setMonth(oDate.getMonth()+1);
 		oDate.setDate(0);
 		return oDate.getDate();
 	}
-	//¼ÆËãÄ³¸öÊ±¼äµÄÔÂ·İµÚÒ»ÌìÊÇĞÇÆÚ¼¸
+	//è®¡ç®—æŸä¸ªæ—¶é—´çš„æœˆä»½ç¬¬ä¸€å¤©æ˜¯æ˜ŸæœŸå‡ 
 	function getDateDay(oDate){
 		oDate.setDate(1);
 		return oDate.getDay();
 	}
-	//»ñÈ¡¶¨Î»Left¡¢Top
+	//è·å–å®šä½Leftã€Top
 	function getPos(obj){
 		var l=0,t=0;
 		while(obj){
