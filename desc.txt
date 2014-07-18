@@ -1,80 +1,224 @@
-�켣�طţ�
-ԭ��1������ק��div
-ԭ��2���ƶ���������Ҫ��¼�˶�·����λ�õ㣬��onmousemove�м�¼���浽����
-ԭ��3���طţ�������һ����ʱ��setInterval��ʱ��ֵ������λ�ø�div���طż��Ӻ���ǰִ�У�arr.pop()ȡ��Ԫ��
-ע��㣺onmousemove���һ���ܰ���ʼλ�õ��¼������������onmousedown���Ȳ�����ʼ��λ��
+﻿demo/ajax.html
+原生ajax详解
+Ajax最大优势是异步、无刷新加载数据，增加用户体验性
+步骤1：建立ajax对象，IE5、IE6中：new ActiveXObject('Microsoft.XMLHTTP')；其他浏览器：new XMLHttpRequest()；判断方法：window.XMLHttpRequest
+步骤2：打开连接、发送请求：Get类型：oAjax.open('GET',url,true); 最后一个参数是否异步（true-异步）；oAjax.send(); 如果是Post类型：open方法差不多，不同的是需要设置请求头 oAjax.setRequestHeader('content-type','application/x-www-form-urlencoded'); 而且参数需要放在send()方法，oAjax.send(...);
+步骤3：设置监听事件onreadystatechange，如果oAjax.readyState属性为4 表示数据接收完成，判断oAjax.status返回的状态码：如果是200开头则成功，或者是304（表示文件未修改）也是成功，其他状态码表示失败
+步骤4：成功，调用成功的回调函数 并把获取的数据返回出去，如果是XML，返回值属性是oAjax.responseXML，其他为oAjax.responseText
+之上，ajax请求完毕。当然，可以设置真正加载的函数、请求完成后的函数、以及超时处理函数
+PS：该页面的左侧边栏和右侧内容栏都是通过ajax加载出来的，所有项目描述都放在desc.txt文件，相当于一个小型数据库
+
+|
+
+index.html
+jsonp搜索大全
+jsonp：由于浏览器的同源（即域名、协议、端口）策略，ajax请求无法访问到跨域数据，通过jsonp来实现跨域
+jsonp原理：src具有跨域获取数据能力，通过<script>标签来获取js，传递必要的参数获取动态数据，然后自定义一个函数，在跨域js获取后，执行获取的数据并自行处理；封装的jsonp函数中，json.url为必填、json.data为对方需要的参数、json.cbName是对方回调函数名的参数名、json.succFn是成功后回调函数、json.jsonpCallback为自定义回调函数名（如果没有会自动生成一个随机函数名）、json.timeout为超时时间（默认3s)、json.timeoutFn超时执行函数
+原理2：将实参url和data拼成完整url作为<script>的src，将json.jasonpCallback函数设置成window的属性作为全局函数
+注意1：上面是针对正常可自行定义函数名的js来说，由于各个网站给出的接口不一样，需要具体对待
+注意2：如果接口给出的js是全局变量形式，需要在script加载完成后直接使用数据？问题的关键是怎么知道什么时候数据加载完成？在IE9及以上的IE系、FF、Chrome等高级浏览器中可通过onload事件监听，IE8及以下通过onreadystatechange事件监听，当readyState属性为complete时表示加载完成，但是有时候IE浏览器不一定能监听到complete，所以最好再加上loaded属性，如果为complete或loaded时表示加载完成，此时可以使用该全局变量。
+搜索大全：通过jsonp获取google、百度、360、搜狗、迅雷等智能提示信息，难点在于：各家的js内部定义不一样，比如360、百度可以自定义函数，而Google、搜狗则是自己定好的函数而且是通过命名空间方式定义，怎样通过jsonp函数兼容所有模式。可以通过上下方向键选择智能提示的关键词。
+
+|
+
+demo/calender/calender.html
+原生Js日历插件
+使用方法：z_Calender(idName);	//引入js，通过z_Calender函数绑定到所需的文本框id上
+实现功能：上月、下月、周六日红字标出、今天之前的日期不能选择
+原理1：生成某个月份的日期，首先要求出月份的总天数：将oDate置为下个月，设置setDate(0)，则为当前月份的最后一天即为总天数；找到当前月份的第一天是星期几，设置setDate(1)，然后getDay()；
+原理2：上月、下月的翻页只需要重新计算并渲染页面，周六、周日需要通过取余判断，如果是当月之前的月份，所有日期置灰无法点击；如果是当月之后的月份，正常显示；如果是当月，需要判断当天之前的置灰且无法点击，当天之后日期的正常显示。
+原理3：点击页面其他地方日历消失，是通过绑定document.onclick中事件实现，但是在点击文本框事件时，需要取消冒泡（oEvent.cancelBubble=true;）否则会冒泡到document也导致日历消失
+原理4：找到文本框的绝对定位left、top，然后固定定位该日历的位置
+原理5：样式css文件的引入是通过闭包形式在引进该js时，appendChild到head里面
+
+|
+
+demo/photoWall/photo.html
+照片墙
+主要原理是点击鼠标时的拖拽、交换图片位置时的缓冲运动
+缓冲运动原理1：先清空定时器；在对象上新开一个定时器
+缓冲运动原理2：循环所有json参数，获取当前值，注意获取opacity和其他属性要分开
+缓冲运动原理3：获取目标值，设置速度，缓冲运动速度是越来越慢通过目标值减去当前值，再除以固定值；注意速度需要取整，否则最后到不了目标值，速度大于0向上取整Math.ceil()，速度小于0向下取整Math.floor()
+缓冲运动原理4：当目标值不等于当前值，做标记（此次运动未结束），并且赋值（注意opacity的赋值有两个opacity、filter:alpha(opacity:XX); filter是兼容IE用）；当所有循环都结束则清除定时器，如有回调函数则执行
+拖拽原理1：在拖拽的对象绑定onmousedown事件，在鼠标点击该对象时记下鼠标到对象左边沿disX和上边沿disY的距离，在移动过程中跟着鼠标点移动时使用；
+拖拽原理2：在onmousedown事件中绑定document的onmousemove事件，为什么绑在document上？拖动时如果太快容易脱离对象，如果绑定在对象容易出问题，根据disX、disY和鼠标当前位置oEvent.clientX、oEvent.clientY设置对象的位置
+拖拽原理3：在onmouseup事件中绑定document.onmouseup事件，目的？在释放鼠标时，清除document.onmousemove
+拖拽注意1：在移动时需要消除复制功能的默认事件，用return false; IE中用obj.setCapture() 在鼠标抬起时需要释放捕获obj.releaseCapture(); 如果是在addEventListener中使用 return false在Chrome中不好使，需要用oEvent.preventDefault()来 阻止默认事件
+拖拽注意2：移动时需要考虑边界问题，不能超出上下左右边界
+照片墙：在移动过程中需要计算当前移动对象距离哪个照片更近？一旦释放鼠标将会交换位置点；
+
+|
+
+demo/chat/chatroom.html
+聊天室
+原理1：窗口大小的计算、从中间放大、缩小用到运动
+原理2：聊天窗口和人员列表自定义滚动条用到了拖拽、鼠标滚轮事件、运动等原理
+原理3：上传表情、解析表情用到正则表达式做转换
+原理4：获取聊天内容和人员信息用到jsonp从接口取数据，再转换
+综上，聊天室是各种效果和交互的一种综合运用，这个demo的设计做的丑了点
+
+|
+
+demo/tetris/Tetris.html
+俄罗斯方块
+原理1：
+
+|
+
+demo/30s/Dodge.html
+能忍30s吗
+原理1：
+
+|
+
+demo/showImg.html
+多图片展示
+原理1：运动，跟上面运动原理一样
+原理2：图片从中间放大原理，width、height需要放大，margin-left=-放大宽度/2、margin-top=-放大高度/2
+原理3：鼠标移动到图片上时，修改该图片的zIndex，保持该图片每次都在最上面
+
+|
+
+demo/imgScroll/seamlessScroll.html
+无缝滚动
+纵向无缝滚动原理1：布局转换，将固定定位转换成绝对定位，有个坑：先循环将left、top设置好，然后再次循环设置position:absolute；为什么在一次循环中写？因为对象设置为绝对定位后，不占位置后面元素向前浮动，导致后面所以元素的left、top跟第一个元素一致
+纵向无缝滚动原理2：运动。当鼠标移动到图片索引时，重新设置top值，并移动
+横向无缝滚动原理1：布局转换跟上面原理一样
+横向无缝滚动原理2：需要将里面图片的ul再复制一份，同时计算ul宽度；目的是在图片向某个方向移动完后瞬间再拉回来，类似于障眼法；
+横向无缝滚动原理3：还是运动。向左、向右、定时移动都是改变left的值，控制下边界问题即可
+
+|
+
+demo/backToTop.html
+完美版回到顶部
+完美指全兼容所有浏览器，包括IE6
+原理1：由于IE6不支持fixed定位，所以需要通过navigator.userAgent判断如果是IE6需要通过运动来搞定回到顶部。当检测到IE6时，设置position:absolute;绑定onscroll事件，触发事件设置top
+原理2：在点击回到顶部按钮时，触发onclick，当scrollTop不为0，开启定时器，定时修改document的top值，其中有个兼容性问题：document.body.scrollTop兼容于Chrome；document.documentElement.scrollTop 兼容于非Chrome；IE6下还需要修改回到顶部按钮的top值。在scrollTop等于0时，清除定时器。
+
+|
+
+demo/snake/snake.html
+贪吃蛇
+原理1：贪吃蛇对象，具有的基本属性和方法，开始、暂停、改变方向、移动、是否碰撞死亡、吃食物等；食物对象，有一个生成食物方法
+原理2：根据低中高级来设置定时器的时间，开始和暂停是控制启动、清除定时器来实现；根据方向来掌控移动的方向，前面的蛇身div的left、top赋值给后面的蛇身，第一个蛇头根据方向移动div宽度的距离；判断是否撞墙死亡，判断下一步的距离是否跟同方向墙体left、top有碰撞；判断是否有食物也是根食物div检测碰撞；
+
+|
+
+demo/track.html
+轨迹回放
+原理1：能拖拽的div
+原理2：移动过程中需要记录运动路径的位置点，在onmousemove中记录保存到数组
+原理3：回放：是设置一个定时器setInterval定时赋值数组中位置给div，回放即从后往前执行，arr.pop()取出元素
+注意点：onmousemove里，不一定能把起始位置点记录下来，所以在onmousedown中先插入起始点位置
+
+|
+
+demo/eventDelegate.html
+事件委托
+将子元素需要执行的任务委托给父级
+原理1：事件冒泡。点击内部的元素时，会向上触发父级相同的事件。根据此原理，才把内部元素要执行的方法绑定到父级元素
+原理2：如何判断点击的内部元素是需要执行某任务的元素，根据来源元素判断：oEvent.srcElement（兼容IE系、Chrome）、oEvent.target（兼容Firefox）
+原理3：拿到来源元素，根据标签名或者ID甚至class都可以去判断是否是需要执行任务的元素
+作用：减少子元素for循环绑定事件；给未来新增元素绑定事件，不用再处理，特别是动态增加的元素
+
+|
+
+demo/waterfall.html
+瀑布流
+原理1：比较scrollTop、clientHeight跟当前元素的offsetHeight的高度，onscroll触发时，找到最小的列所在offsetHeight然后比较是否超过当前列高度，如果超过则重新请求数据
+原理2：onscroll在到底触发时有可能会触发多次（跟浏览器有关）所以需要设置定时器来定时获取数据，且定义一个变量来标记是否创建完毕，完毕才能再次创建
+
+|
+
+demo/ceiling.html
+模拟淘宝吸顶条
+原理1：设置滚动事件onscroll，判断如果滚动距离大于吸顶条的绝对top时，将吸顶条的position设为fixed（如想兼容IE6，需要运动来做但有点抖动，所以淘宝、腾讯都不考虑IE6不兼容fixed的问题，我这也不做处理）
+原理2：获取吸顶条的绝对top，需要通过循环取得吸顶条所有父级最后到body的top，才是他的绝对定位距离，offsetParent 元素定位上的父级
+原理3：吸顶条需要做2个，另一个隐藏，只有在吸顶条设置为fixed时才出来，否则吸顶条会飘起来，导致后面的元素向上顶
+
+|
+
+demo/domReady.html
+探究domReady加载顺序
+关于window.onload、dom加载完成、img加载完成的先后顺序
+原理1：dom加载完成：Firefox、Chrome、IE9+中支持dom事件DOMContentLoaded来判断；IE8-只能用<script>标签并且需要将该脚本设置成defer（延迟执行：即在dom加载完全后执行里面的脚本），怎么判断script加载完成：通过onreadystatechange事件判断，当oS.readyState=='complete'时（有时可能捕获不到，再加oS.readyState=='loaded'）表示script执行完成，也就是dom加载完成。
+原理2：所有的DOM事件需要通过事件绑定才能生效，在Firefox、Chrome、IE9+高级浏览器支持 addEventListener ，用这个方法绑定DOMContentLoaded事件
+原理3：img加载完成也有一个onload事件可以捕获
+测试顺序结果：dom加载完成、img加载完成、window.onload捕获
+可以将dom加载完成封装在domReady函数中，所以在不影响dom加载的情况下，将代码写在domReady(fn)中是最快的
+
+|
 
 
-�¼�ί�У�����Ԫ����Ҫִ�е�����ί�и�����
-ԭ��1���¼�ð�ݡ�����ڲ���Ԫ��ʱ�������ϴ���������ͬ���¼������ݴ�ԭ�����Ű��ڲ�Ԫ��Ҫִ�еķ����󶨵�����Ԫ��
-ԭ��2������жϵ�����ڲ�Ԫ������Ҫִ��ĳ�����Ԫ�أ�������ԴԪ���жϣ�oEvent.srcElement������IEϵ��Chrome����oEvent.target������Firefox��
-ԭ��3���õ���ԴԪ�أ����ݱ�ǩ������ID����class������ȥ�ж��Ƿ�����Ҫִ�������Ԫ��
-���ã�������Ԫ��forѭ�����¼�����δ������Ԫ�ذ��¼��������ٴ������ر��Ƕ�̬���ӵ�Ԫ��
+demo/event.html
+事件绑定、解绑详解
+原理1：事件绑定：Firefox、Chrome、IE9+支持 obj.addEventListener(sEv,fn,是否捕获)，是否捕获：true，表示捕获（即从父级捕获相同的事件到自己的事件），false，表示不捕获（即事件冒泡，从自己冒泡到父级元素）；IE8及以下版本：支持obj.attachEvent('on'+sEv,fn)。这两个方法attachEvent事件名前面带on，如'onscroll'、'onload'，而addEventListener事件名不带on，只能写成'scroll'、'load'
+原理2：注意事件冒泡的顺序和事件捕获的顺序截然相反，而且由于只有addEventListener支持捕获，如果想写成兼容的方法，捕获这个参数没有意义，所以一般为false
+原理3：事件解绑：跟事件绑定类似，Firefox、Chrome、IE9+支持 obj.removeEventListener(sEv,fn,是否捕获)；IE8及以下版本支持：obj.detachEvent('on'+sEv,fn)。需要注意的是，解绑的函数必须跟绑定函数是同一个，否则不生效
 
-ceiling.html
-ģ���Ա���������
-ԭ��1�����ù����¼�onscroll���ж����������������������ľ���topʱ������������position��Ϊfixed���������IE6����Ҫ�˶��������е㶶���������Ա�����Ѷ��������IE6������fixed�����⣬����Ҳ����������
-ԭ��2����ȡ�������ľ���top����Ҫͨ��ѭ��ȡ�����������и������body��top���������ľ��Զ�λ���룬offsetParent Ԫ�ض�λ�ϵĸ���
-ԭ��3����������Ҫ��2������һ�����أ�ֻ��������������Ϊfixedʱ�ų�����������������Ʈ���������º����Ԫ�����϶�
+|
 
 
-domReady.html
-̽��domReady����˳�򣺹���window.onload��dom������ɡ�img������ɵ��Ⱥ�˳��
-ԭ��1��dom������ɣ�Firefox��Chrome��IE9+��֧��dom�¼�DOMContentLoaded���жϣ�IE8-ֻ����<script>��ǩ������Ҫ���ýű����ó�defer���ӳ�ִ�У�����dom������ȫ��ִ������Ľű�������ô�ж�script������ɣ�ͨ��onreadystatechange�¼��жϣ���oS.readyState=='complete'ʱ����ʱ���ܲ��񲻵����ټ�oS.readyState=='loaded'����ʾscriptִ����ɣ�Ҳ����dom������ɡ�
-ԭ��2�����е�DOM�¼���Ҫͨ���¼��󶨲�����Ч����Firefox��Chrome��IE9+�߼������֧�� addEventListener �������������DOMContentLoaded�¼�
-ԭ��3��img�������Ҳ��һ��onload�¼����Բ���
-����˳������dom������ɡ�img������ɡ�window.onload����
-���Խ�dom������ɷ�װ��domReady�����У������ڲ�Ӱ��dom���ص�����£�������д��domReady(fn)��������
+demo/mouseWheel.html
+滚轮事件详解
+原理1：Chrome、IE中onmousewheel事件捕获滚轮信息，其中oEvent.wheelDelta>0：向上滚动，oEvent.wheelDelta<0：向下滚动（默认一次滚动距离120）
+原理2：Firefox中只能通过DOMMouseScroll事件捕获滚轮信息，其中捕获向下向上的属性不一样，且大小方向判断正好相反
+oEvent.detail>0：向下滚动，oEvent.detail<0：向上滚动；（默认一次滚动距离3）
+原理3：兼容型写法，需要通过navigator.userAgent判断浏览器，如果是firefox执行...其他执行...
+注意：DOM事件的绑定需要通过事件绑定来处理
+
+|
 
 
-event.html
-�¼��󶨡������⣺
-ԭ��1���¼��󶨣�Firefox��Chrome��IE9+֧�� obj.addEventListener(sEv,fn,�Ƿ񲶻�)���Ƿ񲶻�true����ʾ���񣨼��Ӹ���������ͬ���¼����Լ����¼�����false����ʾ�����񣨼��¼�ð�ݣ����Լ�ð�ݵ�����Ԫ�أ���IE8�����°汾��֧��obj.attachEvent('on'+sEv,fn)������������attachEvent�¼���ǰ���on����'onscroll'��'onload'����addEventListener�¼�������on��ֻ��д��'scroll'��'load'
-ԭ��2��ע���¼�ð�ݵ�˳����¼������˳���Ȼ�෴����������ֻ��addEventListener֧�ֲ��������д�ɼ��ݵķ����������������û�����壬����һ��Ϊfalse
-ԭ��3���¼���󣺸��¼������ƣ�Firefox��Chrome��IE9+֧�� obj.removeEventListener(sEv,fn,�Ƿ񲶻�)��IE8�����°汾֧�֣�obj.detachEvent('on'+sEv,fn)����Ҫע����ǣ����ĺ���������󶨺�����ͬһ����������Ч
+demo/weiboWord.html
+微博字数统计
+原理1：onkeydown：键盘按下去之后触发，此时文字未进入文本框中；onkeyup：键盘起来才会触发，如果连着按无法计数；onchange：失去焦点才触发
+原理2：上面的几个事件对于微博计数都不行，oninput：是HTML5的标准事件，当textarea、input:text、input:password、input:search中文本框内容发生改变时即刻触发的事件，但只兼容：Firefox、Chrome、IE9+等高级浏览器；IE中用他的专属事件onpropertychange事件来监听，作用跟oninput一样
+原理3：IE9下oninput和onpropertychange事件都有一个bug，即在删除、剪切时不触发这两个事件。所以只有在IE9浏览器下时，需要设置一个定时器setInterval来实时计算，当焦点离开清除定时器，当聚焦时再启动定时器
+
+|
+
+demo/scrollBar.html
+自定义滚动条
+原理1：滚动条可移动，拖拽原理，注意控制上下不能超出的范围
+原理2：滚动条移动时，根据高度比例，计算控制内容框的top值
+原理3：滚动条长度的大小，需要根据内容长度等比例变化，这样内容多 滚动条长度就小，内容少 滚动条长度就大
+原理4：鼠标在内容区域上下滚动时，内容需要跟着滚动，判断出向上向下的方向，设定一个速度，即每次滚动走的距离
+注意：getStyle(obj,'height');可以捕获高度，但是在没有定义高度时，IE8及以下，只能通过offsetHeight来获取obj元素的高度
+
+|
+
+demo/loadImgBar.html
+3D图片效果展示
+原理1：img有onload监听图片加载完成的事件，当图片加载完成立即执行到onload内部
+原理2：在onload中根据图片完成个数，来计算加载进度，显示进度条
+原理3：在最后一张图片加载完成之后，开启定时器setInterval，此时定时修改显示在页面上图片的地址（此时获取的图片是从缓存中读取，所以速度很快）
+
+|
 
 
-mouseWheel.html
-�����¼���⣺
-ԭ��1��Chrome��IE��onmousewheel�¼����������Ϣ������oEvent.wheelDelta>0�����Ϲ�����oEvent.wheelDelta<0�����¹�����Ĭ��һ�ι�������120��
-ԭ��2��Firefox��ֻ��ͨ��DOMMouseScroll�¼����������Ϣ�����в����������ϵ����Բ�һ�����Ҵ�С�����ж������෴
-oEvent.detail>0�����¹�����oEvent.detail<0�����Ϲ�������Ĭ��һ�ι�������3��
-ԭ��3��������д������Ҫͨ��navigator.userAgent�ж�������������firefoxִ��...����ִ��...
-ע�⣺DOM�¼��İ���Ҫͨ���¼���������
+demo/aboutThis.html
+关于this
+最重要的是能理清this所引用的对象是哪个。简单说，this所在函数是被哪个对象调用的，该对象就是this所引用的对象。还要记住：javascript的变量作用域有一条规则“全局变量都是window对象的属性”
+调用形式       this
+普通函数   -》 全局对象window
+对象的方法 -》 该对象
+构造函数   -》 新构造的对象
+关于this容易出错的几个地方：
+1）定时器中的this 是window对象
+2）多包一层的function，内部的this 是window对象
+3）IE8及以下的事件绑定方法attachEvent中的this 是window对象
+4）元素行间事件中调用的函数，函数内部使用的this 是window对象
+this容易出问题的几处地方：
 
-weiboWord.html
-΢������ͳ�ƣ�
-ԭ��1��onkeydown�����̰���ȥ֮�󴥷�����ʱ����δ�����ı����У�onkeyup�����������Żᴥ����������Ű��޷�������onchange��ʧȥ����Ŵ���
-ԭ��2������ļ����¼�����΢�����������У�oninput����HTML5�ı�׼�¼�����textarea��input:text��input:password��input:search���ı������ݷ����ı�ʱ���̴������¼�����ֻ���ݣ�Firefox��Chrome��IE9+�ȸ߼��������IE��������ר���¼�onpropertychange�¼������������ø�oninputһ��
-ԭ��3��IE9��oninput��onpropertychange�¼�����һ��bug������ɾ��������ʱ�������������¼�������ֻ����IE9�������ʱ����Ҫ����һ����ʱ��setInterval��ʵʱ���㣬�������뿪�����ʱ�������۽�ʱ��������ʱ��
+|
 
-scrollBar.html
-ԭ��1�����������ƶ�����קԭ����ע��������²��ܳ����ķ�Χ
-ԭ��2���������ƶ�ʱ�����ݸ߶ȱ���������������ݿ��topֵ
-ԭ��3�����������ȵĴ�С����Ҫ�������ݳ��ȵȱ����仯���������ݶ� ���������Ⱦ�С�������� ���������Ⱦʹ�
-ԭ��4������������������¹���ʱ��������Ҫ���Ź������жϳ��������µķ����趨һ���ٶȣ���ÿ�ι����ߵľ���
-ע�⣺getStyle(obj,'height');���Բ���߶ȣ�������û�ж���߶�ʱ��IE8�����£�ֻ��ͨ��offsetHeight����ȡobjԪ�صĸ߶�
+demo/mouseover_mouseout_bug.html
+onmouseover/out的bug
+关于onmouseover的bug：父元素设置onmouseover，当在父元素内移动到子元素时，也会被认为是移入。
+解决：根据oEvent判断从哪个元素移过来，如果是子元素，则不触发onmouseover事件。判断从哪个元素移过来oEvent.fromElement：兼容IE系、Chrome；oEvent.relatedTarget：兼容Firefox
+关于onmouseout的bug：父元素设置onmouseout，当在父元素内移动到子元素时，也会被认为是移出。
+解决：根据oEvent判断移动到哪个元素，如果是子元素，则不触发onmouseout事件。判断移动到哪个元素：oEvent.toElement：兼容IE系、Chrome；oEvent.relatedTarget：兼容Firefox
+注：找到目标元素后，判断该元素是否是父元素的子元素是找该元素的所有父级元素parentNode，如果有跟当前父元素相同，则是子元素
+ 
 
-
-loadImgBar.html
-ԭ��1��img��onload����ͼƬ������ɵ��¼�����ͼƬ�����������ִ�е�onload�ڲ�
-ԭ��2����onload�и���ͼƬ��ɸ�������������ؽ��ȣ���ʾ������
-ԭ��3�������һ��ͼƬ�������֮�󣬿�����ʱ��setInterval����ʱ��ʱ�޸���ʾ��ҳ����ͼƬ�ĵ�ַ����ʱ��ȡ��ͼƬ�Ǵӻ����ж�ȡ�������ٶȺܿ죩
-
-aboutThis.html
-this������Ҫ����������this�����õĶ������ĸ�����˵��this���ں����Ǳ��ĸ�������õģ��ö������this�����õĶ��󡣻�Ҫ��ס��javascript�ı�����������һ������ȫ�ֱ�������window��������ԡ�
-������ʽ       this
-��ͨ����   -�� ȫ�ֶ���window
-����ķ��� -�� �ö���
-���캯��   -�� �¹���Ķ���
-����this���׳����ļ����ط���
-1����ʱ���е�this ��window����
-2�����һ���function���ڲ���this ��window����
-3��IE8�����µ��¼��󶨷���attachEvent�е�this ��window����
-4��Ԫ���м��¼��е��õĺ����������ڲ�ʹ�õ�this ��window����
-this���׳�����ļ����ط���
-
-
-mouseover_mouseout_bug.html
-����onmouseover��onmouseout��bug��
-bug��
