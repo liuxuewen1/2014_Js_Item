@@ -33,6 +33,7 @@ img{border:none;}
 #middle ul li:hover{ cursor:pointer;}
 #middle #ulFont { top:20px; background:#DDD;}
 #middle #ulFont li{ float:none; border-bottom:1px dotted #666;}
+#middle #ulFace{ background:#fff;}
 #entry{ height:20%; left:0; bottom:10%;}
 #submit{ height:10%; right:0; bottom:0; border-top:1px solid #000;}
 #submit input{float:right;}
@@ -41,6 +42,8 @@ img{border:none;}
 #right{ width:36%; height:90%; right:0; top:10%;}
 #member{ width:100%; height:100%; border-left:1px solid #000; right:0; top:0; overflow:hidden;}
 #member ul{ width:98%; position:absolute; left:0; top:0;}
+#member ul li{ padding:4px; height:24px; line-height:24px; vertical-align:middle;}
+#member ul li img{ margin-right:4px;width:20px;height:20px;}
 <!--#m_scroll{ width:2%; height:99%; background:#ccc; top:2px; right:2px;}-->
 <!--#m_bar{ width:100%; height:4%; background:#00f;}-->
 
@@ -146,62 +149,84 @@ window.onload=function(){
 	var oBar=$('bar');
 	var oMemberScroll=$('m_scroll');
 	var oMemberBar=$('m_bar');
+	var isBig=true;
+	var arrDesc=[],arrImg=[];
+	for(var i=0;i<aImgFace.length;i++){
+		arrDesc.push(aImgFace[i].alt);
+		arrImg.push(aImgFace[i].getAttribute('key'));
+	}
 	
 	//清空回复内容
 	oClear.onclick=function(){
-		oWord.innerHTML='';
+		oWord.value='';
 	}
 	
 	//计算窗口大小
+	var cW=100,cH=100;
 	var winX=document.documentElement.clientWidth;
 	var winY=document.documentElement.clientHeight;
 	oBox.style.left=(winX-oBox.offsetWidth)/2+'px';
 	oBox.style.top=(winY-oBox.offsetHeight)/2+'px';
 	oBig.onclick=function(){
-		var cW=100,cH=100;
-		move(oBox,{width:oBox.offsetWidth+cW,height:oBox.offsetHeight+cH,left:oBox.offsetLeft-cW/2,top:oBox.offsetTop-cH/2},bindScroll);
+		if(!isBig){ return; }
+		move(oBox,{width:oBox.offsetWidth+cW,height:oBox.offsetHeight+cH,left:oBox.offsetLeft-cW/2,top:oBox.offsetTop-cH/2},function(){
+			bindScroll();
+			isBig=false;
+		});
 	}
-	
-	//设置conetent下面单双行样式
-	/*var aContentLi=oContent.getElementsByTagName('li');
-	for(var i=0,len=aContentLi.length;i<len;i++){
-		aContentLi[i].className+=(i+1)%2?' single':' double';
-	}*/
-	
+	oClose.onclick=function(){
+		if(isBig){ return;}
+		move(oBox,{width:oBox.offsetWidth-cW,height:oBox.offsetHeight-cH,left:oBox.offsetLeft+cW/2,top:oBox.offsetTop+cH/2},function(){
+			bindScroll();
+			isBig=true;
+		});
+	}
+	 
 	//绑定字体Ul点击事件
 	oAFont.onclick=function(ev){
 		var oEvent=ev||event;
 		oUlFont.style.display=oUlFont.style.display=='block'?'none':'block';
+		oUlFace.style.display='none';
 		oEvent.cancelBubble=true;
 	}
 	//绑定每个字体点击事件
 	for(var i=0,len=aLiFont.length;i<len;i++){
 		aLiFont[i].onclick=function(){
-			oWord.className+=' '+this.className;
+			oWord.className=this.className;
 		};
 	}
 	//绑定表情点击事件
 	oAFace.onclick=function(ev){
 		var oEvent=ev||event;
 		oUlFace.style.display=oUlFace.style.display=='block'?'none':'block';
+		oUlFont.style.display='none';
 		oEvent.cancelBubble=true;
 	};
 	//绑定每张face点击事件
 	for(var i=0,len=aImgFace.length;i<len;i++){
 		aImgFace[i].onclick=function(){
-			oWord.innerHTML+='['+this.alt+']';
+			oWord.value+='['+this.alt+']';
 		}
 	}
 	
 	//点击发送触发事件
 	oSubmit.onclick=function(){
-		var value=oWord.value;
-		var arrReg=[[/</g,'&lt;'],[/>/g,'&gt;']];
-		var newValue='';
-		for(var i=0;i<arrReg.length;i++){
-			newValue=value.replace(arrReg[i][0],arrReg[i][1]);
-		}
-		alert(newValue);
+		jsonp({
+			url:URL,
+			data:{a:'snd_msg',content:oWord.value,token:token},
+			cbName:'cb',
+			succFn:function(json){
+				if(!json.error){
+					getContent();
+					oWord.value='';
+				}else{
+					alert(json.msg);
+				}
+			},
+			failFn:function(status){
+				alert('错误：'+status);
+			}
+		});
 	}
 	document.onclick=function(){
 		oUlFont.style.display='none';
@@ -218,6 +243,7 @@ window.onload=function(){
 		succFn:function(json){
 			token=json.token;
 			getContent();
+			getMember();
 		}
 	});
 	//请求内容列表
@@ -235,12 +261,39 @@ window.onload=function(){
 					var time=(oDate.getFullYear()+'-'+addZero(oDate.getMonth()+1)+'-'+addZero(oDate.getDate())+' '+addZero(oDate.getHours())+':'+addZero(oDate.getMinutes())+':'+addZero(oDate.getSeconds()));
 					var oLi=createLi(data.username+' '+time);
 					oLi.className='single';
-					var oLi1=createLi(data.content);
+					var content=data.content;
+					for(var k=0;k<arrDesc.length;k++){
+						var reg=new RegExp('\\['+arrDesc[k]+'\\]','g');						
+						content=content.replace(reg,'<img src="images/face/'+arrImg[k]+'.gif"/>');
+					}
+					var oLi1=createLi(content);
 					oLi1.className='double';
 					oContentUl.appendChild(oLi);
-					oContentUl.appendChild(oLi1);
+					oContentUl.appendChild(oLi1);					
 				}
-				bindScroll();
+				//内容滚动条
+				setScroll(oBar,oScroll,oContentUl,oContent.offsetHeight);
+				//直接定位到最后一行
+				oBar.style.top=oScroll.offsetHeight-oBar.offsetHeight+'px';
+				oContentUl.style.top=-(oContentUl.offsetHeight-oContent.offsetHeight)+'px';
+			}
+		});
+	}
+	//获取用户列表
+	function getMember(){
+		jsonp({
+			url:URL,
+			data:{a:'get_user_list',token:token},
+			cbName:'cb',
+			succFn:function(json){
+				var arrData=json.data;
+				for(var i=0;i<arrData.length;i++){
+					var data=arrData[i];
+					var oLi=createLi('<img src="http://zhinengshe.com/exercise/im/images/face/'+data.face+'.jpg">'+data.username);
+					oMemberUl.appendChild(oLi);
+				}
+				//人员列表滚动条
+				setScroll(oMemberBar,oMemberScroll,oMemberUl,oMember.offsetHeight);
 			}
 		});
 	}
@@ -250,6 +303,9 @@ window.onload=function(){
 		setScroll(oBar,oScroll,oContentUl,oContent.offsetHeight);
 		//人员列表滚动条
 		setScroll(oMemberBar,oMemberScroll,oMemberUl,oMember.offsetHeight);
+		//直接定位到最后一行
+		oBar.style.top=oScroll.offsetHeight-oBar.offsetHeight+'px';
+		oContentUl.style.top=-(oContentUl.offsetHeight-oContent.offsetHeight)+'px';
 	}
 	//鼠标滚动时控制内容也滚动
 	mouseWheel(oContentUl,function(bDown){
@@ -264,12 +320,12 @@ window.onload=function(){
 }
 
 //滚动条公用方法
-var c_speed=5;
+var c_speed=10;
 function setScroll(obj,oParent,oMove,iMaxHeight){
 	obj.style.top=oMove.style.top=0;
 	//根据内容高度设置滚动条的高度
-	obj.style.height=(iMaxHeight/oParent.offsetHeight)*oMove.offsetHeight/100+'%';
-	oMove.offsetHeight<oParent.offsetHeight && (obj.style.height=0);
+	//console.log(iMaxHeight+','+oMove.offsetHeight);
+	obj.style.height=(iMaxHeight/oMove.offsetHeight)*100+'%';
 	//绑定滚动事件
 	obj.onmousedown=function(ev){
 		var oEvent=ev||event;
@@ -296,12 +352,13 @@ function setScroll(obj,oParent,oMove,iMaxHeight){
 //鼠标滚动时移动内容框
 function mouseMove(obj,oParent,oMove,iMaxHeight){
 	var maxT=oParent.offsetHeight-obj.offsetHeight;
-	var y=obj.offsetTop+c_speed;
-	y<0 && (y=0);
-	y>maxT && (y=maxT);
+	var y=obj.offsetTop+c_speed;	
+	if(y<0 || y>maxT){
+		return;
+	}
 	obj.style.top=y+'px';
-	var bili=y/maxT;
-	oMove.style.top=-(oMove.offsetHeight-iMaxHeight)*bili+'px';
+	var bili=y/maxT; 
+	oMove.style.top=-(oMove.offsetHeight-iMaxHeight)*bili+'px'; 
 }
 
 //鼠标滚动事件
@@ -345,8 +402,8 @@ function createLi(html){
 <div id='box'>
 	<div id='top'>
 		<div id='resize'>
-			<a href="javascript:;" id='close'><img src='images/close.png'/></a>
-			<a href="javascript:;" id='big'><img src='images/bigSize.png'/></a>
+			<a href="javascript:;" alt="缩小窗口" id='close'><img src='images/close.png'/></a>
+			<a href="javascript:;" alt="放大窗口" id='big'><img src='images/bigSize.png'/></a>
 		</div>
 		<div id='topBorder'></div>
 	</div>
@@ -354,38 +411,7 @@ function createLi(html){
 	<div id='left'>
 		<div id='content'>
 			<ul>
-				<!--<li>0000内容1</li>
-				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
-				<li>内容3</li>
-				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
-				<li>内容1</li>
-				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
-				<li>内容3</li>
-				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
-				<li>内容1</li>
-				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
-				<li>内容3</li>
-				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
-				<li>内容1</li>
-				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
-				<li>内容3</li>
-				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
-				<li>内容1</li>
-				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
-				<li>1111内容3</li>
-				<li class="font16">内容等等顶顶顶顶顶顶顶顶顶顶4</li>
-				<li>2222内容1</li>
-				<li>3333&lt;br/&gt;ddd&lt;br/&gt;</li>
-				<li>4444内容3</li>
-				<li class="font16">55555内容等等顶顶顶顶顶顶顶顶顶顶4</li>
-				<li>66666内容1</li>
-				<li>77777&lt;br/&gt;ddd&lt;br/&gt;</li>
-				<li>8888内容3</li>
-				<li class="font16">99999内容等等顶顶顶顶顶顶顶顶顶顶4</li>
-				<li>00000内容1</li>
-				<li>11111&lt;br/&gt;ddd&lt;br/&gt;</li>
-				<li>222222内容3</li>
-				<li class="font16">3333内容等等顶顶顶顶顶顶顶顶顶顶4</li>-->
+			
 			</ul>
 			<div id='scroll'>
 				<div id='bar'></div>
@@ -431,9 +457,7 @@ function createLi(html){
 	<div id='right'>
 		<div id='member'>
 			<ul>
-				<li>0000内容1</li>
-				<li>&lt;br/&gt;ddd&lt;br/&gt;</li>
-				<li>内容3</li>
+			
 			</ul>
 			<div id='m_scroll'>
 				<div id='m_bar'></div>
