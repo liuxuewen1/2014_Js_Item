@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0;}
+div{ width:416px; height:104px; margin:100px auto; border:1px solid #000; overflow:hidden; position:relative}
+div a{width:50%; height:100%; position:absolute; top:0; z-index:99; opacity:0; filter:alpha(opacity:0); }
+div a.left{ left:0; background:red;}
+div a.right{ right:0; background:blue;}
+ul{list-style:none; width:624px; position:absolute; left:0; top:0;}
+ul li{ width:100px; height:100px; margin:2px; float:left;}
+ul li img{width:100px; height:100px;}
+</style>
+<script>
+function getByClass(oParent,iClass){
+	if(oParent.getElementsByClassName){
+		return oParent.getElementsByClassName(iClass);
+	}else{
+		var arr=[];
+		var aEle=oParent.getElementsByTagName('*');
+		var reg=new RegExp('\\b'+iClass+'\\b');
+		for(var i=0;i<aEle.length;i++){
+			if(reg.test(aEle[i].className)){
+				arr.push(aEle[i]);
+			}
+		}
+		return arr;
+	}
+}
+
+window.onload=function(){
+	var oDiv=document.getElementsByTagName('div')[0];
+	var oUl=document.getElementsByTagName('ul')[0];
+	var aLi=oUl.children;
+	oUl.innerHTML+=oUl.innerHTML;
+	oUl.style.width=aLi.length*(aLi[0].offsetWidth+4)+'px';
+	
+	var oLeft=getByClass(oDiv,'left')[0];
+	var oRight=getByClass(oDiv,'right')[0];
+	oLeft.onmouseover=function(){
+		move(oUl,'left');
+	};
+	oRight.onmouseover=function(){
+		move(oUl,'right');
+	};
+	
+	function move(obj,dir){
+		clearInterval(obj.timer);
+		var iLeft=obj.offsetLeft;
+		var iWidth=obj.offsetWidth/2;
+		var n=0;
+		obj.timer=setInterval(function(){
+			switch(dir){
+				case 'left':
+					n-=8;
+					obj.style.left=(iLeft+n)%iWidth+'px';
+					break;
+				case 'right':
+					n+=8;
+					if(iLeft<0){
+						iLeft+=iWidth;
+					}
+					obj.style.left=(iLeft+n)%iWidth-iWidth+'px';
+					break;
+			}
+		},30);
+	}
+	move(oUl,'right');
+};
+</script>
+</head>
+
+<body>
+<div>
+	<a href="javascript:;" class="left"></a>
+	<a href="javascript:;" class="right"></a>
+	<ul>
+		<li><img src="1.jpg" /></li>
+		<li><img src="2.jpg" /></li>
+		<li><img src="3.jpg" /></li>
+		<li><img src="4.jpg" /></li>
+		<li><img src="5.jpg" /></li>
+		<li><img src="6.jpg" /></li>
+	</ul>
+
+</div>
+</body>
+</html>
