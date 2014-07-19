@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0;}
+#box{ width:200px; height:200px; position:relative; margin:100px auto; background:#ccc; overflow:hidden;}
+#box .show{ width:200px; height:200px; position:absolute; left:-200px; top:0; background:#f00; font-size:30px; line-height:200px; text-align:center;}
+</style>
+<script>
+function startMove(obj,json,options){
+	options=options || {};
+	options.time=options.time || 2000;
+	options.type=options.type || 'linear';
+	var count=Math.ceil(options.time/30);
+	var n=0;
+	var oNow={};
+	var dis={};
+	for(var key in json){
+		switch(key){
+			case 'left':oNow[key]=obj.offsetLeft;
+				break;
+			case 'top':oNow[key]=obj.offsetTop;
+				break;
+			case 'width':oNow[key]=obj.offsetWidth;
+				break;
+			case 'height':oNow[key]=obj.offsetHeight;
+				break;
+			case 'opacity':oNow[key]=Math.round(parseFloat(getStyle(obj,key))*100);
+				if(isNaN(oNow[key])){
+					oNow[key]=100;
+				}
+				break;
+		}
+		dis=json[key]-oNow[key];
+	}
+	
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		n++;
+		
+		for(var key in json){
+			switch(options.type){
+				case 'linear':var a=n/count;
+					var iValue=oNow[key]+dis*a;
+					break;
+				case 'ease-in':var a=n/count;
+					var iValue=oNow[key]+dis*a*a;
+					break;
+				case 'ease-out':var a=1-n/count;
+					var iValue=oNow[key]+dis*(1-a*a);
+					break;
+			}
+			if(n==count){
+				iValue=json[key];
+			}
+			if(key=='opacity'){
+				obj.style.opacity=iValue/100;
+				obj.style.filter='alpha(opacity:'+iValue+')';
+			}else{
+				obj.style[key]=iValue+'px';
+			}
+		}
+		if(n==count){
+			clearInterval(obj.timer);
+			options.succFn && options.succFn();
+		}
+		
+	},30);
+}
+</script>
+<script>
+function getMouseDir(obj,oEvent){
+	var dir='left';
+	var x=obj.offsetLeft+obj.offsetWidth/2-oEvent.clientX;
+	var y=obj.offsetTop+obj.offsetHeight/2-oEvent.clientY;
+	var radion=Math.atan2(y,x);
+	var angle=(180/Math.PI*radion).toFixed(2);
+	angle=angle<0?(+angle+360):+angle;
+	switch(true){
+		case angle>45 && angle<=135:dir='up';
+			break;
+		case angle>135 && angle<=225:dir='right';
+			break;
+		case angle>225 && angle<=315:dir='down';
+			break;
+		default:dir='left';
+			break;
+	}
+	return dir;
+}
+function isChild(oParent,obj){
+	while(obj){
+		if(obj==oParent) return true;
+		obj=obj.parentNode;
+	}
+	return false;
+}
+window.onload=function(){
+	var oBox=document.getElementById('box');
+	var oShow=oBox.children[0];
+	var iWidth=oShow.offsetWidth;
+	var iHeight=oShow.offsetHeight;
+	
+	oBox.onmouseover=function(ev){
+		var oEvent=ev||event;
+		var from=oEvent.fromElement||oEvent.relatedTarget;
+		
+		if(isChild(oBox,from)) return;
+		
+		var dir=getMouseDir(oBox,oEvent);
+		switch(dir){
+			case 'left':
+				oShow.style.left=-iWidth+'px';
+				oShow.style.top=0;
+				startMove(oShow,{left:0},{type:'ease-in',time:800});
+				break;
+			case 'right':
+				oShow.style.left=iWidth+'px';
+				oShow.style.top=0;
+				startMove(oShow,{left:0},{type:'ease-in',time:800});
+				break;
+			case 'up':
+				oShow.style.left=0;
+				oShow.style.top=-iHeight+'px';
+				startMove(oShow,{top:0},{type:'ease-in',time:800});
+				break;
+			case 'down':
+				oShow.style.left=0;
+				oShow.style.top=iHeight+'px';
+				startMove(oShow,{top:0},{type:'ease-in',time:800});
+				break;
+		}
+	};
+	oBox.onmouseout=function(ev){
+		var oEvent=ev||event;
+		var to=oEvent.toElement||oEvent.relatedTarget;
+		
+		if(isChild(oBox,to)) return;
+		var dir=getMouseDir(oBox,oEvent);
+		switch(dir){
+			case 'left':
+				startMove(oShow,{left:-iWidth},{type:'ease-out',time:800});
+				break;
+			case 'right':
+				startMove(oShow,{left:iWidth},{type:'ease-out',time:800});
+				break;
+			case 'up':
+				startMove(oShow,{top:-iHeight},{type:'ease-out',time:800});
+				break;
+			case 'down':
+				startMove(oShow,{top:iHeight},{type:'ease-out',time:800});
+				break;
+		}
+	};
+};
+</script>
+</head>
+
+<body>
+<div id='box'>
+	<div class="show">招聘公司信息</div>
+</div>
+</body>
+</html>
