@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0; list-style:none;}
+#box{ width:648px; margin:30px auto;}
+#ul1{ width:648px; height:648px;}
+#ul1 li{ width:150px; height:150px; background:#ccc; border:1px solid #000; margin:0 0 10px 10px; float:left;}
+</style>
+<script>
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+}
+function startMove(obj,json,options){
+	options=options || {};
+	options.type=options.type || 'linear';
+	options.time=options.time || 800;
+	
+	var count=Math.round(options.time/30);
+	var oNow={};
+	var dis={};
+	for(var key in json){
+		if(key=='opacity'){
+			oNow[key]=Math.round(parseFloat(getStyle(obj,key)*100));
+			if(isNaN(oNow[key])){
+				oNow[key]=100;
+			}
+		}else{
+			oNow[key]=parseInt(getStyle(obj,key));
+		}
+		
+		if(!oNow[key]){
+			switch(key){
+				case 'left':oNow[key]=obj.offsetLeft;
+					break;
+				case 'top':oNow[key]=obj.offsetTop;
+					break;
+				case 'width':oNow[key]=obj.offsetWidth;
+					break;
+				case 'height':oNow[key]=obj.offsetHeight;
+					break;
+			}
+		}
+		
+		dis[key]=json[key]-oNow[key];
+		
+	}
+	
+	var n=0;
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		n++;
+		for(var key in json){
+			switch(options.type){
+				case 'linear':
+					var a=n/count;
+					var iValue=oNow[key]+dis[key]*a;
+					break;
+				case 'ease-in':
+					var a=n/count;
+					var iValue=oNow[key]+dis[key]*a*a*a;
+					break;
+				case 'ease-out':
+					var a=1-n/count;
+					var iValue=oNow[key]+dis[key]*(1-a*a*a);
+					break;
+			}
+			if(key=='opacity'){
+				obj.style.opacity=iValue/100;
+				obj.style.filter='alpha(opacity:'+iValue+')';
+			}else{
+				obj.style[key]=iValue+'px';
+			}
+		}
+		if(n==count){
+			clearInterval(obj.timer);
+			options.succFn && options.succFn();	
+		}
+	},30);
+}
+window.onload=function(){
+	var oUl=document.getElementById('ul1');
+	var aLi=oUl.children;
+	var oBtn=document.getElementById('btn');
+	var oNow=[];
+	//布局转换
+	oUl.style.position='relative';
+	for(var i=0;i<aLi.length;i++){
+		oNow.push({left:aLi[i].offsetLeft,top:aLi[i].offsetTop});
+		aLi[i].style.left=aLi[i].offsetLeft+'px';
+		aLi[i].style.top=aLi[i].offsetTop+'px';
+	}
+	for(var i=0;i<aLi.length;i++){
+		aLi[i].style.marginLeft=0;	//由于offsetLeft计算时会包含margin-left值，所以这里要干掉
+		aLi[i].style.position='absolute';
+	}
+	
+	var isOver=true;	//是否结束，是-可运动；否-不可运动
+	var isOpen=true;	//是否展开，是-可以关闭；否-可以展开
+	oBtn.onclick=function(){
+		if(!isOver){ return false; }
+		isOver=false;
+		clearInterval(timer);
+		var count=Math.round(1000/30);
+		var i=0;
+		var timer=setInterval(function(){
+			if(i==aLi.length){
+				clearInterval(timer);
+				return;
+			}
+			if(isOpen){
+				(function(index){
+					startMove(aLi[index],{left:aLi[0].offsetLeft,top:aLi[0].offsetTop},{
+						time:500,
+						succFn:function(){
+							if(index==aLi.length-1){
+								isOpen=false;
+								isOver=true;	
+							}
+						}
+					});
+				})(i);
+				
+			}else{
+				(function(index){
+					startMove(aLi[aLi.length-1-index],{left:oNow[aLi.length-1-index].left,top:oNow[aLi.length-1-index].top},{
+						time:500,
+						succFn:function(){
+							if(index==aLi.length-1){
+								isOpen=true;
+								isOver=true;	
+							}
+						}
+					});
+				})(i);
+				
+			}
+			i++;
+			
+		},150);
+	};
+};
+</script>
+</head>
+
+<body>
+<input type="button" value="点击我" id="btn" />
+<div id="box">
+	<ul id="ul1">
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+		<li></li>
+	</ul>
+</div>
+</body>
+</html>
