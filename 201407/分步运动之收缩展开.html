@@ -45,7 +45,6 @@ function startMove(obj,json,options){
 		}
 		
 		dis[key]=json[key]-oNow[key];
-		
 	}
 	
 	var n=0;
@@ -112,7 +111,7 @@ window.onload=function(){
 			}
 			if(isOpen){
 				(function(index){
-					startMove(aLi[index],{left:aLi[0].offsetLeft,top:aLi[0].offsetTop},{
+					startMove(aLi[index],{left:aLi[0].offsetLeft,top:aLi[0].offsetTop,opacity:0},{
 						time:500,
 						succFn:function(){
 							if(index==aLi.length-1){
@@ -125,7 +124,7 @@ window.onload=function(){
 				
 			}else{
 				(function(index){
-					startMove(aLi[aLi.length-1-index],{left:oNow[aLi.length-1-index].left,top:oNow[aLi.length-1-index].top},{
+					startMove(aLi[aLi.length-1-index],{left:oNow[aLi.length-1-index].left,top:oNow[aLi.length-1-index].top,opacity:100},{
 						time:500,
 						succFn:function(){
 							if(index==aLi.length-1){
