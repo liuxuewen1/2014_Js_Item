@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>苹果菜单</title>
+<style>
+*{margin:0; padding:0;}
+#box{ position:absolute; left:0; bottom:0; text-align:center; width:100%;}
+#box img{ width:64px; height:64px;}
+</style>
+<script>
+function getPos(obj){
+	var l=0,t=0;
+	while(obj){
+		l+=obj.offsetLeft;
+		t+=obj.offsetTop;
+		obj=obj.offsetParent;
+	}
+	return {left:l,top:t};
+}
+window.onload=function(){
+	var oBox=document.getElementById('box');
+	var aImg=oBox.children;
+	var aTxt=document.getElementsByTagName('input');
+	
+	document.onmousemove=function(ev){
+		var oEvent=ev||event;
+		//鼠标位置
+		var cx=oEvent.clientX;
+		var cy=oEvent.clientY;
+		for(var i=0;i<aImg.length;i++){
+			//计算图片绝对定位位置
+			var pos=getPos(aImg[i]);
+			//计算图片中心点的left、top
+			var l=pos.left+aImg[i].offsetWidth/2;
+			var t=pos.top+aImg[i].offsetHeight/2;
+			//计算图片中心点到鼠标构成的直角三角形中两个直角边大小
+			var x=l-cx;
+			var y=t-cy;
+			//计算斜边（即图片中心点到鼠标）的距离
+			var dis=Math.sqrt(x*x+y*y);
+			//300为base，当鼠标到距离图片中心点300px时，图片开始有反应
+			var bili=(1-dis/300).toFixed(2);
+			//控制图片显示的最小值。由于最小值控制在0.5，所以当鼠标到距离图片中心点为base/2即150px时，图片大小才有变动
+			bili<0.5 && (bili=0.5);
+			aTxt[i].value=bili;
+			//将图片最大值与bili相乘得到图片大小
+			aImg[i].style.width=bili*128+'px';
+			aImg[i].style.height=bili*128+'px';
+		}
+	};
+};
+</script>
+</head>
+
+<body>
+<input type="text"/>
+<input type="text"/>
+<input type="text"/>
+<input type="text"/>
+<input type="text"/>
+<div id="box">
+	<img src="1.png" />
+	<img src="2.png" />
+	<img src="3.png" />
+	<img src="4.png" />
+	<img src="5.png" />
+</div>
+</body>
+</html>
