@@ -91,6 +91,7 @@ window.onload=function(){
 	var oBtn2=document.getElementById('btn2');
 	var oBtn3=document.getElementById('btn3');
 	var oBtn4=document.getElementById('btn4');
+	var oBtn5=document.getElementById('btn5');	//随机渐变
 	var arrImgs=['0.jpg','1.jpg','2.jpg'];
 	var iType=1;	//渐变类型：1、2、3 跟btn类型一致
 	var iNow=0;
@@ -126,25 +127,11 @@ window.onload=function(){
 	var timer=null;
 	//渐变1：纵向一个一个消失
 	oBtn1.onclick=function(){
-		if(!isOver) return;
-		isOver=false;
-			
-		liW=70;
-		liH=40;
-		judgeType(1);
-		
-		liTab();
+		setNext(1);
 	}
 	//渐变2：横向消失
 	oBtn2.onclick=function(){
-		if(!isOver) return;
-		isOver=false;
-		
-		liW=7;
-		liH=400;
-		judgeType(2);
-			
-		liTab();		
+		setNext(2);		
 	};
 	//渐变3：斜着消失（这个要知道找规律）
 	/*
@@ -158,58 +145,88 @@ window.onload=function(){
 	  都是 列+行之和 从0开始消失 然后直到最后
 	*/
 	oBtn3.onclick=function(){
-		if(!isOver) return;
-		isOver=false;
-		
-		judgeType(1);
-				
-		for(var k=0;k<aLi.length;k++){
-			(function(index){
-				setTimeout(function(){
-					startMove(aLi[index],{opacity:0},{
-						succFn:function(){
-							if(index==aLi.length-1){
-								for(var k=aLi.length-1;k>=0;k--){
-									oUl.removeChild(aLi[k]);
-								}
-								setLiBlock();
-								isOver=true;
-							}
-						}
-					});				
-				},(aLi[index].row+aLi[index].col)*80);
-			})(k);
-		}
-			
+		setNext(3);			
 	}
 	//渐变4：跟渐变3类似
 	oBtn4.onclick=function(){
+		setNext(4);			
+	}
+	
+	//随机渐变
+	oBtn5.onclick=function(){
+		var type=Math.floor(Math.random()*4+1);
+		setNext(type);
+	};
+	
+	function setNext(type){
 		if(!isOver) return;
 		isOver=false;
 		
-		judgeType(1);
-		var r=oUl.offsetHeight/liH;
-		var c=oUl.offsetWidth/liW;
-		for(var k=0;k<aLi.length;k++){
-			(function(index){
-				setTimeout(function(){
-					startMove(aLi[index],{opacity:0},{
-						succFn:function(){
-							if(index==aLi.length-1){
-								alert(index+','+(aLi.length-1));
-								for(var k=aLi.length-1;k>=0;k--){
-								//console.log(k);
-									oUl.removeChild(aLi[k]);
+		switch(type){
+			case 1:
+				liW=70;
+				liH=40;
+				judgeType(1);
+				
+				liTab();
+				break;
+			case 2:
+				liW=7;
+				liH=400;
+				judgeType(2);
+					
+				liTab();
+				break;
+			case 3:
+				liW=70;
+				liH=40;
+				judgeType(1);
+						
+				for(var k=0;k<aLi.length;k++){
+					(function(index){
+						setTimeout(function(){
+							startMove(aLi[index],{opacity:0},{
+								succFn:function(){
+									if(index==aLi.length-1){
+										for(var k=aLi.length-1;k>=0;k--){
+											oUl.removeChild(aLi[k]);
+										}
+										setLiBlock();
+										isOver=true;
+									}
 								}
-								//setLiBlock(); 问题所在？
-								isOver=true;
-							}
-						}
-					});				
-				},((r-1-aLi[index].row)+(c-1-aLi[index].col))*80);
-			})(k);
-		}
+							});				
+						},(aLi[index].row+aLi[index].col)*80);
+					})(k);
+				}
 			
+				break;
+			case 4:
+				liW=70;
+				liH=40;
+				judgeType(1);
+				
+				var r=oUl.offsetHeight/liH;
+				var c=oUl.offsetWidth/liW;
+				for(var k=0;k<aLi.length;k++){
+					(function(index){
+						setTimeout(function(){
+							startMove(aLi[index],{opacity:0},{
+								succFn:function(){
+									if(index==0){
+										for(var k=aLi.length-1;k>=0;k--){
+											oUl.removeChild(aLi[k]);
+										}
+										setLiBlock();
+										isOver=true;
+									}
+								}
+							});				
+						},((r-1-aLi[index].row)+(c-1-aLi[index].col))*80);
+					})(k);
+				}
+				break;
+		}
 	}
 	
 	//判断是否属于当前渐变类型，如果不属于则重新设置块状li的形状和个数
@@ -265,6 +282,7 @@ window.onload=function(){
 	<input type="button" id="btn2" value="渐变2" />
 	<input type="button" id="btn3" value="渐变3" />
 	<input type="button" id="btn4" value="渐变4" />
+	<input type="button" id="btn5" value="随机" />
 </div>
 </body>
 </html>
