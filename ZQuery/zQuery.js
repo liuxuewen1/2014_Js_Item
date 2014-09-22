@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 function $(arg){
 	return new ZQuery(arg);
 }
@@ -398,4 +398,3 @@ function getByClass(obj,attr){
 	}
 }
 
->>>>>>> c066f83b5598e8423920e5c86cbd4d7623ce4091
