@@ -62,7 +62,6 @@ ZQuery.prototype.hover=function(fnOver, fnOut){
 	this.mouseleave(fnOut);
 }
 
-
 function addEvent(sEv,obj,fn){
 	if(obj.addEventListener){
 		obj.addEventListener(sEv,function(ev){
