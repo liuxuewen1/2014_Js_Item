@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
@@ -42,4 +43,48 @@
         <li>44</li>
     </ul>
 </body>
+=======
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>选择器</title>
+	<script src="zQuery.js"></script>
+	<script> 
+		ZQuery(function(){
+			$("li").click(function(){
+				alert(this)
+			})
+		}) 
+		// window.onload=function(){
+		// 	var arr=getEle('li:eq(3)');
+		// 	console.log(arr)
+		// }
+	</script>
+</head>
+<body>
+	<ul>
+		<li class="box box2 box3" id="li1">
+        	<span id='box3'>adadf</span>
+        </li>
+		<li>2</li>
+		<li id="li1">3</li>
+		<li class="box">4</li>
+		<li>5</li>
+	</ul>
+    <ul>
+    	<li class="box box2">11</li>
+    	<li class="box box2">
+        	<ul>
+            	<li class="box2"></li>
+            	<li class="box2"></li>
+            	<li class="box"></li>
+            	<li class="box3"></li>
+            </ul>
+        </li>
+    	<li class="box box2">33</li>
+        <li>44</li>
+    </ul>
+</body>
+>>>>>>> c066f83b5598e8423920e5c86cbd4d7623ce4091
 </html>
