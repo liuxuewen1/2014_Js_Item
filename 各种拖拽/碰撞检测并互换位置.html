@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0}
+div{width:100px; height:100px; position:absolute; left:0; top:0;}
+#box1{ background:red;}
+#box2{ background:blue; left:200px; top:300px;}
+</style>
+<script>
+window.onload=function(){
+	collision('box1','box2');
+	collision('box2','box1');
+
+	function collision(id1,id2){
+	
+		var oBox1=document.getElementById(id1);
+		var oBox2=document.getElementById(id2);
+		
+		oBox1.onmousedown=function(ev){
+			var oEvent=ev||event;
+			var dx=oEvent.clientX-oBox1.offsetLeft;
+			var dy=oEvent.clientY-oBox1.offsetTop;
+			var originLeft=oBox1.offsetLeft;	//原始位置
+			var originTop=oBox1.offsetTop;		//原始位置
+			var originColor=oBox2.style.color;		//原始颜色
+			oBox1.style.zIndex=2;
+			
+			document.onmousemove=function(ev){
+				var oEvent=ev||event;
+				var left=oEvent.clientX-dx;
+				var top=oEvent.clientY-dy;
+				left<0 && (left=0);
+				top<0 && (top=0);
+				var maxLeft=document.documentElement.clientWidth-oBox1.offsetWidth;
+				var maxTop=document.documentElement.clientHeight-oBox1.offsetHeight;
+				left>maxLeft && (left=maxLeft);
+				top>maxTop && (top=maxTop);
+				
+				oBox1.style.left=left+'px';
+				oBox1.style.top=top+'px';
+				
+				//检测碰撞
+				if(collTest(oBox1,oBox2)){
+					oBox2.style.background="yellow";
+				}
+				else{
+					oBox2.style.background=originColor;
+				}
+			}
+			document.onmouseup=function(){
+				document.onmousemove=document.onmouseup=null;
+				oBox1.releaseCapture && oBox1.releaseCapture();
+				oBox1.style.zIndex=1;
+				oBox2.style.background=originColor;
+				
+				if(collTest(oBox1,oBox2)){
+					//碰撞到释放后，互换位置
+					oBox1.style.left=oBox2.offsetLeft+'px';
+					oBox1.style.top=oBox2.offsetTop+'px';
+					oBox2.style.left=originLeft+'px';
+					oBox2.style.top=originTop+'px';
+				}
+			}
+			oBox1.setCapture && oBox1.setCapture();
+			return false;
+		}
+		
+		function collTest(obj1, obj2){
+			if(typeof obj1!=="object" || typeof obj2!=="object") return;
+			if(obj1.offsetLeft+oBox1.offsetWidth>oBox2.offsetLeft && obj1.offsetTop+oBox1.offsetHeight>oBox2.offsetTop && obj1.offsetTop<oBox2.offsetTop+oBox2.offsetHeight && obj1.offsetLeft<oBox2.offsetLeft+oBox2.offsetWidth){
+				return true;
+			}
+			return false;
+		}
+		
+	}
+}
+</script>
+</head>
+
+<body>
+<div id='box1'>111111111111</div>
+<div id='box2'>222222222222</div>
+</body>
+</html>

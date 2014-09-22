@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0;list-style:none;}
+body{ overflow:hidden;}
+#box .bg{ position:absolute; left:0px; top:0; width:6400px; height:100%;}
+#box .bg1{ background:url(2.png) left 80px repeat-x;}
+#box .bg2{ background:url(1.png) 0px 40px repeat-x;}
+#box .bg3{ background:url(3.png) 0px 200px; repeat-x;}
+#box{ }
+#box span{ position:absolute; width:30px; height:66px; background:#666 url(prev.png) no-repeat center center; z-index:3;}
+#box span.right{ background-image:url(next.png);}
+#box span:hover{cursor:pointer;}
+
+#ulBig{ position:relative;}
+#ulBig li{ float:left; position:relative;}
+#ulBig li div{ padding:2px; background:#fff; position:absolute; left:50%; top:50%; margin-left:-325px; margin-top:-200px; width:650px; height:406px;}
+
+#ulSmall{ position:absolute; left:48px; bottom:30px; z-index:2; }
+#ulSmall li{ float:left; margin-right:10px; padding:2px; background:#fff; line-height:10px;}
+#ulSmall li:hover{cursor:pointer;}
+</style>
+<script>
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+}
+function startMove(obj,json,fn){
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		var isOver=true;
+		for(var attr in json){
+			if(attr=='opacity'){
+				var iNow=Math.round(getStyle(obj,attr)*100);
+				if(isNaN(iNow)) iNow=100;
+			}else{
+				var iNow=parseInt(getStyle(obj,attr)) || 0;
+			}
+			var iTarget=json[attr];
+			var speed=(iTarget-iNow)/8;
+			speed=speed>0?Math.ceil(speed):Math.floor(speed);
+			if(iTarget!=iNow){
+				isOver=false;
+				if(attr=='opacity'){
+					obj.style[attr]=(iNow+speed)/100;
+					obj.style['filter']='alpha(opacity:'+(iNow+speed)+')';
+				}else{
+					obj.style[attr]=(iNow+speed)+'px';
+				}
+			}
+		}
+		if(isOver){
+			clearInterval(obj.timer);
+			fn && fn();
+		}
+	},30);
+}
+</script>
+<script>
+window.onload=function(){
+	var oBig=document.getElementById('ulBig');
+	var aBigLi=oBig.children;
+	var oSmall=document.getElementById('ulSmall');
+	var aSmallLi=oSmall.children;
+	var aSpan=document.getElementsByTagName('span');
+	var oLeft=aSpan[0];
+	var oRight=aSpan[1];
+	
+	//移动白云准备
+	var oBox=document.getElementById('box');
+	//oBox.style.width=oBig.offsetWidth+'px';
+	//oBox.style.height=clientH+'px';
+	var oBg1=oBox.children[0];
+	var oBg2=oBox.children[1];
+	var oBg3=oBox.children[2];
+		
+	var clientH=document.documentElement.clientHeight;
+	var clientW=document.documentElement.clientWidth;
+	oBig.style.width=clientW*aBigLi.length+'px';
+	oLeft.style.left=oRight.style.right=clientW/4+30+'px';
+	oLeft.style.top=oRight.style.top=clientH/4+120+'px';
+	oSmall.style.left=oLeft.offsetLeft+10+'px';
+	oSmall.style.top=oLeft.offsetTop+140+'px';
+	//布局转换
+	for(var i=0,len=aBigLi.length;i<len;i++){
+		aBigLi[i].style.width=clientW+'px';
+		aBigLi[i].style.height=clientH+'px';
+	}
+	for(var i=0,len=aSmallLi.length;i<len;i++){
+		aSmallLi[i].style.left=aSmallLi[i].offsetLeft+'px';
+		aSmallLi[i].style.top=aSmallLi[i].offsetTop+'px';
+	}
+	for(var i=0,len=aSmallLi.length;i<len;i++){
+		aSmallLi[i].style.position='absolute';
+	}
+	
+	var idx=0;
+	aSmallLi[idx].style.top=aSmallLi[idx].offsetTop-20+'px';
+	oLeft.onclick=function(){	
+		startMove(aSmallLi[idx],{top:aSmallLi[idx].offsetTop+20});
+		++idx;
+		idx==aBigLi.length && (idx=0);
+		turnFn(idx);
+	}
+	function turnFn(idx){
+		startMove(oBig,{left:-clientW*idx});	
+		startMove(aSmallLi[idx],{top:aSmallLi[idx].offsetTop-20});
+		startMove(oBg1,{left:-280*idx});
+		startMove(oBg2,{left:-210*idx});
+		startMove(oBg3,{left:-150*idx});
+	}
+	oRight.onclick=function(){
+		startMove(aSmallLi[idx],{top:aSmallLi[idx].offsetTop+20});
+		--idx;
+		idx==-1 && (idx=aBigLi.length-1);
+		turnFn(idx);
+	}
+	for(var i=0,len=aSmallLi.length;i<len;i++){
+		aSmallLi[i].onclick=(function(i){
+			return function(){
+				startMove(aSmallLi[idx],{top:aSmallLi[idx].offsetTop+20});
+				idx=i;
+				turnFn(idx);
+			}
+		})(i);
+	}
+	
+}
+</script>
+</head>
+
+<body>
+<div id="box"> 
+		<div class="bg bg1"></div>
+		<div class="bg bg2"></div>
+		<div class="bg bg3"></div> 
+	<span class='left'></span>
+	<span class='right'></span>
+	<ul id='ulBig'>
+		<li><div><img src="1.jpg" /></div></li>
+		<li><div><img src="2.jpg" /></div></li>
+		<li><div><img src="3.jpg" /></div></li>
+		<li><div><img src="4.jpg" /></div></li>
+		<li><div><img src="5.jpg" /></div></li>
+	</ul>
+	<ul id='ulSmall'>
+		<li><img src="thumbs/1.jpg" /></li>
+		<li><img src="thumbs/2.jpg" /></li>
+		<li><img src="thumbs/3.jpg" /></li>
+		<li><img src="thumbs/4.jpg" /></li>
+		<li><img src="thumbs/5.jpg" /></li>
+	</ul>
+</div>
+</body>
+</html>

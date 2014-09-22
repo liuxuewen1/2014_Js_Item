@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0; background:}
+#box{ width:234px; height:156px; border-top:1px solid #000; border-left:1px solid #000; position:absolute; left:0; top:0; display:none;}
+ul{ list-style:none; width:78px; height:78px; float:left;}
+ul li{ width:12px; height:12px; border-right:1px solid #000; border-bottom:1px solid #000; float:left;}
+</style>
+<script>
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);	
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}	
+}
+function domReady(fn){
+	if(document.addEventListener){
+		addEvent(document,'DOMContentLoaded',function(){
+			fn && fn(); 
+		});
+	}else{
+		document.write('<script id="lxw_IE_Ready" defer><\/script>');
+		var oScript=document.getElementById('lxw_IE_Ready');
+		addEvent(oScript,'readystatechange',function(){
+			if(oScript.readyState=='complete'){
+				fn && fn();
+			}
+		});
+	}
+}
+</script>
+<script>
+domReady(function(){
+	var oBox=document.getElementById('box');
+	var oFrag=document.createDocumentFragment();
+	
+	for(var k=0;k<6;k++){
+		var oUl=document.createElement('ul');
+		for(var row=0;row<6;row++){
+			for(var col=0;col<6;col++){
+				var oLi=document.createElement('li');
+				var color='#'+(k*3).toString(16)+(col*3).toString(16)+(row*3).toString(16);
+				oLi.style.background=color;
+				oUl.appendChild(oLi);
+				
+				(function(c){
+					oLi.onclick=function(){
+						oTxt.value=c;
+						oBox.style.display='none';
+					};	
+				})(color);
+						
+			}
+		}
+		oFrag.appendChild(oUl);
+	}
+	oBox.appendChild(oFrag);
+	
+	var oTxt=document.getElementById('txtColor');
+	oTxt.onclick=function(){
+		oBox.style.display='block';
+		var pos=getPos(oTxt);
+		oBox.style.left=pos.left+'px';
+		oBox.style.top=pos.top+oTxt.offsetHeight+'px';
+	};
+});
+
+function getPos(obj){
+	var l=0,t=0;
+	while(obj){
+		l+=obj.offsetLeft;
+		t+=obj.offsetTop;
+		obj=obj.offsetParent;
+	}
+	return {left:l, top:t};
+}
+</script>
+</head>
+
+<body>
+<div style="width:100px; height:100px;"></div>
+<input id="txtColor" type="text" />
+<div id="box">
+</div>
+</body>
+</html>

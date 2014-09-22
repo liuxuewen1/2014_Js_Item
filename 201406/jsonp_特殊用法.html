@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script>
+function jsonp(url){
+	var oS=document.createElement('script');
+	oS.src=url;
+	document.getElementsByTagName('head')[0].appendChild(oS);
+	
+	//_jsonpData数据格式 _jsonpData={x:1,y:2} 不是普通的执行函数 所以，需要在script加载进来后直接进行使用
+	
+	//IE9+、FF、Chrome高级浏览器用onload事件即可
+	if(document.addEventListener){
+		oS.onload=function(){
+			alert(__GetZoneResult_+'_load');
+		};
+	}else{
+		//IE8、IE8- 通过onreadystatechange来拿到
+		oS.onreadystatechange=function(){
+			//有时候IE系浏览器捕获不到complete，所以只能加上loaded状态
+			if(oS.readyState=='complete' || oS.readyState=='loaded'){
+				alert(__GetZoneResult_+'_state');
+			}
+		};
+	}
+	
+}
+</script>
+<script>
+function domReady(fn){
+	if(document.addEventListener){
+		document.addEventListener('DOMContentLoaded',fn,false);
+	}else{
+		document.write('<script id="lxw_Ready_IE" defer><\/script>');
+		var oS=document.getElementById('lxw_Ready_IE');
+		oS.onreadystatechange=function(){
+			if(oS.readyState=='complete'){
+				fn && fn();
+			}
+		}
+	}
+}
+</script>
+<script>
+domReady(function(){
+	var url='http://tcc.taobao.com/cc/json/mobile_tel_segment.htm?tel=13569854525';
+	jsonp(url);
+});
+</script>
+</head>
+
+<body>
+</body>
+</html>

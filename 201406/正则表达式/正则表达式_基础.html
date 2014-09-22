@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script>
+function domReady(fn){
+	if(document.addEventListener){
+		document.addEventListener('DOMContentLoaded',fn,false);
+	}else{
+		document.write('<script id="ready_IE" defer><\/script>');
+		var oReady=document.getElementById('ready_IE');
+		oReady.onreadystatechange=function(){
+			if(oReady.readyState=='complete'){
+				fn && fn();
+			}
+		}
+	}
+}
+</script>
+<script>
+domReady(function(){
+	var str='abcdabcabCa';
+	//RegExp:Regular Expression 规则表达式
+	
+	//接收1个参数：RegExp(正则字符串)
+	var oRex1=new RegExp('c');
+	console.log(str.search(oRex1));	//search()：在str中查找字符串，返回匹配的“位置”
+	
+	//接收2个参数：RegExp(正则字符串,模式)
+	//模式：g->全局匹配； m->多行匹配； i->忽略大小写匹配
+	var oRex2=new RegExp('c','g');
+	console.log(str.match(oRex2));	//match()：在str中查找字符串，返回匹配的“结果”
+	
+	//接收1个参数：RegExp(正则)
+	var oRex3=new RegExp(/c/g);		//跟oRex2功能相同
+	console.log(str.match(oRex3));
+	
+	//RegExp的简写模式
+	var reg1=/C/;
+	console.log(str.search(reg1));
+	var reg2=/C/i;					//i:忽略大小写
+	console.log(str.match(reg2));
+	var reg3=/C/gi;					//gi:全局且忽略大小写查找，gi顺序可颠倒
+	console.log(str.match(reg3));
+	var reg4=/C/gmi;				//gmi:全局且多行且忽略大小写查找，gmi顺序可颠倒
+	console.log(str.match(reg4));
+	
+	//Demo: 找出字符串中连续的数字
+	var s='abc 12 dd 334d5adc12_da7670';
+	var regS=/\d+/g;	//\d表示数字 +若干个；  \d+  表示连续若干个数字组成的串；
+	//var regS = new RegExp('\\d+','g');	//这句跟上面那句简写功能一样；\\d是防止转义
+	console.log(s.match(regS));
+});
+</script>
+</head>
+
+<body>
+
+</body>
+</html>

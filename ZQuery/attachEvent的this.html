@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>Document</title>
+	<script>
+	function addEvent(sEv, obj, fn){
+		if(obj.addEventListener){
+			//google firefox ie9及以上
+			//this为obj 正确
+			obj.addEventListener(sEv, fn, false);
+
+			//fn由于被function包了一层，此时this为window
+			// obj.addEventListener(sEv, function(){
+			// 	fn && fn();
+			// },false)
+			
+			//想要解决当this被改变时的问题，用call
+		}else{
+			//ie8及以下
+			//this为window 不正确
+			//obj.attachEvent('on'+sEv, fn);
+
+			//用call重新指示this
+			obj.attachEvent('on'+sEv, function(){
+				fn && fn.call(obj)
+			})
+
+			// obj.attachEvent('on'+sEv,function(){
+			// 	fn && fn();
+			// })
+
+		}
+	}
+
+	window.onload=function(){
+		addEvent('click', document.getElementsByTagName('div')[0], function(){
+			alert(this.innerHTML)
+		})
+	}
+	</script>
+</head>
+<body>
+	<div>1111111111111111111111111</div>
+</body>
+</html>

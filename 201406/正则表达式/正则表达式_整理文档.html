@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script>
+window.onload=function(){
+	var oTxt1=document.getElementById('txt1');
+	var oTxt2=document.getElementById('txt2');
+	var oBtn=document.getElementById('btn');
+	oBtn.onclick=function(){
+		var str=oTxt1.value;
+		var reg=/^/gm;			//^ 起始位置 gm 全局且多行匹配
+		oTxt2.value=str.replace(reg,'  ');	//将每行的开头增加2个空格
+	};
+}
+</script>
+</head>
+
+<body>
+<textarea rows="20" cols="50" id="txt1"></textarea>
+<input type="button" id="btn" value="整理" />
+<textarea rows="20" cols="50" id="txt2"></textarea>
+
+</body>
+</html>

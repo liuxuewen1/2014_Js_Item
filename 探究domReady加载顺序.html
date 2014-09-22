@@ -1,0 +1,36 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<script>
+window.onload=function(){
+	document.title+='O |';
+}
+
+//FF、Chrome、IE9+
+if(document.addEventListener){
+
+	document.addEventListener('DOMContentLoaded',function(){
+		document.title+='R |';
+	},false);
+	
+}else{
+	//IE8及以下
+	document.write('<script id="lxw_IE_Ready" defer><\/script>');
+	var oDefer=document.getElementById('lxw_IE_Ready');
+	oDefer.onreadystatechange=function(){
+		if(oDefer.readyState=='complete'){
+			document.title+='R IE |';
+		}
+	}
+	
+}
+</script>
+</head>
+
+<body>
+<img src="http://www.baidu.com/img/bdlogo.gif" onload="document.title+='IMG |'" />
+<img src="http://www.baidu.com/img/bdlogo.gif" onload="document.title+='IMG2 |'" />
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="author" content="" />
+<meta name="copyright" content="" />
+<meta name="description" content="" />
+<title></title>
+<link rel="stylesheet" href="./Css/index.css" />
+<script>
+function domReady(fn){
+	if(document.addEventListener){
+		//DOMContentLoaded：兼容IE9+ FF Chrome ，Dom事件必须通过绑定来处理
+		document.addEventListener('DOMContentLoaded',fn,false);
+	}else{
+		//其他IE8 及以下，通过defer最后加载script脚本
+		document.write('<script id="lxw_Ready_IE" defer><\/script>');
+		var oReady=document.getElementById('lxw_Ready_IE');
+		//通过onreadystatechange来监听script脚本加载情况
+		oReady.onreadystatechange=function(){
+			//如果readyState状态为complete，说明脚本已加载完成DOM加载完成，可以执行后续函数
+			if(oReady.readyState=='complete'){
+				fn && fn();
+			}
+		}
+	}
+}
+</script>
+<script>
+//原生态Ajax
+function ajax(obj){
+	//参数默认值设置
+	obj=obj || {};
+	if(!obj.url){
+		alert('URL必填，请求失败');
+		return;
+	}
+	obj.type=obj.type || 'GET';
+	obj.data=obj.data || {};
+	obj.timeout=obj.timeout || 3;
+
+	//1、建立oAjax对象
+	//XMLHttpRequest兼容IE7、IE7+、FF、Chrome等各种浏览器
+	if(window.XMLHttpRequest){
+		var oAjax=new XMLHttpRequest();
+	}else{
+		//兼容IE5、IE6
+		var oAjax=new ActiveXObject('Microsoft.XMLHTTP');
+	}
+	
+	//2、打开连接、发送请求
+	switch(obj.type.toLowerCase()){
+		case 'get':
+			oAjax.open('GET',obj.url+'?'+jsonToURL(obj.data),true);
+			oAjax.send();
+			break;
+		case 'post':
+			oAjax.open('POST',obj.url,true);
+			//post时需要设置请求头
+			oAjax.setRequestHeader('content-type','application/x-www-form-urlencoded');
+			oAjax.send(jsonToURL(obj.data));
+			break;
+	}
+	
+	//如果有正在加载函数 执行
+	obj.loadingFn && obj.loadingFn();
+	
+	//3、监听事件：是否成功返回回来数据
+	oAjax.onreadystatechange=function(){
+		//readyState：0-准备状态；1-ajax准备完毕；2-接收完毕；3-正在解析；4-数据接受完成
+		if(oAjax.readyState!=4) return;
+		
+		//请求完成，如果有完成函数 执行
+		obj.completeFn && obj.completeFn();
+		
+		//status：2开头表示成功；304表示文件未修改-成功
+		if(oAjax.status>=200 && oAjax.status<300 || oAjax.status==304){
+			//成功，清除超时定时器
+			clearTimeout(timer);
+			
+			//responseText：请求到的数据（常用）
+			//responseXML：请求到的xml数据（很少用），然后在succFn中跟使用DOM一样解析XML使用，稍麻烦
+			obj.succFn && obj.succFn(oAjax.responseText);
+		}else{
+			//失败，清除超时定时器
+			clearTimeout(timer);
+			
+			obj.failFn && obj.failFn(oAjax.status);
+		}
+		
+	}
+	
+	//设置超时时间
+	var timer=setTimeout(function(){
+		oAjax.onreadystatechange=null;
+		alert('请求超时');
+	},obj.timeout*1000);
+}
+function jsonToURL(json){
+	json=json || {};
+	json.t=Math.random();
+	var arr=[];
+	for(var key in json){
+		arr.push(key+'='+json[key]);
+	}
+	return arr.join('&');
+}
+</script>
+<script>
+//绑定、解绑事件
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+function removeEvent(obj,sEv,fn){
+	if(obj.detachEvent){
+		obj.detachEvent('on'+sEv,fn);
+	}else{
+		obj.removeEventListener(sEv,fn,false);
+	}
+}
+</script>
+<script>
+function getByClass(obj,iClass){
+	if(obj.getElementsByClassName){
+		return obj.getElementsByClassName(iClass);
+	}else{
+		var arr=[];
+		var aEle=obj.getElementsByTagName('*');
+		for(var i=0;i<aEle.length;i++){
+			if(findSame(aEle[i].className.split(' '),iClass)){
+				arr.push(aEle[i]);
+			}
+		}
+		return arr;
+	}
+}
+function findSame(arr,n){
+	for(var i=0;i<arr.length;i++){
+		if(arr[i]==n){
+			return true;
+		}
+	}
+	return false;
+}
+</script>
+<script>
+domReady(function(){
+	var doc=document,byid='getElementById',docEle='documentElement',cHt='clientHeight',cWh='clientWidth';
+	var oTop=doc[byid]('top');
+	var oSpan=doc[byid]('send');
+	var oPop=doc[byid]('send-form');
+	var oClose=doc[byid]('close');
+	var oSend=doc[byid]('send-btn');
+	var oUser=doc[byid]('username');
+	var oContent=doc[byid]('content');
+	var oFontNum=doc[byid]('font-num');
+	var oMain=doc[byid]('main');
+	var oTag=doc[byid]('phiz');
+	var aImg=oTag.children;
+	var arrKeys=[],arrValues=[];
+	var URL='wish.php';
+	
+	//请求所有心愿记录
+	function getAll(){
+		ajax({
+			url:URL,
+			data:{act:'get'},
+			succFn:function(data){
+				var jsonData=eval('('+data+')');
+				if(jsonData.error!=0) return;
+				
+				for(var i=0;i<jsonData.msg.length;i++){
+					var oMsg=jsonData.msg[i];
+					var html="<dl class='paper a"+(i%5+1)+"'>";
+								html+="<dt>";
+									html+="<span class='username'>"+oMsg.username+"</span>";
+									html+="<span class='num'>"+oMsg.id+"</span>";
+								html+="</dt>";
+								html+="<dd class='content'>"+getContent(oMsg.content)+"</dd>";
+								html+="<dd class='bottom'>";
+									html+="<span class='time'>"+oMsg.time+"</span>";
+									html+="<a href='javascript:;' class='close'></a>";
+								html+="</dd>";
+							html+="</dl>";
+					oMain.innerHTML+=html;
+				}
+				var aPaper=oMain.children;
+				for(var i=0;i<aPaper.length;i++){
+					aPaper[i].style.left=getRandom(0,doc[docEle][cWh]-aPaper[i].offsetWidth)+'px';
+					aPaper[i].style.top=getRandom(oTop.offsetHeight-100,doc[docEle][cHt]-aPaper[i].offsetHeight-200)+'px';
+					drag(aPaper[i]);
+					(function(i){
+						var oPaperClose=getByClass(aPaper[i],'close')[0];
+						var oPaperID=getByClass(aPaper[i],'num')[0];
+						addEvent(oPaperClose,'click',function(){
+							var t=confirm('确定删除吗？');
+							if(!t) return;
+							ajax({
+								url:URL,
+								data:{act:'delete',id:parseInt(oPaperID.innerHTML)},
+								succFn:function(data){
+									var json=eval('('+data+')');
+									if(json.error){
+										alert(json.msg);
+									}else{
+										oMain.removeChild(aPaper[i]);
+									}
+								}
+							});
+							
+						});	
+					})(i);
+					
+				}
+			}
+		});
+	}
+	getAll();
+	
+	//将内容中表情替换成图片
+	function getContent(content){
+		for(var i=0;i<arrValues.length;i++){
+			var val="\\["+arrValues[i]+"\\]";
+			var reg=new RegExp(val,'g');
+			content=content.replace(reg,'<img src="./Images/phiz/'+arrKeys[i]+'.gif"/>'); 
+		}
+		return content;
+	}
+	
+	for(var i=0;i<aImg.length;i++){
+		arrKeys.push(aImg[i].getAttribute('key'));
+		arrValues.push(aImg[i].alt);
+		(function(i){
+			addEvent(aImg[i],'click',function(){
+				oContent.value+='['+aImg[i].alt+']';
+				getFontNum();
+			});
+		})(i);
+		
+	}
+	
+	addEvent(oSpan,'click',function(){
+		oPop.style.display='block';
+		oPop.style.left=(doc[docEle][cWh]-oPop.offsetWidth)/2+'px';
+		oPop.style.top=(doc[docEle][cHt]-oPop.offsetHeight)/2+'px';
+	});
+	
+	addEvent(oClose,'click',function(){
+		oPop.style.display='none';
+	});
+	
+	addEvent(oSend,'click',function(){
+		ajax({
+			url:URL,
+			data:{act:'add',username:encodeURIComponent(oUser.value),content:encodeURIComponent(oContent.value)},
+			succFn:function(data){
+				var json=eval('('+data+')');
+				if(json.error){
+					alert(json.msg);
+				}else{
+					getAll();
+					oPop.style.display='none';
+				}
+			},
+			faliFn:function(status){
+				alert('失败：'+status);
+			}
+		});
+	});
+	
+	//计算字数
+	var timer=null;
+	if(navigator.userAgent.toLowerCase().indexOf('msie 9.0')!=-1){
+		timer=setInterval(getFontNum,30);
+	}else{
+		oContent.oninput=oContent.onpropertychange=function(){
+			getFontNum();
+		}
+	}
+	function getFontNum(){
+		var content=oContent.value;
+		var size=50-content.length;
+		if(size<0){
+			oSend.style.display='none';
+		}else{
+			oSend.style.display='block';
+		}
+		oFontNum.innerHTML=size;
+	}
+	
+});
+
+function getRandom(m,n){
+	return Math.random()*(n-m+1)+m;
+}
+
+zIndex=1;
+//拖拽
+function drag(obj){
+	addEvent(obj,'mousedown',downFn);
+	function downFn(ev){
+		var oEvent=ev||event;
+		var disX=oEvent.clientX-obj.offsetLeft;
+		var disY=oEvent.clientY-obj.offsetTop;
+		obj.style.zIndex=++zIndex;
+		obj.style.opacity='0.5';
+		obj.style.filter='alpha(opacity:50)';
+		
+		addEvent(document,'mousemove',moveFn);
+		addEvent(document,'mouseup',upFn);
+		
+		function moveFn(ev){
+			var oEvent=ev||event;
+			obj.style.left=oEvent.clientX-disX+'px';
+			obj.style.top=oEvent.clientY-disY+'px';
+		}
+		function upFn(){
+			obj.style.opacity='1';
+			obj.style.filter='alpha(opacity:100)';
+			removeEvent(document,'mousemove',moveFn);
+			removeEvent(document,'mouseup',upFn);
+			obj.releaseCapture && obj.releaseCapture();
+		}
+		
+		obj.setCapture && obj.setCapture();
+		return false;
+	}
+}
+</script>
+</head>
+<body>
+<div id='top'>
+    <span id='send'></span>
+</div>
+<div id='main'> 
+	<!--<dl class='paper a1'>
+        <dt>
+            <span class='username'>智能社</span>
+            <span class='num'>No.00001</span>
+        </dt>
+        <dd class='content'>欢迎来到智能社</dd>
+        <dd class='bottom'>
+            <span class='time'>今天08:30</span>
+            <a href="" class='close'></a>
+        </dd>
+    </dl>-->
+</div>
+
+<div id='send-form'>
+    <p class='title'><span>许下你的愿望</span><a href="javascript:;" id='close'></a></p>
+    <form action="" name='wish'>
+        <p>
+            <label for="username">昵称：</label>
+            <input type="text" name='username' id='username'/>
+        </p>
+        <p>
+            <label for="content">愿望：(您还可以输入&nbsp;<span id='font-num'>50</span>&nbsp;个字)</label>
+            <textarea name="content" id='content'>adsadfadfadfadfadfadfasdfadfasdfadfadfafafadfa</textarea>
+            <div id='phiz'>
+                <img src="./Images/phiz/zhuakuang.gif" alt="抓狂" key='zhuakuang'/>
+                <img src="./Images/phiz/baobao.gif" alt="抱抱" key='baobao'/>
+                <img src="./Images/phiz/haixiu.gif" alt="害羞" key='haixiu'/>
+                <img src="./Images/phiz/ku.gif" alt="酷" key='ku'/>
+                <img src="./Images/phiz/xixi.gif" alt="嘻嘻" key='xixi'/>
+                <img src="./Images/phiz/taikaixin.gif" alt="太开心" key='taikaixin'/>
+                <img src="./Images/phiz/touxiao.gif" alt="偷笑" key='touxiao'/>
+                <img src="./Images/phiz/qian.gif" alt="钱" key='qian'/>
+                <img src="./Images/phiz/huaxin.gif" alt="花心" key='huaxin'/>
+                <img src="./Images/phiz/jiyan.gif" alt="挤眼" key='jiyan'/>
+            </div>
+        </p>
+        <span id='send-btn'></span>
+    </form>
+</div>
+<!--[if IE 6]>
+<script type="text/javascript" src="./Js/iepng.js"></script>
+<script type="text/javascript">
+    DD_belatedPNG.fix('#send,#close,.close','background');
+</script>
+<![endif]-->
+</body>
+</html>

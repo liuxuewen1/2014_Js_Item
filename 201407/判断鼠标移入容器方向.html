@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>判断从哪个方向移入到div中</title>
+<style>
+*{margin:0; padding:0;}
+div{ width:200px; height:200px; margin:100px auto; background:#ccc; font-size:30px; color:#000; line-height:200px; text-align:center;}
+</style>
+<script>
+<!--原理-->
+//想象一下div中有一个内切圆，无论从哪个方向的鼠标移入都会经过圆上的某一个点，就可以求出这个点与圆心形成的夹角，从而判断方向
+//夹角怎么求：数学公式tanα=y/x；js中只能求出弧度值 radian=Math.atan2(y,x)，然后根据弧度与角度的公式求角度 2π * radian=360*度
+//推导出 角度angle=(180/π)*radian ，π在js中用 Math.PI
+window.onload=function(){
+	var oDiv=document.getElementsByTagName('div')[0];
+	
+	oDiv.onmouseover=function(ev){
+		var oEvent=ev || event;
+		var x=oDiv.offsetLeft+oDiv.offsetWidth/2-oEvent.clientX;	//x坐标
+		var y=oDiv.offsetTop+oDiv.offsetHeight/2-oEvent.clientY;	//y坐标
+		var radian=Math.atan2(y,x);							//弧度数
+		var angle=((180/Math.PI)*radian).toFixed(2);		//角度数
+		//oDiv.innerHTML=angle;
+		
+		//结果可以看到 左边进入：-45° ~ 45° ；上边进入：45° ~ 135° ；右边进入：135° ~ 180° 且 -135° ~ -180° ；下边进入：-135° ~ -45°
+		//其实这些负数的角度，是因为按照180°来计算，实际上负数部分是180°~360°
+		// 实际值     想要值
+		// 0		 0
+		// 45		 45
+		// 90		 90
+		// 135		 135
+		// 180		 180
+		// -180		 180
+		// -135		 225
+		// -90		 270
+		// -45		 315
+		//看上面发现只要为负数时 加上360°就能得到想要的正角度
+		angle=angle<0?(+angle+360):+angle;
+		oDiv.innerHTML=angle;
+		//此时，左边进入：315~0 且 0~45；上边：45~135；右边：135~225；下边：225~315；
+		switch(true){
+			case angle>45 && angle<=135:
+				oDiv.innerHTML='上边';
+				break;
+			case angle>135 && angle<=225:
+				oDiv.innerHTML='右边';
+				break;
+			case angle>225 && angle<=315:
+				oDiv.innerHTML='下边';
+				break;
+			default:
+				oDiv.innerHTML='左边';
+				break;
+		}
+	}
+};
+</script>
+</head>
+
+<body>
+<div>
+X
+</div>
+</body>
+</html>

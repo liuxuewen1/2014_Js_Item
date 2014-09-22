@@ -1,0 +1,16 @@
+
+.zns_calender{ width:210px; border:1px solid #000;font-size:14px;position:absolute; display:none;}
+.zns_calender ul{list-style:none}
+.zns_calender .ulPage{ position:relative;}
+.zns_calender .ulPage li{ height:30px; width:210px; line-height:30px; text-align:center;}
+.zns_calender .ulPage li .pre{ position:absolute; left:10px; top:0;}
+.zns_calender .ulPage li .next{ position:absolute; right:10px; top:0;}
+
+.zns_calender .ulWeek{ height:30px; }
+.zns_calender .ulWeek li,.zns_calender .ulDate li{ float:left; height:30px; width:30px; line-height:30px;}
+
+.zns_calender .ulDate{ height:180px;}
+.zns_calender .ulDate li:hover{ cursor:pointer;}
+.zns_calender .ulDate li.gray{ color:#ccc;}
+.zns_calender .ulDate li.red{ color:#f00;}
+.zns_calender .ulDate li.black{ color:#000;}

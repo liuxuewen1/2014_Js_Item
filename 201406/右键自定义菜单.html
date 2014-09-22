@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0;list-style:none;}
+div{ width:200px; margin:60px auto 0 auto;}
+#ul1{ margin:20px auto; width:200px;}
+#ul1 li{ width:200px; height:30px; line-height:30px; border:1px solid #000;}
+#ul2{ z-index:999; }
+#ul2 li{width:100px; height:30px; line-height:30px; text-align:center; border:1px solid #000; background:#ccc;}
+#ul2 li:hover{cursor:pointer;}
+</style>
+<script>
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+function domReady(fn){
+	if(document.addEventListener){
+		document.addEventListener('DOMContentLoaded',fn,false);
+	}else{
+		document.write('<script id="lxw_Ready_IE" defer><\/script>');
+		var oReady=document.getElementById('lxw_Ready_IE');
+		addEvent(oReady,'readystatechange',function(){
+			if(oReady.readyState=='computer'){
+				fn && fn();
+			}
+		});
+	}
+}
+</script>
+<script>
+
+
+window.onload=function(){
+	var oUl1=document.getElementById('ul1');
+	var oUl2=document.getElementById('ul2');
+	var aLi2=oUl2.children;
+	
+	oUl1.oncontextmenu=function(ev){
+		var oEvent=ev||event;
+		oUl2.style.left=oEvent.clientX+'px';
+		oUl2.style.top=oEvent.clientY+'px'; 
+		oUl2.style.display='block';
+		
+		var target=oEvent.srcElement||oEvent.target;
+		aLi2[0].onclick=function(){
+			oUl1.removeChild(target);
+			oUl2.style.display='none';
+		}
+		aLi2[1].onclick=function(){
+			target.style.background='#f00';
+			oUl2.style.display='none';
+		}
+		aLi2[2].onclick=function(){
+			target.style.background='#0f0';
+			oUl2.style.display='none';
+		}
+		aLi2[3].onclick=function(){
+			target.style.background='#00f';
+			oUl2.style.display='none';
+		}
+		return false;
+	}
+	oUl1.onclick=function(){
+		oUl2.style.display='none';
+	}
+	
+	var oBtn=document.getElementById('btn');
+	var oTxt=document.getElementById('txt');
+	oBtn.onclick=function(){
+		var oLi=document.createElement('li');
+		oLi.innerHTML=oTxt.value;
+		oUl1.appendChild(oLi);
+	}
+	
+}
+</script>
+</head>
+
+<body style="">
+	<div><input type='text' id='txt'  /><input type="button" id='btn' value="新增" /></div>
+	<ul id='ul1'>
+		<li>aaaaaa</li>
+		<li>bbbbbbbb</li>
+		<li>cccccc</li>
+		<li>ddddddd</li>
+		<li>eeeeeeee</li>
+		<li>fffffffff</li>
+	</ul>
+	<ul id='ul2' style="display:none;position:absolute; ">
+		<li>删除</li>
+		<li>变红</li>
+		<li>变绿</li>
+		<li>变蓝</li>
+	</ul>
+</body>
+</html>

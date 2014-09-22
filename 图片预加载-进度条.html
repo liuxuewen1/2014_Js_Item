@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0}
+#box1{ width:640px; height:378px; position:relative; margin:100px auto;}
+#box1 span{ width:320px; height:378px; position:absolute; left:0; top:0;}
+#box1 span.right{ left:320px;}
+
+#box2{ width:400px; height:30px; position:absolute; left:50%; top:50%; margin:-20px 0 0 -200px; border:1px solid red;}
+#box2 p{ width:0%; height:30px; background:blue;}
+#box2 span{ width:400px; height:30px; background:#CCC; position:absolute; top:-30px; left:0; line-height:30px; font-size:24px; text-align:center;}
+</style>
+<script>
+window.onload=function(){
+	var oImg=document.getElementById("img1"),
+		oBox1=document.getElementById("box1"),
+		oSpan=oBox1.getElementsByTagName("span"),
+		oBox2=document.getElementById("box2"),
+		oBiLi=oBox2.getElementsByTagName("span")[0],
+		oP=oBox2.getElementsByTagName("p")[0];
+	
+	oSpan[0].onclick=function(){
+		speed=1;
+	}
+	oSpan[1].onclick=function(){
+		speed=-1;
+	}
+		
+	var iNow=0;
+	var num=0;
+	var speed=1;
+	loadImg();
+	function loadImg(){
+		var img=new Image();
+		img.onload=function(){
+		
+			var bili=Math.ceil((num+1)/77*100);
+			oBiLi.innerHTML=oP.style.width=bili+"%";
+			
+			num++;
+			if(num==77){
+				oBox2.style.display="none";
+				setInterval(function(){
+					iNow+=speed;
+					
+					if(iNow==77){
+						iNow=0;
+					}
+					if(iNow==-1){
+						iNow=76;
+					}
+					oImg.src="http://www.zhinengshe.com/works/3525/img/"+iNow+".jpg";
+				},50);
+				
+			}
+			else{
+				loadImg();
+			}
+			
+		}
+		img.src="http://www.zhinengshe.com/works/3525/img/"+num+".jpg";
+	}
+	
+}
+</script>
+</head>
+
+<body>
+<div id="box1">
+	<img id="img1" src="http://www.zhinengshe.com/works/3525/img/0.jpg" alt="" />
+	<span></span>
+	<span class="right"></span>
+</div>
+
+<div id="box2">
+	<p></p>
+	<span></span>
+</div>
+</body>
+</html>

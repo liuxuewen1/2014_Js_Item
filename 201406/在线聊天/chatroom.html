@@ -1,0 +1,470 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0}
+ul{list-style:none;}
+ul li{ height:20px; line-height:20px;}
+img{border:none;}
+#box{ width:500px; height:500px; border:1px solid #000; position:absolute; left:0; top:0; font-size:12px; font-family:Arial, Helvetica, sans-serif;}
+#box div{ position:absolute;}
+
+#top{ width:100%; height:10%;}
+#resize{ right:2px; top:4px; height:80%;}
+#big{ width:15px; height:12px;}
+#close{ width:12px; height:12px;}
+#topBorder{ width:100%; height:20%; background:#ccc; top:80%;}
+
+#left{width:64%; height:90%; top:10%;}
+#left div{ width:100%;}
+#content{height:65%; border-bottom:1px solid #000; left:0; top:0; overflow:hidden; }
+#content ul{ width:98%; position:absolute; left:0; top:0;}
+#content li.single{ color:#00f;}
+#content li.double{ color:#000; padding-left:10px;}
+#content #scroll,#m_scroll{ width:2%; height:99%; background:#ccc; top:2px; right:2px;}
+#scroll #bar,#m_bar{ width:100%; height:4%; background:#00f;}
+#middle{ height:5%; background:#ccc; left:0; bottom:30%;}
+#aTagFont{ margin-left:4px;}
+#middle a img{ margin-top:2px;}
+#middle ul{ width:78px; border:1px solid #000; padding:2px; position:absolute; left:2px; top:-78px; z-index:99; display:none;}
+#middle ul li{ float:left; margin:2px;}
+#middle ul li:hover{ cursor:pointer;}
+#middle #ulFont { top:20px; background:#DDD;}
+#middle #ulFont li{ float:none; border-bottom:1px dotted #666;}
+#middle #ulFace{ background:#fff;}
+#entry{ height:20%; left:0; bottom:10%;}
+#submit{ height:10%; right:0; bottom:0; border-top:1px solid #000;}
+#submit input{float:right;}
+#entry textarea{width:98%; height:98%; border:none; margin:2px; font-size:12px; font-family:Arial, Helvetica, sans-serif;}
+
+#right{ width:36%; height:90%; right:0; top:10%;}
+#member{ width:100%; height:100%; border-left:1px solid #000; right:0; top:0; overflow:hidden;}
+#member ul{ width:98%; position:absolute; left:0; top:0;}
+#member ul li{ padding:4px; height:24px; line-height:24px; vertical-align:middle;}
+#member ul li img{ margin-right:4px;width:20px;height:20px;}
+<!--#m_scroll{ width:2%; height:99%; background:#ccc; top:2px; right:2px;}-->
+<!--#m_bar{ width:100%; height:4%; background:#00f;}-->
+
+#box .font9{ font-size:9px;}
+#box .font12{ font-size:12px;}
+#box .font14{ font-size:14px;}
+#box .font16{ font-size:16px;}
+#box .colorRed{ color:red;}
+#box .colorBlue{ color:blue;}
+#box .colorYellow{ color:yellow;}
+#box .colorGray{ color:gray;}
+</style>
+<script>
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+}
+function move(obj,json,succFn){
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		var isOver=true;	
+		for(var attr in json){
+			if(name=='opacity'){
+				var nowValue=parseFloat(getStyle(obj,attr)*100);
+				if(isNaN(nowValue)){
+					nowValue=100;
+				}
+			}else{
+				var nowValue=parseInt(getStyle(obj,attr)) || 0;
+			}
+			var target=json[attr];
+			var speed=(target-nowValue)/8;
+			speed=speed>0?Math.ceil(speed):Math.floor(speed);
+			if(target==nowValue){
+				obj.style[attr]=target+'px';
+			}else{
+				isOver=false;
+				obj.style[attr]=nowValue+speed+'px';
+			}
+		}
+		if(isOver){
+			clearInterval(obj.timer);
+			succFn && succFn();
+		}
+	},30);	
+}
+</script>
+<script>
+function jsonp(obj){
+	obj=obj || {};
+	if(!obj.url){
+		alert('错误：缺少必填参数URL');
+		return;
+	}
+	obj.jsonpCallback=obj.jsonpCallback || ('jsonp_'+Math.random()).replace('.','');
+	obj.timeout=obj.timeout || 3;
+	obj.data=obj.data || {};
+	obj.data.t=Math.random();
+	
+	obj.cbName && (obj.data[obj.cbName]=obj.jsonpCallback);
+	window[obj.jsonpCallback]=function(json){
+		clearTimeout(timer);
+		obj.succFn && obj.succFn(json);
+		oHead.removeChild(oS);
+	};
+	var oHead=document.getElementsByTagName('head')[0];
+	var oS=document.createElement('script');
+	var arr=[];
+	for(var key in obj.data){
+		arr.push(key+'='+obj.data[key]);
+	}
+	oS.src=obj.url+'?'+arr.join('&');
+	oHead.appendChild(oS);
+	
+	var timer=setTimeout(function(){
+		window[obj.jsonpCallback]=null;
+		obj.timeoutFn && obj.timeoutFn();
+	},obj.timeout*1000);
+}
+</script>
+<script>
+function $(id){
+	return document.getElementById(id);
+}
+window.onload=function(){
+	var oBox=$('box');
+	var oBig=$('big');
+	var oClose=$('close');
+	var oWord=$('txtWord');
+	var oClear=$('btnClear');
+	var oContent=$('content');
+	var oContentUl=oContent.children[0];
+	var oMiddle=$('middle');
+	var oUlFace=$('ulFace');
+	var oAFace=$('aTagFace');
+	var aImgFace=oUlFace.getElementsByTagName('img');
+	var oSubmit=$('btnSubmit');
+	var oUlFont=$('ulFont');
+	var oAFont=$('aTagFont');
+	var aLiFont=oUlFont.children;
+	var oMember=$('member');
+	var oMemberUl=oMember.children[0];
+	var oScroll=$('scroll');
+	var oBar=$('bar');
+	var oMemberScroll=$('m_scroll');
+	var oMemberBar=$('m_bar');
+	var isBig=true;
+	var arrDesc=[],arrImg=[];
+	for(var i=0;i<aImgFace.length;i++){
+		arrDesc.push(aImgFace[i].alt);
+		arrImg.push(aImgFace[i].getAttribute('key'));
+	}
+	
+	//清空回复内容
+	oClear.onclick=function(){
+		oWord.value='';
+	}
+	
+	//计算窗口大小
+	var cW=100,cH=100;
+	var winX=document.documentElement.clientWidth;
+	var winY=document.documentElement.clientHeight;
+	oBox.style.left=(winX-oBox.offsetWidth)/2+'px';
+	oBox.style.top=(winY-oBox.offsetHeight)/2+'px';
+	oBig.onclick=function(){
+		if(!isBig){ return; }
+		move(oBox,{width:oBox.offsetWidth+cW,height:oBox.offsetHeight+cH,left:oBox.offsetLeft-cW/2,top:oBox.offsetTop-cH/2},function(){
+			bindScroll();
+			isBig=false;
+		});
+	}
+	oClose.onclick=function(){
+		if(isBig){ return;}
+		move(oBox,{width:oBox.offsetWidth-cW,height:oBox.offsetHeight-cH,left:oBox.offsetLeft+cW/2,top:oBox.offsetTop+cH/2},function(){
+			bindScroll();
+			isBig=true;
+		});
+	}
+	 
+	//绑定字体Ul点击事件
+	oAFont.onclick=function(ev){
+		var oEvent=ev||event;
+		oUlFont.style.display=oUlFont.style.display=='block'?'none':'block';
+		oUlFace.style.display='none';
+		oEvent.cancelBubble=true;
+	}
+	//绑定每个字体点击事件
+	for(var i=0,len=aLiFont.length;i<len;i++){
+		aLiFont[i].onclick=function(){
+			oWord.className=this.className;
+		};
+	}
+	//绑定表情点击事件
+	oAFace.onclick=function(ev){
+		var oEvent=ev||event;
+		oUlFace.style.display=oUlFace.style.display=='block'?'none':'block';
+		oUlFont.style.display='none';
+		oEvent.cancelBubble=true;
+	};
+	//绑定每张face点击事件
+	for(var i=0,len=aImgFace.length;i<len;i++){
+		aImgFace[i].onclick=function(){
+			oWord.value+='['+this.alt+']';
+		}
+	}
+	
+	//点击发送触发事件
+	oSubmit.onclick=function(){
+		jsonp({
+			url:URL,
+			data:{a:'snd_msg',content:oWord.value,token:token},
+			cbName:'cb',
+			succFn:function(json){
+				if(!json.error){
+					getContent();
+					oWord.value='';
+				}else{
+					alert(json.msg);
+				}
+			},
+			failFn:function(status){
+				alert('错误：'+status);
+			}
+		});
+	}
+	document.onclick=function(){
+		oUlFont.style.display='none';
+		oUlFace.style.display='none';
+	}
+	
+	//登录
+	var URL='http://zhinengshe.com/exercise/im/api.php';
+	var token='';
+	jsonp({
+		url:URL,
+		data:{a:'lgn',user:'pp',pass:'pp'},
+		cbName:'cb',
+		succFn:function(json){
+			token=json.token;
+			getContent();
+			getMember();
+		}
+	});
+	//请求内容列表
+	function getContent(){
+		jsonp({
+			url:URL,
+			data:{a:'get_msg',token:token},
+			cbName:'cb',
+			succFn:function(json){
+				var arrData=json.data;
+				for(var i=0;i<arrData.length;i++){
+					var data=arrData[i];
+					var oDate=new Date();
+					oDate.setTime(data.post_time*1000);
+					var time=(oDate.getFullYear()+'-'+addZero(oDate.getMonth()+1)+'-'+addZero(oDate.getDate())+' '+addZero(oDate.getHours())+':'+addZero(oDate.getMinutes())+':'+addZero(oDate.getSeconds()));
+					var oLi=createLi(data.username+' '+time);
+					oLi.className='single';
+					var content=data.content;
+					for(var k=0;k<arrDesc.length;k++){
+						var reg=new RegExp('\\['+arrDesc[k]+'\\]','g');						
+						content=content.replace(reg,'<img src="images/face/'+arrImg[k]+'.gif"/>');
+					}
+					var oLi1=createLi(content);
+					oLi1.className='double';
+					oContentUl.appendChild(oLi);
+					oContentUl.appendChild(oLi1);					
+				}
+				//内容滚动条
+				setScroll(oBar,oScroll,oContentUl,oContent.offsetHeight);
+				//直接定位到最后一行
+				oBar.style.top=oScroll.offsetHeight-oBar.offsetHeight+'px';
+				oContentUl.style.top=-(oContentUl.offsetHeight-oContent.offsetHeight)+'px';
+			}
+		});
+	}
+	//获取用户列表
+	function getMember(){
+		jsonp({
+			url:URL,
+			data:{a:'get_user_list',token:token},
+			cbName:'cb',
+			succFn:function(json){
+				var arrData=json.data;
+				for(var i=0;i<arrData.length;i++){
+					var data=arrData[i];
+					var oLi=createLi('<img src="http://zhinengshe.com/exercise/im/images/face/'+data.face+'.jpg">'+data.username);
+					oMemberUl.appendChild(oLi);
+				}
+				//人员列表滚动条
+				setScroll(oMemberBar,oMemberScroll,oMemberUl,oMember.offsetHeight);
+			}
+		});
+	}
+	
+	function bindScroll(){
+		//内容滚动条
+		setScroll(oBar,oScroll,oContentUl,oContent.offsetHeight);
+		//人员列表滚动条
+		setScroll(oMemberBar,oMemberScroll,oMemberUl,oMember.offsetHeight);
+		//直接定位到最后一行
+		oBar.style.top=oScroll.offsetHeight-oBar.offsetHeight+'px';
+		oContentUl.style.top=-(oContentUl.offsetHeight-oContent.offsetHeight)+'px';
+	}
+	//鼠标滚动时控制内容也滚动
+	mouseWheel(oContentUl,function(bDown){
+		c_speed=bDown?Math.abs(c_speed):-Math.abs(c_speed);
+		mouseMove(oBar,oScroll,oContentUl,oContent.offsetHeight);
+	});
+	mouseWheel(oMemberUl,function(bDown){
+		c_speed=bDown?Math.abs(c_speed):-Math.abs(c_speed);
+		mouseMove(oMemberBar,oMemberScroll,oMemberUl,oMember.offsetHeight);
+	});
+	
+}
+
+//滚动条公用方法
+var c_speed=10;
+function setScroll(obj,oParent,oMove,iMaxHeight){
+	obj.style.top=oMove.style.top=0;
+	//根据内容高度设置滚动条的高度
+	//console.log(iMaxHeight+','+oMove.offsetHeight);
+	obj.style.height=(iMaxHeight/oMove.offsetHeight)*100+'%';
+	//绑定滚动事件
+	obj.onmousedown=function(ev){
+		var oEvent=ev||event;
+		var disY=oEvent.clientY-obj.offsetTop;
+		document.onmousemove=function(ev){
+			var oEvent=ev||event;
+			var y=oEvent.clientY-disY;
+			var maxT=oParent.offsetHeight-obj.offsetHeight;
+			y<0 && (y=0);
+			y>maxT && (y=maxT);
+			obj.style.top=y+'px';
+			var bili=y/maxT;
+			oMove.style.top=-(oMove.offsetHeight-iMaxHeight)*bili+'px';
+		};
+		document.onmouseup=function(){
+			document.onmousemove=document.onmouseup=null;
+			obj.releaseCapture && obj.releaseCapture();
+		}
+		obj.setCapture && obj.setCapture();
+		return false;
+	};
+}
+
+//鼠标滚动时移动内容框
+function mouseMove(obj,oParent,oMove,iMaxHeight){
+	var maxT=oParent.offsetHeight-obj.offsetHeight;
+	var y=obj.offsetTop+c_speed;	
+	if(y<0 || y>maxT){
+		return;
+	}
+	obj.style.top=y+'px';
+	var bili=y/maxT; 
+	oMove.style.top=-(oMove.offsetHeight-iMaxHeight)*bili+'px'; 
+}
+
+//鼠标滚动事件
+function mouseWheel(obj,fn){
+	if(navigator.userAgent.toLowerCase().indexOf('firefox')!=-1){
+		addEvent(obj,'DOMMouseScroll',function(ev){
+			var oEvent=ev||event;
+			var isDown=oEvent.detail>0?true:false;
+			fn && fn(isDown);
+		});
+	}else{
+		addEvent(obj,'mousewheel',function(ev){
+			var oEvent=ev||event;
+			var isDown=oEvent.wheelDelta>0?false:true;
+			fn && fn(isDown);
+		});
+	}
+}
+
+function addZero(n){
+	return n<10?'0'+n:n;
+}
+
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+
+function createLi(html){
+	var oLi=document.createElement('li');
+	oLi.innerHTML=html;
+	return oLi;
+}
+</script>
+</head>
+
+<body>
+<div id='box'>
+	<div id='top'>
+		<div id='resize'>
+			<a href="javascript:;" alt="缩小窗口" id='close'><img src='images/close.png'/></a>
+			<a href="javascript:;" alt="放大窗口" id='big'><img src='images/bigSize.png'/></a>
+		</div>
+		<div id='topBorder'></div>
+	</div>
+	
+	<div id='left'>
+		<div id='content'>
+			<ul>
+			
+			</ul>
+			<div id='scroll'>
+				<div id='bar'></div>
+			</div>
+		</div>
+		<div id='middle'>
+			<a href="javascript:;" id='aTagFont'><img src="images/font.png" /></a>
+			<a href="javascript:;" id='aTagColor'></a>
+			<a href="javascript:;" id='aTagFace'><img src="images/expression.png" /></a>
+			<ul id='ulFont'>
+				<li class='font9'>9px</li>
+				<li class='font12'>12px</li>
+				<li class='font14'>14px</li>
+				<li class='font16'>16px</li>
+			</ul>
+			<ul id='ulColor'>
+				<li class='colorRed'>9px</li>
+				<li class='colorBlue'>12px</li>
+				<li class='colorYellow'>14px</li>
+				<li class='colorGray'>16px</li>
+			</ul>
+			<ul id='ulFace'>
+				<li><img key="baobao" alt="抱抱" src="images/face/baobao.gif"  /></li>
+				<li><img key="haixiu" alt="害羞" src="images/face/haixiu.gif" /></li>
+				<li><img key="zhuakuang" alt="抓狂" src="images/face/zhuakuang.gif" /></li>
+				<li><img key="huaxin" alt="花心" src="images/face/huaxin.gif" /></li>
+				<li><img key="jiyan" alt="挤眼" src="images/face/jiyan.gif" /></li>
+				<li><img key="ku" alt="酷" src="images/face/ku.gif" /></li>
+				<li><img key="qian" alt="钱" src="images/face/qian.gif" /></li>
+				<li><img key="taikaixin" alt="太开心" src="images/face/taikaixin.gif" /></li>
+				<li><img key="touxiao" alt="偷笑" src="images/face/touxiao.gif" /></li>
+			</ul>
+		</div>
+		<div id='entry'>
+			<textarea id='txtWord'></textarea>
+		</div>
+		<div id='submit'>
+			<input type="button" id='btnSubmit' value="发送" />
+			<input type="button" id='btnClear' value="清空" />
+		</div>
+	</div>
+	
+	<div id='right'>
+		<div id='member'>
+			<ul>
+			
+			</ul>
+			<div id='m_scroll'>
+				<div id='m_bar'></div>
+			</div>
+		</div>
+	</div> 
+	
+</div>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>搜索大全</title>
+<style>
+*{margin:0; padding:0;}
+#search{ margin:40px auto; width:360px;}
+#search div{}
+#search div a{ width:60px; height:24px; line-height:30px; margin:10px; font-size:12px; text-decoration:none; color:#999;}
+#search div a:hover{cursor:pointer;}
+#search div a.active{color:#FF3333; text-decoration:underline; font-size:14px; font-weight:bold;}
+#search #txtKey{ width:280px; height:24px; line-height:24px; padding:4px; border:1px solid #999;}
+#search #btnSearch{ width:60px; height:34px; border:1px solid #666; border-left:0; background:#f5f5f5;}
+#search ul{ list-style:none; width:280px; border:1px solid #000; padding:4px; border-top:0; display:none;}
+#search ul li{ height:24px; line-height:24px; font-size:12px;}
+</style>
+<script>
+function jsonp(obj){
+	obj=obj || {};
+	if(!obj.url){
+		alert('错误：参数不完整');
+		return;
+	}
+	//默认超时时间：3s
+	obj.timeout=obj.timeout || 3;
+	//回调函数名称，如果没有生成一个随机函数名
+	obj.jsonpCallback=obj.jsonpCallback || ('jsonp_'+Math.random()).replace('.','');
+	
+	var oHead=document.head || document.getElementsByTagName('head')[0];
+	var oS=document.createElement('script');
+	
+	//为接口中的函数名参数赋值
+	obj.cbName && (obj.data[obj.cbName]=obj.jsonpCallback);
+	//将函数封装到全局中
+	window[obj.jsonpCallback]=function(json){
+		clearTimeout(timer);
+		//成功，则回调函数
+		obj.succFn && obj.succFn(json);
+		//删除script
+		oHead.removeChild(oS);
+	};
+	//将传过来的json格式参数解析成 a=1&b=2形式
+	var arr=[];
+	for(var key in obj.data){
+		arr.push(key+'='+obj.data[key]);
+	}
+	oS.src=obj.url+'?'+arr.join('&');
+	
+	oHead.appendChild(oS);
+	//超时执行timeoutFn()函数
+	var timer=setTimeout(function(){
+		obj.timeoutFn && obj.timeoutFn();
+		window[obj.jsonpCallback]=null;
+	},obj.timeout*1000);
+}
+
+window.onload=function(){
+	var oSearch=document.getElementById('search');
+	var aSo=oSearch.children[0].getElementsByTagName('a');
+	var oKey=document.getElementById('txtKey');
+	var oBtn=document.getElementById('btnSearch');
+	var oUl=oSearch.children[1];
+	var aLi=oUl.children;
+	var company='google';	//默认 Google
+	
+	var obj={
+				google:{url:'http://74.125.110.2/complete/search',key:'q',cbName:'callback',soUrl:'http://74.125.110.2/webhp#newwindow=1',soKey:'q'},
+				baidu:{url:'http://suggestion.baidu.com/su',key:'wd',cbName:'cb',soUrl:'http://www.baidu.com/s',soKey:'wd'},
+			 	so360:{url:'http://sug.so.360.cn/suggest',key:'word',cbName:'callback',soUrl:'http://www.so.com/s',soKey:'q'},
+				youdao:{url:'http://sug.so.360.cn/suggest/word',key:'word',cbName:'callback',soUrl:'http://www.youdao.com/search',soKey:'q'}
+	};
+	for(var i=0,len=aSo.length;i<len;i++){
+		//切换搜索类型
+		aSo[i].onclick=(function(i){
+			return function(){
+				for(var k=0;k<aSo.length;k++){
+					aSo[k].className='';
+				}
+				aSo[i].className='active';
+				company=aSo[i].getAttribute('company');
+				oUl.style.display='none';
+				oUl.innerHTML='';
+				oKey.value='';
+				oKey.focus();
+			}
+		})(i);
+	}
+	
+	oBtn.onclick=searchFn;	
+	function searchFn(){
+		if(company=='google'){
+			var soUrl=obj[company].soUrl+'&'+obj[company].soKey+'='+encodeURIComponent(oKey.value);
+		}else{
+			var soUrl=obj[company].soUrl+'?'+obj[company].soKey+'='+encodeURIComponent(oKey.value);
+		}
+		window.open(soUrl);	
+		oUl.style.display='none';
+		oUl.innerHTML='';
+		oKey.value='';
+	}
+	
+	var oldValue='';
+	oKey.onkeyup=function(ev){
+		var oEvent=ev||event;
+		if(oEvent.keyCode==40 || oEvent.keyCode==38){
+			return;
+		}
+		
+		if(oEvent.keyCode==13){			
+			searchFn();
+		}
+		
+		var json={
+			url:obj[company].url,	//360接口: http://sug.so.360.cn/suggest
+			data:{encodein:'utf-8',client:'hp',hl:'zh-CN'},	//encodein：给so360准备的，否则在搜索中文情况下不能出数据
+			cbName:obj[company].cbName,						//360接口: callback
+			succFn:function(json){
+				oUl.style.display='block';
+				oUl.innerHTML='';
+				
+				json.s.length<=0 && (oUl.style.display='none');
+				for(var i=0,len=json.s.length;i<len;i++){
+					var oLi=document.createElement('li');
+					oLi.innerHTML=json.s[i];
+					oUl.appendChild(oLi);
+				}
+			},
+			timeout:3,
+			timeoutFn:function(){
+				alert('网络超时');
+			}
+		};
+		json.data[obj[company].key]=encodeURIComponent(oKey.value);
+		if(company=='google'){
+			json.succFn=function(arr){
+				oUl.style.display='block';
+				oUl.innerHTML='';
+				
+				arr[1].length<=0 && (oUl.style.display='none');
+				for(var i=0,len=arr[1].length;i<len;i++){
+					var oLi=document.createElement('li');
+					oLi.innerHTML=arr[1][i][0];
+					oUl.appendChild(oLi);
+				}
+			}
+		}
+		jsonp(json);	//调用jsonp获取li数据
+		
+		iNow=-1;
+		oldValue=oKey.value;
+			
+	}
+	
+	//控制键盘上下方向移动选中项
+	var iNow=-1;
+	oKey.onkeydown=function(ev){
+		var oEvent=ev||event;
+		switch(oEvent.keyCode){
+			case 40:
+				for(var i=0,len=aLi.length;i<len;i++){
+					aLi[i].style.background='';
+				}
+				iNow++;
+				if(iNow==aLi.length){
+					iNow=-1;
+					oKey.value=oldValue;
+				}else{
+					aLi[iNow].style.background='#ccc';
+					oKey.value=aLi[iNow].innerHTML;
+				}
+				break;
+			case 38:
+				for(var i=0,len=aLi.length;i<len;i++){
+					aLi[i].style.background='';
+				}
+				iNow--;
+				if(iNow==-1){
+					oKey.value=oldValue;
+				}else{
+					iNow==-2 && (iNow=aLi.length-1);
+					aLi[iNow].style.background='#ccc';
+					oKey.value=aLi[iNow].innerHTML;
+				}
+				break;
+		}
+		
+	}
+	
+}
+</script>
+</head>
+
+<body>
+<div id='search'>
+	<div>
+		<a href="javascript:;" company='google' class="active">Google</a>
+		<a href="javascript:;" company='baidu'>百度搜</a>
+		<a href="javascript:;" company='so360'>360搜</a>
+		<a href="javascript:;" company='youdao'>有道搜</a>
+		<input type="text" id="txtKey"  /><input type="button" value="搜&nbsp;索" id="btnSearch" />
+	</div>
+	<ul>
+		<li>abc</li>
+		<li>abc</li>
+		<li>abc</li>
+	</ul>
+</div>
+</body>
+</html>

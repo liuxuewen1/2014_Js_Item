@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0;list-style:none;}
+#ul1{ width:630px; height:630px; margin:10px auto;}
+#ul1 li{width:200px; height:200px; margin: 0 10px 10px 0 ; float:left;}
+#ul1 li.box{border:2px dotted #000}
+#ul1 li img{ width:200px; height:200px;}
+</style>
+<script>
+function domReady(fn){
+	if(document.addEventListener){
+		document.addEventListener('DOMContentLoaded',fn,false);
+	}else{
+		document.write('<script id="lxw_Ready_IE" defer><\/script>');
+		var oReady=document.getElementById('lxw_Ready_IE');
+		addEvent(oReady,'readystatechange',function(){
+			if(oReady.readyState=='complete'){
+				fn && fn();
+			}
+		});
+	}
+}
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+function removeEvent(obj,sEv,fn){
+	if(obj.detachEvent){
+		obj.detachEvent('on'+sEv,fn);
+	}else{
+		obj.removeEventListener(sEv,fn,false);
+	}
+}
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+}
+function getPos(obj){
+	var l=0,t=0;
+	while(obj){
+		l+=obj.offsetLeft;
+		t+=obj.offsetTop;
+		obj=obj.offsetParent;
+	}
+	return {left:l,top:t};
+}
+</script>
+<script>
+function startMove(obj,json,fn){
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		var isOver=true;
+		for(var attr in json){
+			if(attr=='opacity'){
+				var iCur=getStyle(obj,attr)*100;
+				if(isNaN(iCur)){
+					iCur=100;
+				}
+			}else{
+				var iCur=parseInt(getStyle(obj,attr)) || 0;
+			}
+			var target=json[attr];
+			var speed=(target-iCur)/8;
+			speed=speed>0?Math.ceil(speed):Math.floor(speed);
+			if(target!=iCur){
+				isOver=false;
+			}
+			
+			if(attr=='opacity'){
+				obj.style[attr]=(iCur+speed)/100;
+				obj.style['filter']='alpha(opacity:'+(iCur+speed)+')';
+			}else{
+				obj.style[attr]=(iCur+speed)+'px';
+			}
+		}
+		if(isOver){
+			clearInterval(obj.timer);
+			fn && fn();
+		}
+	},30);
+}
+</script>
+<script>
+domReady(function(){
+	var oBtn=document.getElementById('btn');
+	var oUl1=document.getElementById('ul1');
+	var aLi=oUl1.children;
+	var arrPos=[];
+	
+	//图片随机变化
+	addEvent(oBtn,'click',function(){
+		arrPos.sort(function(){
+			return Math.random()-0.5;
+		});
+		
+		for(var i=0;i<aLi.length;i++){
+			startMove(aLi[i],arrPos[i]);
+		}
+	});
+	
+	for(var i=0;i<aLi.length;i++){
+		arrPos.push({left:aLi[i].offsetLeft,top:aLi[i].offsetTop});
+		aLi[i].style.left=aLi[i].offsetLeft+'px';
+		aLi[i].style.top=aLi[i].offsetTop+'px';
+	}
+	for(var i=0,len=aLi.length;i<len;i++){
+		aLi[i].style.position='absolute';
+	}
+	
+	var zIndex=1;
+	for(var i=0,len=aLi.length;i<len;i++){
+		
+		(function(i){
+		
+			var oLi=aLi[i];
+			addEvent(oLi,'mousedown',function(ev){
+				var oEvent=ev||event;
+				var left=oLi.offsetLeft;
+				var top=oLi.offsetTop;
+				var disX=oEvent.clientX-left;
+				var disY=oEvent.clientY-top;
+				oLi.style.zIndex=++zIndex;
+				var nearIdx=-1;
+				
+				function mouseMove(ev){
+					var oEvent=ev||event;
+					var l=oEvent.clientX-disX;
+					var t=oEvent.clientY-disY;
+					oLi.style.left=l+'px';
+					oLi.style.top=t+'px';
+					
+					nearIdx=findNearest(oLi);
+					if(nearIdx!=-1){
+						for(var i=0,len=aLi.length;i<len;i++){
+							aLi[i].className='';
+						}
+						aLi[nearIdx].className='box';
+					}
+				}
+				function mouseUp(){
+					nearIdx!=-1 && (aLi[nearIdx].className='');
+					removeEvent(document,'mousemove',mouseMove);
+					removeEvent(document,'mouseup',mouseUp);					
+					oLi.releaseCapture && oLi.releaseCapture();
+				
+					if(nearIdx!=-1){
+						startMove(oLi,arrPos[nearIdx]);
+						startMove(aLi[nearIdx],{left:left,top:top});
+						//需要修改arrPos中存的位置点
+						arrPos[i]=arrPos[nearIdx];
+						arrPos[nearIdx]={left:left,top:top};
+					}else{
+						startMove(oLi,{left:left,top:top});
+					}
+				}
+				addEvent(document,'mousemove',mouseMove);
+				addEvent(document,'mouseup',mouseUp);
+				
+				//oEvent.preventDefault：Chrome浏览器阻止默认事件，只有事件在绑定时使用
+				oEvent.preventDefault && oEvent.preventDefault();
+				oLi.setCapture && oLi.setCapture();
+				return false;
+			});
+			
+		})(i);
+	}
+	
+	//寻找碰撞到的距离最近的照片
+	function findNearest(obj){
+		var idx=-1;
+		var minDis=new Date().getTime();
+		var left=obj.offsetLeft;
+		var top=obj.offsetTop;
+		for(var i=0,len=aLi.length;i<len;i++){
+			var oLi=aLi[i];
+			if(obj===oLi || !isHit(obj,oLi)) continue;
+			
+			var dx=Math.abs(oLi.offsetLeft-left);
+			var dy=Math.abs(oLi.offsetTop-top);
+			var distance=Math.sqrt(dx*dx+dy*dy);
+			if(distance<minDis){
+				idx=i;
+				minDis=distance;
+			}
+		}
+		return idx;
+	}
+	
+	//是否碰撞
+	function isHit(obj1,obj2){
+		var l1=obj1.offsetLeft+obj1.offsetWidth;
+		var r1=obj1.offsetLeft;
+		var t1=obj1.offsetTop+obj1.offsetHeight;
+		var b1=obj1.offsetTop;
+		
+		var l2=obj2.offsetLeft;
+		var r2=obj2.offsetLeft+obj2.offsetWidth;
+		var t2=obj2.offsetTop;
+		var b2=obj2.offsetTop+obj2.offsetHeight;
+		
+		if(l1<l2 || r1>r2 || t1<t2 || b1>b2){
+			return false;
+		}else{
+			return true;
+		}
+	}
+	
+});
+</script>
+</head>
+
+<body>
+<input type="button" id='btn' value="随机" />
+<ul id='ul1'>
+	<li><img src="1.jpg" /></li>
+	<li><img src="2.jpg" /></li>
+	<li><img src="3.jpg" /></li>
+	<li><img src="4.jpg" /></li>
+	<li><img src="5.jpg" /></li>
+	<li><img src="6.jpg" /></li>
+	<li><img src="7.jpg" /></li>
+	<li><img src="8.jpg" /></li>
+	<li><img src="9.jpg" /></li>
+</ul>
+</body>
+</html>

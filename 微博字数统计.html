@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style></style>
+<script>
+window.onload=function(){
+	var oStrong=document.getElementsByTagName("strong")[0];
+	var oTxt=document.getElementById("txt");
+	
+	if(navigator.userAgent.toLowerCase().indexOf("msie 9.0")!=-1){
+	
+		//解决下面事件在IE9中删除出现计数问题的方法
+		var timer=null;
+		addEvent(oTxt,'focus',function(){
+			timer=setInterval(calcute,10);	
+		});
+		addEvent(oTxt,'blur',function(){
+			clearInterval(timer);
+		});
+	}else{
+		
+		//oTxt.oninput 兼容FF Chrome IE9+
+		//oTxt.onpropertychange 兼容IE系
+		//绑定事件的兼容性判断：不需要if(..)，因为即使没有只是不执行不会报错，所以可以用连等形式来写
+		//但IE9中删除时会出问题
+		addEvent(oTxt,'input',calcute);
+		addEvent(oTxt,'propertychange',calcute);
+	}
+	
+	function calcute(){
+		oStrong.innerHTML=140-oTxt.value.length;
+	}
+}
+
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+</script>
+</head>
+
+<body>
+<span>还可输入<strong>140</strong>字</span>
+<input id='txt' type="text" />
+</body>
+</html>

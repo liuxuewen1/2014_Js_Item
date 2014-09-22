@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0; background:}
+ul{list-style:none; width:234px; border-top:1px solid #000; border-left:1px solid #000;}
+ul li{ width:72px; height:12px; float:left; border-bottom:1px solid #000; border-right:1px solid #000;}
+</style>
+<script>
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+function domReady(fn){
+	if(document.addEventListener){
+		addEvent(document,'DOMContentLoaded',function(){
+			fn && fn();
+		});
+	}else{
+		document.write('<script id="lxw_Ready_IE" defer><\/script>');
+		var oScript=document.getElementById('lxw_Ready_IE');
+		addEvent(oScript,'readystatechange',function(){
+			if(oScript.readyState=='complete'){
+				fn && fn();
+			}
+		});
+	}
+}
+</script>
+<script>
+domReady(function(){
+	var oUl=document.getElementById('ul1');
+	var arr=['0','3','6','9','c','f'];
+	for(var li=0;li<12;li++){
+		var oLi=document.createElement('li');
+		for(var k=0;k<3;k++){
+			var oSpan=document.createElement('span');
+			var color='#0'+arr[k];
+			oSpan.style.background=color;
+		}
+		oUl.appendChild(oLi);
+	}
+});
+</script>
+</head>
+
+<body>
+<ul id='ul1'></ul>
+</body>
+</html>

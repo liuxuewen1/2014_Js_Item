@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script>
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+function domReady(fn){
+	if(document.addEventListener){
+		addEvent(document,'DOMContentLoaded',function(){
+			fn && fn();
+		});
+	}else{
+		document.write('<script id="ready_IE" defer><\/script>');
+		var oReady=document.getElementById('ready_IE');
+		addEvent(oReady,'readystatechange',function(){
+			if(oReady.readyState=='complete'){
+				fn && fn();
+			}
+		});
+	}
+}
+</script>
+<script>
+domReady(function(){
+	var oDiv=document.body.children[0];
+	//replace 1、简单字符串替换 ->只会替换第一个匹配值
+	//oDiv.innerHTML=oDiv.innerHTML.replace('建设','<span style="color:red">**</span>');
+	
+	//replace 2、第一个参数为正则表达式，按照正则替换字符
+	var reg=/反腐倡廉|建设|解决|狠/g;
+	//oDiv.innerHTML=oDiv.innerHTML.replace(reg,'<span style="color:red">**</span>');
+	
+	//replace 3、第一个参数为正则表达式，第二个参数为函数，将匹配的字符串传递到函数，然后函数自定义处理。需要有返回值
+	oDiv.innerHTML=oDiv.innerHTML.replace(reg,function(str){
+		var s='';
+		//根据被替换的字数个数用相同数量的*号替代
+		for(var i=0;i<str.length;i++){
+			s+='*';
+		}
+		return s?'<span style="color:red">'+s+'</span>':'';
+	});
+	
+});
+</script>
+</head>
+
+<body>
+<div>
+	中共中央政治局6月30日下午就加强改进作风制度建设进行第十六次集体学习。中共中央总书记习近平在主持学习时强调，抓作风是推进党的建设新的伟大工程的重要切入点和着力点，必须坚持从严治党，落实管党治党责任，把作风建设要求融入党的思想建设、组织建设、反腐倡廉建设、制度建设之中，全面提高党的建设工作水平。抓作风既要着力解决当前突出问题，又要注重建立长效机制，下功夫、用狠劲，持续努力、久久为功。
+</div>
+</body>
+</html>

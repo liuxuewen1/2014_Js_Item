@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>分步运动</title>
+<style>
+*{margin:0; padding:0;}
+body{background:#000;}
+span{ color:#fff; font-size:30px; opacity:0; filter:alpha(opacity:0);}
+</style>
+<script>
+window.onload=function(){
+	var str="新华网布宜诺斯艾利斯7月19日电7月18日，国家主席习近平就马来西亚航空公司客机坠毁事件分别致电马来西亚最高元首哈利姆、荷兰国王威廉－亚历山大表示慰问。习近平在致哈利姆的慰问电中表示，惊悉马来西亚航空公司MH17航班7月17日在乌克兰东部坠毁，我们对此感到震惊。我谨代表中国政府和人民，对贵国遭遇这起不幸事件表示深切慰问，对航班上贵国及所有遇难者表示深切哀悼。习近平在致威廉－亚历山大的慰问电中表示，惊悉马来西亚航空公司MH17航班7月17日在乌克兰东部坠毁，造成贵国大量乘客不幸遇难。我们对贵国政府和人民的悲痛心情感同身受。在此，我谨向你表达我及中国政府和人民的深切慰问，并对这起事件中的贵国遇难者表示深切哀悼。";
+	var arr=str.split('');
+	for(var i=0;i<arr.length;i++){
+		var oSpan=document.createElement('span');
+		oSpan.innerHTML=str.charAt(i);
+		document.body.appendChild(oSpan);
+	}
+	var aSpan=document.getElementsByTagName('span');
+	i=0;
+	var timer=setInterval(function(){
+		document.title=i;
+		aSpan[i].style.opacity=1;
+		aSpan[i].style.filter='alpha(opacity:100)';
+		i++;
+		if(i==aSpan.length){
+			clearInterval(timer);
+		}
+	},100);
+	
+};
+
+</script>
+</head>
+
+<body>
+</body>
+</html>

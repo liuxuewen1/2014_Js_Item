@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0;}
+#top{ width:60px; height:24px; background:#ccc; line-height:24px; position:fixed; bottom:10px; right:10px; border:1px solid #000; font-size:12px; text-align:center;}
+#top:hover{cursor:pointer;}
+</style>
+<script>
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+}
+function startMove(obj,json,fn){
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		var isOver=true;
+		for(var attr in json){
+			if(attr=='opacity'){
+				var iNow=Math.round(getStyle(obj,attr)*100);
+				if(isNaN(iNow)) iNow=100;
+			}else{
+				var iNow=parseInt(getStyle(obj,attr))+'px';
+			}
+			var iTarget=json[attr];
+			var iSpeed=(iTarget-iNow)/8;
+			iSpeed=iSpeed>0?Math.ceil(iSpeed):Math.floor(iSpeed);
+			if(iTarget!=iNow){
+				isOver=false;
+				if(attr=='opacity'){
+					obj.style[attr]=(iNow+speed)/100;
+					obj.style['filter']='alpha(opacity:'+(iNow+speed)+')';
+				}else{
+					obj.style[attr]=(iNow+speed)+'px';
+				}
+			}
+		}
+		if(isOver){
+			clearInterval(obj.timer);
+			fn && fn();
+		}
+	},30);
+}
+</script>
+<script>
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);
+	}else{
+		obj.addEventListener(sEv,fn,false);
+	}
+}
+function removeEvent(obj,sEv,fn){
+	if(obj.detachEvent){
+		obj.detachEvent('on'+sEv,fn);
+	}else{
+		obj.removeEventListener(sEv,fn,false);
+	}
+}
+window.onload=function(){
+	var oTop=document.getElementById('top');
+	
+	//IE6由于不兼容fixed，需要特殊处理
+	var isIE6=(navigator.userAgent.toLowerCase().indexOf('msie 6.0')!=-1);
+	if(isIE6){
+		oTop.style.position='absolute';
+		
+		var top=oTop.offsetTop;
+		addEvent(window,'scroll',scrollByIE6);
+	}
+	function scrollByIE6(){
+		var scrollTop=document.documentElement.scrollTop || document.body.scrollTop;
+		oTop.style.top=top+scrollTop+'px';
+	}
+	
+	addEvent(oTop,'click',function(){
+		clearInterval(oTop.timer);
+		isIE6 && removeEvent(window,'scroll',scrollByIE6);
+		oTop.timer=setInterval(function(){
+			var scrollTop=document.documentElement.scrollTop || document.body.scrollTop;
+			var iSpeed=(0-scrollTop)/8;
+			iSpeed=iSpeed>0?Math.ceil(iSpeed):Math.floor(iSpeed);
+			if(scrollTop!=0){
+				var iNow=scrollTop+iSpeed;
+				document.documentElement.scrollTop=document.body.scrollTop=iNow;
+				isIE6 && (oTop.style.top=top+iNow+'px');
+			}else{
+				clearInterval(oTop.timer);
+				isIE6 && addEvent(window,'scroll',scrollByIE6);
+			}
+		},30);
+	});
+}
+</script>
+</head>
+
+<body style="height:3000px;">
+<div>
+
+</div>
+<div id='top'>回到顶部</div>
+</body>
+</html>

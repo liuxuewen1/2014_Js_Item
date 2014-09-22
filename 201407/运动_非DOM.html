@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0;}
+#box{ width:200px; height:200px; position:absolute; left:100px; top:100px; background:#f00;}
+</style>
+<script>
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+}
+<!--DOM操作下的运动：由于操作DOM会影响性能-->
+function startMove_DOM(obj,json,type,succFn){
+	type=type || 'linear';
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		var isOver=true;
+		for(var attr in json){
+			if(attr=='opacity'){
+				var iNow=parseFloat(getStyle(obj,attr))*100;
+				if(isNaN(iNow)){
+					iNow=0;
+				}
+			}else{
+				var iNow=parseInt(getStyle(obj,attr)) || 0;
+			}
+			var target=json[attr];
+			switch(type){
+				case 'linear':
+					var iSpeed=target>iNow?10:-10;
+					if(Math.abs(target-iNow)<Math.abs(iSpeed)){
+						var iValue=target;
+					}else{
+						var iValue=iNow+iSpeed;
+						isOver=false;
+					}
+					break;
+				case 'ease-in':
+					var iSpeed=(target-iNow)/8;
+					iSpeed=iSpeed>0?Math.ceil(iSpeed):Math.floor(iSpeed);
+					if(target==iNow){
+						var iValue=target;
+					}else{
+						var iValue=iNow+iSpeed;
+						isOver=false;
+					}
+					break;
+			}
+			if(attr=='opacity'){
+				obj.style.opacity=iValue/100;
+				obj.style.filter='alpha("opacity:'+iValue+')';
+			}else{
+				obj.style[attr]=iValue+'px';
+			}
+			
+		}
+		if(isOver){
+			clearInterval(obj.timer);
+			succFn && succFn();
+		}
+		
+	},30);
+}
+</script>
+<script>
+function startMove(obj,json,options){
+	options = options || {};
+	var count=Math.floor(options.time/30);
+	var n=0;
+	var oNow={};
+	var dis={};
+	for(var key in json){
+		switch(key){
+			case 'left':oNow[key]=obj.offsetLeft;
+				break;
+			case 'top':oNow[key]=obj.offsetTop;
+				break;
+			case 'width':oNow[key]=obj.offsetWidth;
+				break;
+			case 'height':oNow[key]=obj.offsetHeight;
+				break;
+			case 'opacity':oNow[key]=Math.round(parseFloat(getStyle(obj,key))*100);
+				if(isNaN(oNow[key])){
+					oNow[key]=100;
+				}
+				break;
+		}
+		dis[key]=json[key]-oNow[key];
+	}
+	
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		n++;
+		
+		for(var key in json){
+			switch(options.type){
+				case 'linear':var a=n/count;
+					var iValue=oNow[key]+dis[key]*a;
+					break;
+				case 'ease-out':var a=n/count;
+					var iValue=oNow[key]+dis[key]*a*a;
+					break;
+				case 'ease-in':var a=1-n/count;
+					var iValue=oNow[key]+dis[key]*(1-a*a);
+					break;
+			}
+			if(n==count){
+				iValue=json[key];
+			}
+			if(key=='opacity'){
+				obj.style.opacity=iValue/100;
+				obj.style.filter='alpha(opacity:'+iValue+')';
+			}else{
+				obj.style[key]=iValue+'px';
+			}
+		}
+		
+		if(n==count){
+			clearInterval(obj.timer);
+			options.succFn && options.succFn();
+		}
+	},30);
+}
+</script>
+<script>
+window.onload=function(){
+	var oBox=document.getElementById('box');
+	var oBtn=document.getElementById('btn');
+	oBtn.onclick=function(){
+		//startMove_DOM(oBox,{left:400,top:200},'ease-in',function(){});
+		startMove(oBox,{'left':0,'opacity':20},{
+			time:800,
+			type:'ease-out',
+			succFn:function(){
+				alert('结束');
+			}
+		});
+	};
+};
+</script>
+</head>
+
+<body>
+<input type="button" value="运动" id="btn" />
+<div id="box"></div>
+</body>
+</html>

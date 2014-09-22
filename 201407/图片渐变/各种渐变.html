@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>图片渐变</title>
+<style>
+*{margin:0; padding:0; list-style:none;}
+#btnBox{ width:700px; height:100px; margin:20px auto;}
+#btnBox input{ width:100px; height:40px; color:#000; font-size:24px; line-height:24px; text-align:center; font-weight:bold;}
+#box{ width:700px; height:400px; background:url(0.jpg) no-repeat; margin:20px auto; position:relative; }
+#ul1{ width:700px; height:400px;}
+#ul1 li{ width:70px; height:40px; background:url(0.jpg) no-repeat; background-position:0 0; position:absolute; left:0; top:0;}
+</style>
+<script>
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+}
+function startMove(obj,json,options){
+	options=options || {};
+	options.type=options.type || 'linear';
+	options.time=options.time || 800;
+	
+	var count=Math.round(options.time/30);
+	var oNow={};
+	var dis={};
+	for(var key in json){
+		if(key=='opacity'){
+			oNow[key]=Math.round(parseFloat(getStyle(obj,key)*100));
+			if(isNaN(oNow[key])){
+				oNow[key]=100;
+			}
+		}else{
+			oNow[key]=parseInt(getStyle(obj,key));
+		}
+		
+		if(!oNow[key]){
+			switch(key){
+				case 'left':oNow[key]=obj.offsetLeft;
+					break;
+				case 'top':oNow[key]=obj.offsetTop;
+					break;
+				case 'width':oNow[key]=obj.offsetWidth;
+					break;
+				case 'height':oNow[key]=obj.offsetHeight;
+					break;
+			}
+		}
+		dis[key]=json[key]-oNow[key];
+	}
+	
+	var n=0;
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		n++;
+		
+		for(var key in json){
+			switch(options.type){
+				case 'linear':
+					var a=n/count;
+					var iValue=oNow[key]+dis[key]*a;
+					break;
+				case 'ease-in':
+					var a=n/count;
+					var iValue=oNow[key]+dis[key]*a*a*a;
+					break;
+				case 'ease-out':
+					var a=1-n/count;
+					var iValue=oNow[key]+dis[key](1-a*a*a);
+					break;
+			}
+			if(key=='opacity'){
+				obj.style.opacity=iValue/100;
+				obj.style.filter='alpha(opacity:'+iValue+')';
+			}else{
+				obj.style[key]=iValue+'px';
+			}
+			
+		}
+		
+		if(n==count){
+			clearInterval(obj.timer);
+			options.succFn && options.succFn();
+		}
+	},30);
+}
+window.onload=function(){
+	var oBox=document.getElementById('box');
+	var oUl=document.getElementById('ul1');
+	var aLi=oUl.children;
+	var oBtn1=document.getElementById('btn1');
+	var oBtn2=document.getElementById('btn2');
+	var oBtn3=document.getElementById('btn3');
+	var oBtn4=document.getElementById('btn4');
+	var oBtn5=document.getElementById('btn5');	//随机渐变
+	var arrImgs=['0.jpg','1.jpg','2.jpg'];
+	var iType=1;	//渐变类型：1、2、3 跟btn类型一致
+	var iNow=0;
+	
+	var liW=70;
+	var liH=40;
+	//初始化每一块li
+	function setLiBlock(){
+		var r=oUl.offsetHeight/liH;
+		var c=oUl.offsetWidth/liW;
+		for(var i=0;i<r;i++){
+			for(var j=0;j<c;j++){
+				var oLi=document.createElement('li');
+				oLi.style.width=liW+'px';
+				oLi.style.height=liH+'px';
+				var left=liW*j,top=liH*i;
+				oLi.style.left=left+'px';
+				oLi.style.top=top+'px';
+				oLi.style.backgroundImage='url('+arrImgs[iNow]+')';
+				oLi.style.backgroundPosition='-'+left+'px -'+top+'px';
+				oUl.appendChild(oLi);
+				oLi.row=i;
+				oLi.col=j;
+			}
+		}
+		iNow++;
+		iNow>=arrImgs.length && (iNow=0);
+		oBox.style.backgroundImage='url('+arrImgs[iNow]+')';
+	}
+	setLiBlock();
+	
+	var isOver=true;
+	var timer=null;
+	//渐变1：纵向一个一个消失
+	oBtn1.onclick=function(){
+		setNext(1);
+	}
+	//渐变2：横向消失
+	oBtn2.onclick=function(){
+		setNext(2);		
+	};
+	//渐变3：斜着消失（这个要知道找规律）
+	/*
+		   行
+	  列 0,0 0,1 0,2 0,3 0,4
+	  	 1,0 1,1 1,2 1,3 1,4
+		 2,0 2,1 2,2 2,3 2,4
+		 3,0 3,1 3,2 3,3 3,4
+	  先是 0,0 消失，接着是 0,1和1,0消失，然后是0,2、1,1和2,0消失，然后是0,3、1,2、2,1和3,0消失
+	  综上，规律就是 0+0=0消失；0+1或1+0=1消失；然后0+2或1+1或2+0消失，然后是0+3或1+2或2+1或3+0消失
+	  都是 列+行之和 从0开始消失 然后直到最后
+	*/
+	oBtn3.onclick=function(){
+		setNext(3);			
+	}
+	//渐变4：跟渐变3类似
+	oBtn4.onclick=function(){
+		setNext(4);			
+	}
+	
+	//随机渐变
+	oBtn5.onclick=function(){
+		var type=Math.floor(Math.random()*4+1);
+		setNext(type);
+	};
+	
+	function setNext(type){
+		if(!isOver) return;
+		isOver=false;
+		
+		switch(type){
+			case 1:
+				liW=70;
+				liH=40;
+				judgeType(1);
+				
+				liTab();
+				break;
+			case 2:
+				liW=7;
+				liH=400;
+				judgeType(2);
+					
+				liTab();
+				break;
+			case 3:
+				liW=70;
+				liH=40;
+				judgeType(1);
+						
+				for(var k=0;k<aLi.length;k++){
+					(function(index){
+						setTimeout(function(){
+							startMove(aLi[index],{opacity:0},{
+								succFn:function(){
+									if(index==aLi.length-1){
+										for(var k=aLi.length-1;k>=0;k--){
+											oUl.removeChild(aLi[k]);
+										}
+										setLiBlock();
+										isOver=true;
+									}
+								}
+							});				
+						},(aLi[index].row+aLi[index].col)*80);
+					})(k);
+				}
+			
+				break;
+			case 4:
+				liW=70;
+				liH=40;
+				judgeType(1);
+				
+				var r=oUl.offsetHeight/liH;
+				var c=oUl.offsetWidth/liW;
+				for(var k=0;k<aLi.length;k++){
+					(function(index){
+						setTimeout(function(){
+							startMove(aLi[index],{opacity:0},{
+								succFn:function(){
+									if(index==0){
+										for(var k=aLi.length-1;k>=0;k--){
+											oUl.removeChild(aLi[k]);
+										}
+										setLiBlock();
+										isOver=true;
+									}
+								}
+							});				
+						},((r-1-aLi[index].row)+(c-1-aLi[index].col))*80);
+					})(k);
+				}
+				break;
+		}
+	}
+	
+	//判断是否属于当前渐变类型，如果不属于则重新设置块状li的形状和个数
+	function judgeType(type){
+		if(iType==type) return;
+		iNow--;
+		iNow<0 && (iNow=arrImgs.length-1);
+		for(var i=aLi.length-1;i>=0;i--){
+			oUl.removeChild(aLi[i]);
+		}
+		setLiBlock();
+		iType=type;		
+	}
+	
+	//设置块状图片消失
+	function liTab(){
+		var i=0;
+		timer=setInterval(function(){
+			(function(i){
+				startMove(aLi[i],{opacity:0},{
+					time:60,
+					succFn:function(){
+						if(i==aLi.length-1){
+							for(var k=aLi.length-1;k>=0;k--){
+								oUl.removeChild(aLi[k]);
+							}
+							setLiBlock();
+							isOver=true;
+						}	
+					}
+				});
+			})(i);
+			
+			i++;
+			if(i==aLi.length){
+				i=0;
+				clearInterval(timer);
+			}
+		},1);
+	}
+	
+};
+</script>
+</head>
+
+<body>
+<div id="box">
+	<ul id="ul1">
+	</ul>
+</div>
+<div id="btnBox">
+	<input type="button" id="btn1" value="渐变1" />
+	<input type="button" id="btn2" value="渐变2" />
+	<input type="button" id="btn3" value="渐变3" />
+	<input type="button" id="btn4" value="渐变4" />
+	<input type="button" id="btn5" value="随机" />
+</div>
+</body>
+</html>

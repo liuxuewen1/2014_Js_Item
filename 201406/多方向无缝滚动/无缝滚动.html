@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0;padding:0;}
+ul{list-style:none;}
+#box,#box2{ width:670px; height:240px; margin:40px auto; position:relative; overflow:hidden;}
+#ul1{ width:670px; position:relative;}
+#ul1 li,#ul3 li{ width:670px; height:240px;}
+#ul2{ position:absolute; right:10px; bottom:10px;}
+#ul2 li{width:14px; height:20px; margin-right:6px; float:left; background:#ccc; line-height:20px; text-align:center;}
+#ul2 li:hover{cursor:pointer;}
+
+#box2{ margin:40px auto;}
+#ul3{ width:3350px; height:240px; position:relative;}
+#ul3 li{ float:left;}
+#box2 span{position:absolute; top:100px; z-index:2; color:#fff; width:30px; height:30px; line-height:30px;}
+#box2 span.left{ left:20px;}
+#box2 span.right{ right:20px;}
+#box2 span:hover{ cursor:pointer;}
+</style>
+<script>
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
+}
+function startMove(obj,json,fn){
+	clearInterval(obj.timer);
+	obj.timer=setInterval(function(){
+		var isOver=true;
+		for(var attr in json){
+			if(attr=='opacity'){
+				var iNow=Math.round(getStyle(obj,attr)*100);
+				if(isNaN(iNow)) iNow=100;
+			}else{
+				var iNow=parseInt(getStyle(obj,attr)) || 0;
+			}
+			var iTarget=json[attr];
+			var iSpeed=(iTarget-iNow)/8;
+			iSpeed=iSpeed>0?Math.ceil(iSpeed):Math.floor(iSpeed);
+			if(iTarget!=iNow){
+				isOver=false;
+				if(attr=='opacity'){
+					obj.style[attr]=(iNow+iSpeed)/100;
+					obj.style['filter']='alpha(opacity:'+(iNow+iSpeed)+')';
+				}else{
+					obj.style[attr]=(iNow+iSpeed)+'px';
+				}
+			}
+		}
+		if(isOver){
+			clearInterval(obj.timer);
+			fn && fn();
+		}
+	},30);
+}
+</script>
+<script>
+window.onload=function(){
+	//纵向滚动
+	var oUl1=document.getElementById('ul1');
+	var aLi1=oUl1.children;
+	var iWidth=aLi1[0].offsetWidth;
+	var iHeight=aLi1[0].offsetHeight;
+	var oUl2=document.getElementById('ul2');
+	var aLi2=oUl2.children;
+	
+	//布局转换
+	for(var i=0,len=aLi1.length;i<len;i++){
+		aLi1[i].style.left=aLi1[i].offsetLeft+'px';
+		aLi1[i].style.top=aLi1[i].offsetTop+'px';
+	}
+	for(var i=0,len=aLi1.length;i<len;i++){
+		aLi1[i].style.position='absolute';
+	}
+	for(var i=0,len=aLi2.length;i<len;i++){
+		aLi2[i].index=i;
+	}
+	oUl2.onmouseover=function(ev){
+		var oEvent=ev||event;
+		var target=oEvent.srcElement||oEvent.target;
+		if(target.tagName!='LI') return;
+	
+		var top=oUl1.offsetTop;
+		startMove(oUl1,{top:-target.index*iHeight});
+	}
+	
+	//横向滚动
+	var oUl3=document.getElementById('ul3');
+	var oBox2=document.getElementById('box2');
+	var aLi3=oUl3.children;
+	
+	//增加一个跟第一个li相同的li
+	var newLi=document.createElement('li');
+	newLi.innerHTML=aLi3[0].innerHTML;
+	oUl3.appendChild(newLi);
+	oUl3.style.width=iWidth*aLi3.length+'px';
+	
+	//布局转换
+	for(var i=0,len=aLi3.length;i<len;i++){
+		aLi3[i].style.left=aLi3[i].offsetLeft+'px';
+		aLi3[i].style.top=aLi3[i].offsetTop+'px';
+	}
+	for(var i=0,len=aLi3.length;i<len;i++){
+		aLi3[i].style.position='absolute';
+	}
+	var idx=0;
+	var turn='left';
+	oBox2.onclick=function(ev){
+		var oEvent=ev||event;
+		var target=oEvent.srcElement||oEvent.target;
+		if(target.tagName!='SPAN') return;
+		
+		if(target.className.toLowerCase()=='left'){
+			leftMove();
+			turn='left';
+		}else{
+			rightMove();
+			turn='right';	
+		}
+	}
+	
+	//向左拉
+	function leftMove(){
+		++idx;
+		//当拉到最后一个时 拉到开始的位置
+		if(idx>=aLi3.length) {
+			idx=1;
+			oUl3.style.left=0;
+		}
+		startMove(oUl3,{left:-iWidth*idx});
+	}
+	//向右拉
+	function rightMove(){
+		--idx;
+		//当拉到第一个时 拉到最后一个的位置
+		if(idx==-1) {
+			idx=aLi3.length-2;
+			oUl3.style.left=-(aLi3.length-1)*iWidth+'px';
+		}			
+		startMove(oUl3,{left:-iWidth*idx});
+	}
+	
+	//横向滚动定时
+	var timer=null;
+	oBox2.onmouseover=function(){
+		clearInterval(timer);
+	}
+	oBox2.onmouseout=function(){
+		timer=turn=='left'?setInterval(leftMove,2000):setInterval(rightMove,2000);
+	}
+	timer=setInterval(leftMove,2000);
+}
+</script>
+</head>
+
+<body>
+<div id='box'>
+<ul id='ul1'>
+	<li><img src="1.jpg" /></li>
+	<li><img src="2.jpg" /></li>
+	<li><img src="3.jpg" /></li>
+	<li><img src="4.jpg" /></li>
+	<li><img src="5.jpg" /></li>
+</ul>
+<ul id='ul2'>
+	<li>1</li>
+	<li>2</li>
+	<li>3</li>
+	<li>4</li>
+	<li>5</li>
+</ul>
+
+</div>
+
+<div id='box2'>
+	<span class="left">《</span>
+	<span class="right">》</span>
+	<ul id='ul3'>
+		<li><img src="1.jpg" /></li>
+		<li><img src="2.jpg" /></li>
+		<li><img src="3.jpg" /></li>
+		<li><img src="4.jpg" /></li>
+		<li><img src="5.jpg" /></li>
+	</ul>
+</div>
+</body>
+</html>

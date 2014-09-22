@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{margin:0; padding:0;}
+#box{ width:200px; height:200px; border:1px solid #000; border-radius:50%; margin:100px auto; position:relative;}
+#box div{ width:20px; height:20px; background:#f00; position:absolute; left:50%; top:0; border-radius:50%; margin-left:-10px; margin-top:-10px;}
+</style>
+<script>
+window.onload=function(){
+	var oBox=document.getElementById('box');
+	var aBall=oBox.children;
+	
+	for(var i=0;i<10;i++){
+		var oBall=document.createElement('div');
+		oBox.appendChild(oBall);
+	}
+	
+	var isOpen=false;	
+	document.onclick=function(){
+		for(var i=0;i<aBall.length;i++){ 
+			if(isOpen){
+				move(aBall[i],360-36*(i+1),0,{
+					type:'ease-in',
+					time:1000,
+					succFn:function(){
+						isOpen=false;
+					}
+				}); 
+			}else{				
+				move(aBall[i],0,360-36*(i+1),{
+					type:'ease-out',
+					time:1000,
+					succFn:function(){
+						isOpen=true;
+					}
+				});	
+			}
+		}
+	}
+	
+	var r=oBox.offsetWidth/2;
+	function move(obj,iNow,target,options){
+		options=options || {};
+		options.type=options.type || 'linear';
+		options.time=options.time || 800;
+		
+		clearInterval(obj.timer);
+		var count=Math.ceil(options.time/30);
+		var n=0;	//次数
+		var dis=target-iNow;
+		obj.timer=setInterval(function(){
+			n++;
+			switch(options.type){
+				case 'linear':
+					var a=n/count;
+					var radion=dis>0?dis*a:(-dis+dis*a);				//弧度
+					break;
+				case 'ease-in':
+					var a=n/count;
+					var radion=dis>0?dis*a*a:(-dis+dis*a*a);
+					break;
+				case 'ease-out':
+					var a=1-n/count;
+					var radion=dis>0?dis*(1-a*a):(-dis+dis*(1-a*a));
+					break;
+			}
+			var angle=Math.PI/180*radion;	//弧度转角度 2π * 弧度 = 360 * 1角度 =》 角度=π/180 * 弧度
+			var x=r+Math.sin(angle)*r;
+			var y=r-Math.cos(angle)*r;
+			
+			obj.style.left=x+'px';
+			obj.style.top=y+'px';
+			
+			if(n==count){
+				clearInterval(obj.timer);
+				options.succFn && options.succFn();
+			}
+		},30);
+	}
+};
+</script>
+</head>
+
+<body>
+<div id="box">
+
+</div>
+</body>
+</html>

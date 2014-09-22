@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script>
+window.onload=function(){
+	var oDiv1=document.getElementById("div1"),
+		oDiv2=oDiv1.children[0],
+		oDiv3=oDiv2.children[0];
+	
+	//（1）普通直接赋予事件：事件会冒泡
+	/*oDiv1.onclick=function(){
+		alert("red");
+	}
+	oDiv2.onclick=function(){
+		alert("green");
+	}
+	oDiv3.onclick=function(){
+		alert("blue");
+	}*/
+	
+	//（2）绑定事件（最后一个参数为false）：事件也会冒泡（从自己到父级）
+	/*oDiv1.addEventListener("click",function(){
+		alert("red");
+	},false);
+	oDiv2.addEventListener("click",function(){
+		alert("green");
+	},false);
+	oDiv3.addEventListener("click",function(){
+		alert('blue');
+	},false);*/
+	
+	//（3）绑定事件（最后一个参数为true）：事件会捕获（从父级到自己）
+	/*oDiv1.addEventListener("click",function(){
+		alert("red");
+	},true);
+	oDiv2.addEventListener("click",function(){
+		alert("green");
+	},true);
+	oDiv3.addEventListener("click",function(){
+		alert('blue');
+	},true);*/
+	
+	/*注：上面（2）（3）中对addEventListener()方法最后一个参数的区别：
+	*a、最后一个参数的意思：是否事件捕获，true-是；false-否
+	*b、当为true时，为事件捕获，从父级的相同事件向自己的事件捕获
+	*c、当为false时，事件不捕获，则为冒泡，从自己的事件向父级的相同事件冒泡
+	*d、冒泡和事件捕获的顺序正好相反
+	*e、由于attachEvent()方法中，没有第三个参数，所以从兼容性考虑，这个addEventListener()中的最后一个参数是没有意义的，一般情况下写成false即可
+	*/
+}
+
+//绑定事件兼容性写法
+function addEvent(obj, sEv, fn){
+	if(obj.attachEvent){
+		obj.attachEvent('on'+sEv,fn);		//IE8 及以下
+	}else{
+		obj.addEventListener(sEv,fn,false);	//其他
+	}
+}
+
+//解绑事件兼容性写法
+function removeEvent(obj, sEv, fn){
+	if(obj.detachEvent){
+		obj.detachEvent('on'+sEv,fn);			//IE8 及以下
+	}else{
+		obj.removeEventListener(sEv,fn,false);	//其他
+	}
+}
+</script>
+</head>
+
+<body>
+<div style="background:red;width:400px; height:400px;" id="div1">
+	<div style="background:green;width:300px;height:300px">
+		<div style="background:blue;width:100px; height:100px;"></div>
+	</div>
+</div>
+</body>
+</html>

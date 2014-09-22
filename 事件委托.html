@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script>
+function domReady(fn){
+	if(document.addEventListener){
+		//DOMContentLoaded事件兼容IE9+、FF、Chrome
+		addEvent(document,'DOMContentLoaded',function(){
+			fn && fn();
+		});
+	}else{
+		document.write('<script id="lxw_Ready_IE" defer><\/script>');
+		var oScript=document.createElement('lxw_Ready_IE');
+		addEvent(oScript,'readystatechange',function(){
+			if(oScript.readyState=='complete'){
+				fn && fn();
+			}
+		});
+	}
+}
+function addEvent(obj,sEv,fn){
+	if(obj.attachEvent){
+		return obj.attachEvent('on'+sEv,fn);
+	}else{
+		return obj.addEventListener(sEv,fn,false);
+	}
+}
+</script>
+<script>
+domReady(function(){
+	var oUl=document.getElementById('ul1');
+	var oTxt=document.getElementById('txt');
+	var oBtn=document.getElementById('btn');
+	var aA=oUl.children;
+	
+	addEvent(oBtn,'click',function(){
+		var oLi=document.createElement('li');
+		oLi.innerHTML=oTxt.value+'<a href="javascript:;">删除</a>';
+		oUl.appendChild(oLi);
+	});
+	
+	//将点击a删除Li的任务委托给父级ul
+	addEvent(oUl,'click',function(ev){
+		var oEvent=ev||event;
+		//oEvent.srcElement：兼容IE系、Chrome
+		//oEvent.target：兼容Firefox
+		var target=oEvent.srcElement||oEvent.target;
+		//tagName：判断当前点击的标签种类，如果点击的是a标签，则触发删除事件
+		if(target.tagName==="A"){
+			oUl.removeChild(target.parentNode);
+		}
+	});
+	
+	//事件委托作用：1）减少for循环；2）可以给未来的元素绑定事件，比如上面动态生成的li标签
+	
+});
+</script>
+</head>
+
+<body>
+<input type="text" id='txt'  />
+<input type="button" id='btn' value="增加" />
+<ul id='ul1'>
+	
+</ul>
+</body>
+</html>
