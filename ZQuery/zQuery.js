@@ -46,6 +46,7 @@ ZQuery.prototype.mouseenter=function(fn){
 	
 }
 
+
 ZQuery.prototype.mouseleave=function(fn){
 	for (var i = 0; i < this.elements.length; i++) {
 		addEvent('mouseout', this.elements[i], function(ev){
