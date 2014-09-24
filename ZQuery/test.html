@@ -5,11 +5,30 @@
 	<title>选择器</title>
 	<script src="zQuery.js"></script>
 	<script> 
-		ZQuery(function(){
-			$("#test1").mouseenter(function(ev){
-				// alert(this.innerHTML);
-				alert(ev.clientX)
-			})
+		$(function(){
+			//alert($("input").css("width"));
+			//$("input").css("width",'100px')
+			//$("input").css({"width":"100px","fontSize":"1.2em"})
+			
+			/*$("input").css("width",function(index,value){
+				if(parseInt(value)<50){
+					return '50px';
+				}else{
+					return '100px';
+				}
+			});*/
+			
+			//$("input").attr({'value':'xxx'});
+			/*$("input").attr('value',function(index,oldValue){
+				if(oldValue!='aaa'){
+					return 'xxx';
+				}else{
+					return oldValue;
+				}
+			});*/
+			
+			//alert($("li:eq(0)").html());
+			$("li:eq(0)").html("<div style='background:red'>11111</div>");
 		})
 
 		// window.onload=function(){
@@ -19,6 +38,8 @@
 	</script>
 </head>
 <body>
+	<input type="button" value="aaa" style="width:30px;height:30px" />
+	<input type="button" value="bbb" style="width:50px;height:50px" />
 	<ul>
 		<li class="box box2 box3" id="li1">
         	<span id='box3'>adadf</span>

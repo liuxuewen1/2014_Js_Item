@@ -1,10 +1,11 @@
+'use strict';
 
 function $(arg){
 	return new ZQuery(arg);
 }
 
 function ZQuery(arg){
-
+	
 	this.elements = [];		//存元素
 
 	switch(typeof arg){
@@ -62,6 +63,79 @@ ZQuery.prototype.mouseleave=function(fn){
 ZQuery.prototype.hover=function(fnOver, fnOut){
 	this.mouseenter(fnOver);
 	this.mouseleave(fnOut);
+}
+
+//css	.css("width")获取；.css("width","100")设置；.css({'width':'100','height':200})批量设置
+ZQuery.prototype.css=function(arg){
+	if(arguments.length==1){
+		if(typeof arg==='string'){
+			//.css("width") 返回第一个元素的样式
+			return getStyle(this.elements[0],arg);
+		}else if(typeof arg==='object'){
+			for(var i=0;i<this.elements.length;i++){
+				for(var attr in arg){
+					//.css({'width':'100','height':200}) 对所有元素批量设置
+					this.elements[i].style[attr]=arg[attr];
+				}
+			}
+		}
+	}else if(arguments.length==2){
+		for(var i=0;i<this.elements.length;i++){
+			var attr=arguments[0];
+			var value=arguments[1];
+			if(typeof value==='string'){
+				//.css("width","100") 对所有元素批量设置
+				this.elements[i].style[attr]=value;
+			}else if(typeof value==='function'){
+				//自定义函数，参数为(index,currentValue); 返回设置的值newValue
+				var newValue=value(i, getStyle(this.elements[i], attr));
+				this.elements[i].style[attr]=newValue;
+			}
+		}
+	}
+}
+
+//attr .attr("value")获取；.attr("value","100")设置；.attr('value':'100','src':200})批量设置
+ZQuery.prototype.attr=function(arg){
+	if(arguments.length==1){
+		if(typeof arg==='string'){
+			return this.elements[0].getAttribute(arg);
+		}else if(typeof arg==='object'){
+			for(var i=0;i<this.elements.length;i++){
+				for(var attr in arg){
+					this.elements[i].setAttribute(attr,arg[attr]);
+				}
+				
+			}
+		}
+	}else if(arguments.length==2){
+		for(var i=0;i<this.elements.length;i++){
+			var attr=arguments[0];
+			var value=arguments[1];
+			if(typeof value==='string'){
+				this.elements[i].setAttribute(attr,value);
+			}else if(typeof value==='function'){
+				var newValue=value(i, this.elements[i].getAttribute(attr));
+				this.elements[i].setAttribute(attr,newValue);
+			}
+			
+		}
+	}
+}
+
+//html html()获取；html('<div></div>')设置
+ZQuery.prototype.html=function(arg){
+	if(arguments.length==1){
+		for(var i=0;i<this.elements.length;i++){
+			this.elements[i].innerHTML+=arg;
+		}
+	}else{
+		return this.elements[0].innerHTML;
+	}
+}
+
+function getStyle(obj,attr){
+	return obj.currentStyle?obj.currentStyle[attr]:getComputedStyle(obj,false)[attr];
 }
 
 function addEvent(sEv,obj,fn){
@@ -214,7 +288,6 @@ function getByClass(obj,attr){
 	}
 }
 
-=======
 function $(arg){
 	return new ZQuery(arg);
 }
