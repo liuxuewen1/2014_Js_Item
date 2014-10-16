@@ -28,7 +28,16 @@
 			});*/
 			
 			//alert($("li:eq(0)").html());
-			$("li:eq(0)").html("<div style='background:red'>11111</div>");
+			//$("li:eq(0)").html("<div style='background:red'>11111</div>");
+			
+			$("input").toggle(function(ev){
+				//alert(this);
+				this.style.fontSize='9px';
+			},function(){
+				this.style.fontSize='12px';
+			},function(){
+				this.style.fontSize='15px';
+			});
 		})
 
 		// window.onload=function(){
