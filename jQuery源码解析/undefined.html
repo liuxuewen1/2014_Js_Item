@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script>
+	var undefined='abc';
+	//此时undefined 在IE8及以下为abc
+	//在IE9及以上 chrome高版本 Firefox高版本都仍是undefined
+	alert(undefined);
+
+	//jQuery的开篇为什么 传入undefined，就是这个原因：怕undefined之前被改为其他值
+	(function(window, undefined){
+
+	}(window))
+	</script>
+</head>
+<body>
+	
+</body>
+</html>

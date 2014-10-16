@@ -373,11 +373,14 @@ function domReady(fn){
 }
 
 function getEle(str){
+	//截取时先去除前后空格，用\s+的形式截取成数组
 	var arrStr=str.replace(/^\s+|\s+$/g,'').split(/\s+/);
-	var aParent=[document];
+	var aParent=[document];	//起始父元素为document
+	//循环出所有查询关键词，将查询到的元素作为下一组关键词查询的父元素
 	for (var i = 0; i < arrStr.length; i++) {
 		aParent=_getByStr(aParent, arrStr[i]);
 	};
+	//循环完毕，所查找的父元素组为所要选择的元素
 	return (aParent.length==1 && aParent[0]===document)?[] : aParent;
 }
 

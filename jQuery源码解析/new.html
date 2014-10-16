@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="jquery-1.7.2.js"></script>
+	<script>
+	function A(name){
+		//1 创建一个新的空对象
+		//var this=new Object();
+
+		//2 将构造函数的prototype放到对象的__proto__（只有Firefox能看到__proto__）
+		//这样可以保证实例化对象能够访问到A类中公用属性和方法
+		//this.__proto__=A.prototype;
+
+		this.name=name;
+
+		//3 返回一个新对象（如果没有函数内自定义return）
+		//return this;
+
+		//4 如果你自己在A中写了return，则会验证return后面的东西 ，如果返回的是function Array Object 这种对象，则返回自己return的结果result ，否则返回this
+		// return (typeof result === Object) ? result : this;
+	}
+
+	var aa=new A('lxw');
+
+
+	function B(name){
+		this.name='lxw';
+
+		return '123';
+	}
+	var bb=new B;
+	console.log(bb)
+
+
+	</script>
+</head>
+<body>
+	
+</body>
+</html>

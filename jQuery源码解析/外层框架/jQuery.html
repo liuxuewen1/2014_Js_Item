@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="../jquery.js"></script>
+	<script>
+	//$ 实际上是 new 出来的一个对象
+	$(function(){
+		alert('$')
+	})
+	//为什么jQuery = $ ,jQuery也是new出来的一个对象
+	jQuery(function(){
+		alert('jQuery')
+	})
+	//jQuery = $
+	//jQuery 的函数中 new jQuery.fn.init(); new这个函数
+	//jQuery.fn = jQuery.prototype;
+	//jQuery.fn.init.prototype = jQuery.fn;
+	//所以new jQuery.fn.init时 继承的还是jQuery的原型属性和方法
+	//目的：这样才能直接用 $ 时的方便 用在直接使用 jQuery 身上
+	//否则 就是 new jQuery(function(){ ... ... }) 还得有个 new 太麻烦
+
+
+	//new jQuery 是个啥，其实还是返回的 new jQuery.fn.init 对象
+	//new 某一个函数，当函数定义了一个返回值，如果值是对象（Array、Object、Function） 则返回该对象；如果值不是对象，则 返回一个空对象。详见 new总结
+	new jQuery(function(){
+		alert('new jQuery')
+	})
+	</script>
+</head>
+<body>
+	
+
+</body>
+</html>

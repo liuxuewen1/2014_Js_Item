@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script>
+
+	//1、普通的函数类
+	function A(){ }
+	A.prototype.init=function(){ }
+	A.prototype.css=function(){ }
+
+	//2、jQuery类
+	function jQuery(){ }
+	jQuery.prototype.init=function(){ }
+	jQuery.prototype.css=function(){ }
+
+	//如果像上面这样写jQuery，那跟1中定义的普通类一样，调用时：
+	// (new jQuery()).init().css();
+	// 需要像上面这样调用，显然，很麻烦，于是：
+
+	//3、直接执行init的jQuery类
+	function jQuery(){
+		return new jQuery.prototype.init();
+	}
+
+	//上面3中，还是有问题，因为new init，会执行init()的函数，但是返回来的this 是init对象的this，不是我们想要的jQuery的this，于是：
+
+	//4、将jQuery对象上的prototype赋给init对象上的原型对象prototype，增加一个引用
+	jQuery.prototype.init.prototype = jQuery.prototype;
+
+	//这样，使用：jQuery().css(); 可以很方便
+	//init会先执行，然后返回的对象的原型上有jQuery的原型对象上的方法，所以返回的对象就可以直接使用jQuery的方法 css()等
+	//如果要在jQuery上增加自定义的方法：jQuery.prototype.fn1=function(){ ... ... }
+
+
+	//后来，jQuery的作者觉得上面这样增加自定义方法过于冗长且有很多人不知道prototype，解释起来也很费劲，最后想到一个办法：
+
+	//5、上面的4去掉，然后增加下面几句代码
+	function jQuery(){
+		return new jQuery.fn.init();
+	}
+	jQuery.fn = jQuery.prototype = {
+		init: function(){
+			... ...
+		},
+		css: function(){
+			... ...
+		}
+	}
+	jQuery.fn.init.prototype = jQuery.prototype;
+	//这样，在jQuery.prototype上增加的原型方法都在jQuery.fn上，所以：
+	//这样写 jQuery.fn.fn1=function(){} 在jQuery上增加一个方法就很简单，看着也很清晰
+
+	//以上，就是jQuery实现的设计思想，这样用起来就方便了 jQuery('div').css('','')
+
+	</script>
+</head>
+<body>
+	
+</body>
+</html>

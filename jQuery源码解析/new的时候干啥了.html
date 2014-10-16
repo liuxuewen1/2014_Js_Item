@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="jquery-1.7.2.js"></script>
+	<script>
+	function B(name){
+
+		var obj=new Object();
+		obj.name= name;
+
+		return obj;
+	}
+	var bb=new B("liuxuewen");
+	alert(bb.name);	//liuxuewen
+
+	function A(name){
+		//当new时，想想成浏览器默认给你创建名为this的空对象
+		//var this=new Object();
+
+		this.name= name;
+
+		//最后，浏览器默认返回this的对象
+		//return this;
+
+	}
+	var aa=new A('liuxuewen');
+	alert(aa.name);		//liuxuewen
+
+
+	function C(name,age){
+
+		//实际上 new C(); 的时候，如果C中返回的不是一个对象，那么得到的cc是一个空对象
+		return '123';
+
+		//如果 返回出一个对象Object Array Function，这个对象会被cc拿到；反之 1 true undefined 返回空对象
+		//所以，只能说 new Fn() 得到的只会是一个对象
+		// return {
+		// 	name: 'beisen',
+		// 	age: 100
+		// }
+
+		// return function(){
+		// 	alert('haha')
+		// }
+
+	}
+	var cc=new C('liuxuewen','18');
+	// console.log(cc());
+	console.log(cc);
+	// alert(cc.name);
+
+
+	</script>
+</head>
+<body>
+	
+</body>
+</html>
