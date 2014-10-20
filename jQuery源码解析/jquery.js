@@ -57,7 +57,7 @@ var
 	// List of deleted data cache ids, so we can reuse them
 	core_deletedIds = [],
 
-	core_version = "1.10.2",
+	core_version = "1.10.2",	//detail 版本号
 
 	// Save a reference to some core methods
 	//detail 存一些常用的方法，1、为了提升查找效率；2、为了提高压缩率
@@ -78,6 +78,7 @@ var
 	},
 
 	// Used for matching numbers
+	//匹配数字（包括正负+-），包括科学计数法
 	core_pnum = /[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/.source,
 
 	// Used for splitting on whitespace
@@ -89,9 +90,11 @@ var
 	// A simple way to check for HTML strings
 	// Prioritize #id over <tag> to avoid XSS via location.hash (#9521)
 	// Strict HTML recognition (#11290: must start with <)
+	//detail 前半部分匹配类似于：<li>hello 这种的半截标签，后半部分匹配ID：#id1
 	rquickExpr = /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/,
 
 	// Match a standalone tag
+	//匹配 <img /> 或者 <li class='active'></li>
 	rsingleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/,
 
 	// JSON RegExp
@@ -101,7 +104,9 @@ var
 	rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d+\.|)\d+(?:[eE][+-]?\d+|)/g,
 
 	// Matches dashed string for camelizing
+	//匹配 -ms- 开头的，如 -ms-margin-left首字母要大写，MsMarginLeft，不像正常的 webkit-margin-left：webkitMarginLeft 首字母小写
 	rmsPrefix = /^-ms-/,
+	//转大小写使用，如 -b 转成 B
 	rdashAlpha = /-([\da-z])/gi,
 
 	// Used by jQuery.camelCase as callback to replace()
@@ -132,9 +137,11 @@ var
 
 jQuery.fn = jQuery.prototype = {
 	// The current version of jQuery being used
-	jquery: core_version,
+	jquery: core_version,	//detail jQuery版本号
 
-	constructor: jQuery,
+	constructor: jQuery,	//重新指回jQuery对象的constructor
+
+	//$("li", "ul") 查找ul下面的li元素
 	init: function( selector, context, rootjQuery ) {
 		var match, elem;
 
@@ -147,20 +154,30 @@ jQuery.fn = jQuery.prototype = {
 		if ( typeof selector === "string" ) {
 			if ( selector.charAt(0) === "<" && selector.charAt( selector.length - 1 ) === ">" && selector.length >= 3 ) {
 				// Assume that strings that start and end with <> are HTML and skip the regex check
+				// detail $("<li>") $("<ul><li>111</li><li>222</li></ul>") 等
+				// match 类似于： [null, "<ul><li>111</li><li>222</li></ul>", null]
 				match = [ null, selector, null ];
 
 			} else {
+				//匹配 1、$("<li>hello") 和 2、$("#id")
+				//如果是1：match=['<li>hello','<li>',null]
+				//如果是2：id的名称 match=['#id1',null,'id1']
 				match = rquickExpr.exec( selector );
 			}
 
 			// Match html or make sure no context is specified for #id
+			//如果是id的形式，context传进来没有意义
 			if ( match && (match[1] || !context) ) {
-
+				//能进来的是上面选择的几种：$("<li>123</li>") $("<li>hello") $("#id1")
 				// HANDLE: $(html) -> $(array)
 				if ( match[1] ) {
+					//match[1]为真的情况，只有 $("<li>123</li>") $("<li>hello") 的情况，说白了 就是创建标签
+					//context有可能被封装成jQuery元素，如：$("<li>", $(document))，需要处理成原生元素，默认第二个参数document不用传入
+					//其实第二个参数没有什么用处，只有在有iframe情况下 $("<li>",iframeWindow.document)这种有点用
 					context = context instanceof jQuery ? context[0] : context;
 
 					// scripts is true for back-compat
+					//将将要创建的元素创建好后放到当前jQuery对象中，请见jQuery.merge.html
 					jQuery.merge( this, jQuery.parseHTML(
 						match[1],
 						context && context.nodeType ? context.ownerDocument || context : document,
@@ -168,14 +185,18 @@ jQuery.fn = jQuery.prototype = {
 					) );
 
 					// HANDLE: $(html, props)
+					// rsingleTag 匹配单标签的 如，$("<li>") $("<li></li>")这种
 					if ( rsingleTag.test( match[1] ) && jQuery.isPlainObject( context ) ) {
+						//如果对单标签设置一些属性，需要把值循环出来，如 $("<li>",{ title: 'test', html: 'abcd', css: { background: 'red'}})
 						for ( match in context ) {
 							// Properties of context are called as methods if possible
+							//如果属性是jQuery中的方法，则执行，如上述属性中的 html css ，都有现成的方法，直接执行
 							if ( jQuery.isFunction( this[ match ] ) ) {
 								this[ match ]( context[ match ] );
 
 							// ...and otherwise set as attributes
 							} else {
+								//否则，是标签上的属性，直接用attr来设置，如上述 title
 								this.attr( match, context[ match ] );
 							}
 						}
@@ -185,10 +206,13 @@ jQuery.fn = jQuery.prototype = {
 
 				// HANDLE: $(#id)
 				} else {
+					//拿到ID来获取元素
 					elem = document.getElementById( match[2] );
 
 					// Check parentNode to catch when Blackberry 4.6 returns
 					// nodes that are no longer in the document #6963
+					//在黑莓4.6系统下，cloneNode的时候有可能找到elem但是元素并不在页面上，考虑黑莓系统的bug
+					//所以，增加了 elem.parentNode判断，如果存在 父级肯定是存在的
 					if ( elem && elem.parentNode ) {
 						// Handle the case where IE and Opera return items
 						// by name instead of ID
@@ -200,7 +224,7 @@ jQuery.fn = jQuery.prototype = {
 						this.length = 1;
 						this[0] = elem;
 					}
-
+					//存放当前上下文 和 查询的id字符串
 					this.context = document;
 					this.selector = selector;
 					return this;
@@ -208,27 +232,34 @@ jQuery.fn = jQuery.prototype = {
 
 			// HANDLE: $(expr, $(...))
 			} else if ( !context || context.jquery ) {
+				//$("ul", $(document)) 进来，context为jQuery对象，最后为 jQuery(document).find('li')
 				return ( context || rootjQuery ).find( selector );
 
 			// HANDLE: $(expr, context)
 			// (which is just equivalent to: $(context).find(expr)
 			} else {
+				//$("li",document) 进来，this.constructor=jQuery，所以 jQuery(document).find("li")
 				return this.constructor( context ).find( selector );
 			}
 
 		// HANDLE: $(DOMElement)
+		//如果是节点 肯定存在nodeType
 		} else if ( selector.nodeType ) {
+			//节点 上下文、第一个元素都是当前的节点
 			this.context = this[0] = selector;
 			this.length = 1;
 			return this;
 
 		// HANDLE: $(function)
 		// Shortcut for document ready
+		//如果是$(function(){})，则是加载完成触发function
 		} else if ( jQuery.isFunction( selector ) ) {
+			//实际执行还是 $(document).ready(function(){}) ，所以这个跟 $(function(){ }) 是相同的
 			return rootjQuery.ready( selector );
 		}
 
 		if ( selector.selector !== undefined ) {
+			//如果 $( $("#div1")) 你这么写，那么 会让你还是等于 $("#div1")，这边做这个处理
 			this.selector = selector.selector;
 			this.context = selector.context;
 		}
@@ -237,17 +268,20 @@ jQuery.fn = jQuery.prototype = {
 	},
 
 	// Start with an empty selector
-	selector: "",
+	selector: "",	//存储选择字符串
 
 	// The default length of a jQuery object is 0
-	length: 0,
+	length: 0,		//this对象的长度 即元素个数
 
+	//将当前的this可以转成真正的数组，如 $("div") 转成 [div1, div2, div3]
 	toArray: function() {
+		//通过Array.slice的方法实现，里面是原生的js元素
 		return core_slice.call( this );
 	},
 
 	// Get the Nth element in the matched element set OR
 	// Get the whole matched element set as a clean array
+	//转成原生的js元素数组
 	get: function( num ) {
 		return num == null ?
 
@@ -255,17 +289,21 @@ jQuery.fn = jQuery.prototype = {
 			this.toArray() :
 
 			// Return just the object
+			// <0 从后往前找，>0从前往后找
 			( num < 0 ? this[ this.length + num ] : this[ num ] );
 	},
 
 	// Take an array of elements and push it onto the stack
 	// (returning the new matched element set)
+	//对jQuery进行栈操作，先进后出，如 $("div").pushStack($("span")).css("color","#ccc")，这就是对$("span")进行样式修改
+	//如果$("div").pushStack($("span")).end().css("color","#ccc") 通过end()找到存放的prevObject来对$("div")操作
 	pushStack: function( elems ) {
 
 		// Build a new jQuery matched element set
 		var ret = jQuery.merge( this.constructor(), elems );
 
 		// Add the old object onto the stack (as a reference)
+		// 存放上一个元素
 		ret.prevObject = this;
 		ret.context = this.context;
 
@@ -276,17 +314,19 @@ jQuery.fn = jQuery.prototype = {
 	// Execute a callback for every element in the matched set.
 	// (You can seed the arguments with an array of args, but this is
 	// only used internally.)
+	//对元素单独循环操作
 	each: function( callback, args ) {
 		return jQuery.each( this, callback, args );
 	},
 
+	//dom加载好的ready方法
 	ready: function( fn ) {
 		// Add the callback
 		jQuery.ready.promise().done( fn );
 
 		return this;
 	},
-
+	//模拟数组的slice方法操作，通过pushStack实现
 	slice: function() {
 		return this.pushStack( core_slice.apply( this, arguments ) );
 	},
@@ -298,7 +338,7 @@ jQuery.fn = jQuery.prototype = {
 	last: function() {
 		return this.eq( -1 );
 	},
-
+	//得到其中的某个jQuery元素，通过pushStack实现
 	eq: function( i ) {
 		var len = this.length,
 			j = +i + ( i < 0 ? len : 0 );
@@ -310,13 +350,15 @@ jQuery.fn = jQuery.prototype = {
 			return callback.call( elem, i, elem );
 		}));
 	},
-
+	//使用的pushStack方法实现的方法，都可以通过end()回到之前的元素，如：
+	//$("div").eq(2) - 选取第3个元素，$("div").eq(2).end() - 回到 $("div") 这个元素
 	end: function() {
 		return this.prevObject || this.constructor(null);
 	},
 
 	// For internal use only.
 	// Behaves like an Array's method, not like a jQuery method.
+	//jQuery自己内部使用的方法，不建议外部使用
 	push: core_push,
 	sort: [].sort,
 	splice: [].splice
@@ -325,6 +367,11 @@ jQuery.fn = jQuery.prototype = {
 // Give the init function the jQuery prototype for later instantiation
 jQuery.fn.init.prototype = jQuery.fn;
 
+//jQuery.extend({ })：一个参数，属于插件扩展
+//jQuery.extend({ }, { }, { }, ...)：多个参数，属于将后面的obj加到第一个obj实现拷贝继承，浅复制
+//jQuery.extend(true, { }, { } ,...)：多个参数同时第一个参数为true，则是深复制
+//jQuery.extend是静态扩展，在jQuery函数内的扩展，$.extend() 这么来使用
+//jQuery.fn.extend是在jQuery.prototype上做扩展，属于实例化以后才可以使用 $().extend()，实例方法
 jQuery.extend = jQuery.fn.extend = function() {
 	var src, copyIsArray, copy, name, options, clone,
 		target = arguments[0] || {},
@@ -333,19 +380,23 @@ jQuery.extend = jQuery.fn.extend = function() {
 		deep = false;
 
 	// Handle a deep copy situation
+	//如果第一个参数是bool类型，则根据bool值决定深度复制还是浅复制使用
 	if ( typeof target === "boolean" ) {
 		deep = target;
+		//同时把第2个参数作为复制的最终目标
 		target = arguments[1] || {};
 		// skip the boolean and the target
 		i = 2;
 	}
 
 	// Handle case when target is a string or something (possible in deep copy)
+	//如果target既不是对象也不是函数，则目标target置为空对象
 	if ( typeof target !== "object" && !jQuery.isFunction(target) ) {
 		target = {};
 	}
 
 	// extend jQuery itself if only one argument is passed
+	//如果参数只有target，则是准备往当前对象内添加插件，所以直接将当前对象this赋给target
 	if ( length === i ) {
 		target = this;
 		--i;
@@ -355,30 +406,40 @@ jQuery.extend = jQuery.fn.extend = function() {
 		// Only deal with non-null/undefined values
 		if ( (options = arguments[ i ]) != null ) {
 			// Extend the base object
+			//对扩展的JSON进行循环
 			for ( name in options ) {
+				//src存放目标obj中的name属性的值，如果没有为undefined
 				src = target[ name ];
+				//copy存放需要加入的属性值
 				copy = options[ name ];
 
 				// Prevent never-ending loop
+				//如果发现要复制进去的对象就是当前对象，那么跳出，否则会出现层层嵌套 自引用
+				//如 var a={ name: 1} ,b={ bb: a }; $.extend(a, b)
 				if ( target === copy ) {
 					continue;
 				}
 
 				// Recurse if we're merging plain objects or arrays
 				if ( deep && copy && ( jQuery.isPlainObject(copy) || (copyIsArray = jQuery.isArray(copy)) ) ) {
+					//如果是深度复制
 					if ( copyIsArray ) {
+						//如果是数组
 						copyIsArray = false;
 						clone = src && jQuery.isArray(src) ? src : [];
 
 					} else {
+						//如果是对象obj，如果之前存在name的src属性，则 不能被覆盖
 						clone = src && jQuery.isPlainObject(src) ? src : {};
 					}
 
 					// Never move original objects, clone them
+					//有可能有层层的引用关系，所以需要继续执行extend
 					target[ name ] = jQuery.extend( deep, clone, copy );
 
 				// Don't bring in undefined values
 				} else if ( copy !== undefined ) {
+					//如果是浅复制，则直接给target[name]即可
 					target[ name ] = copy;
 				}
 			}
@@ -392,13 +453,20 @@ jQuery.extend = jQuery.fn.extend = function() {
 jQuery.extend({
 	// Unique for each copy of jQuery on the page
 	// Non-digits removed to match rinlinejQuery
+	// jQuery的一个标志
 	expando: "jQuery" + ( core_version + Math.random() ).replace( /\D/g, "" ),
 
+	//防止$ jQuery冲突，如果想$ jQuery被外界使用，可以用$.noConflict()来解决冲突
+	//返回的值 就是等同于 $ jQuery.	详见 noConflict.html
 	noConflict: function( deep ) {
+		//如果当前的 $ 被jQuery占用，则 将载入JQ之前的$表示的值 重新放回到 window上
+		//在载入JQ时，$ 如果有值 会被放在 _$ 上，所以还能找回来
 		if ( window.$ === jQuery ) {
 			window.$ = _$;
 		}
 
+		//如果 给 noConflict传了参数，且为true，则表示 jQuery 这个词也不想被JQ占用 ，把jQuery这个值返还给window
+		//在载入JQ时， jQuery如果有值 会被放在_jQuery上，所以 还能找回来 如果之前有值 则把值还给 jQuery
 		if ( deep && window.jQuery === jQuery ) {
 			window.jQuery = _jQuery;
 		}
@@ -407,17 +475,22 @@ jQuery.extend({
 	},
 
 	// Is the DOM ready to be used? Set to true once it occurs.
+	//标记DOM是否加载完毕， 第一次执行是false	之后为true
 	isReady: false,
 
 	// A counter to track how many items to wait for before
 	// the ready event fires. See #6781
+	//标记 需要等的次数，只有当需要等的次数为0  才会执行ready事件
 	readyWait: 1,
 
 	// Hold (or release) the ready event
+	// 延迟加载DOM Ready事件，具体详见 holdReady.html
 	holdReady: function( hold ) {
 		if ( hold ) {
+			//true 会增加一个readyWait
 			jQuery.readyWait++;
 		} else {
+			//否则 执行 jQuery.ready，是否真的可以执行 需要进ready后判断readyWait决定
 			jQuery.ready( true );
 		}
 	},
@@ -426,28 +499,38 @@ jQuery.extend({
 	ready: function( wait ) {
 
 		// Abort if there are pending holds or we're already ready
+		//如果wait=true 则说明之前有调用holdReady让ready事件等会
+		//如果readyWait=0 则说明需要等的都执行完毕，可以继续向下执行 ready
+		//如果wait=false 则判断isReady 如果是第一次进来 可以继续，否则不需要执行
 		if ( wait === true ? --jQuery.readyWait : jQuery.isReady ) {
 			return;
 		}
 
 		// Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
 		if ( !document.body ) {
+			//这个是为IE准备的 ，在IE下 有可能当DOM还差一点点加载好 但是也会告诉你complete加载好了，此时需要用 setTimeout 延迟一下执行
 			return setTimeout( jQuery.ready );
 		}
 
 		// Remember that the DOM is ready
+		//标记DOM已经加载好了
 		jQuery.isReady = true;
 
 		// If a normal DOM Ready event fired, decrement, and wait if need be
+		// 即使wait=false 也判断一下readyWait 如果大于0  跳出
 		if ( wait !== true && --jQuery.readyWait > 0 ) {
 			return;
 		}
 
 		// If there are functions bound, to execute
+		// resolveWith是通知 jQuery.Deferred() 延时对象 可以调用 done的方法了，具体会面讲
 		readyList.resolveWith( document, [ jQuery ] );
 
 		// Trigger any bound ready events
 		if ( jQuery.fn.trigger ) {
+			// DOM 加载完执行第3种写法：
+			// $(document).on("ready",function(){ alert(123); })
+			//这边先触发 ready 事件，再解除掉 ready 事件。所以，如果绑定了on 也会执行这个事件
 			jQuery( document ).trigger("ready").off("ready");
 		}
 	},
@@ -455,44 +538,68 @@ jQuery.extend({
 	// See test/unit/core.js for details concerning isFunction.
 	// Since version 1.3, DOM methods and functions like alert
 	// aren't supported. They return false on IE (#2968).
+	//判断是否是函数，低版本的IE下这个判断方法有点问题
+	//因为这个判断核心也是typeof，在低版本IE中 typeof function(){} === "object"
+	//1.3版本之前是有过判断的，但是比较复杂 后来就没有管
 	isFunction: function( obj ) {
 		return jQuery.type(obj) === "function";
 	},
 
+	//判断是否是数组，isArray是数组原生的方法，所以效率高，能用原生就用原生的方法
 	isArray: Array.isArray || function( obj ) {
 		return jQuery.type(obj) === "array";
 	},
-
+	//判断是否是window对象
 	isWindow: function( obj ) {
 		/* jshint eqeqeq: false */
+		//由于 null == null , undefined==null，所以需要判断一下obj != null
+		//obj.window 如果obj是window，有一个属性是window 指向自己
 		return obj != null && obj == obj.window;
 	},
 
+	//判断是否是数字类型 包括整数 浮点数 正负数
 	isNumeric: function( obj ) {
+		//parseFloat转换成float类型，如果不是数字则转成NaN，所以有个判断是否是isNaN
+		//如果不是NaN，则需要判断是否超过了计算机计算的最大数 isFinite(obj) 原生的判断方法
 		return !isNaN( parseFloat(obj) ) && isFinite( obj );
 	},
 
+	//判断obj类型，比typeof 判断类型强大很多，比如typeof 判断 RegExp  Date  Array 都是object
+	//type 能够做到 1094 行的 "Boolean Number String Function Array Date RegExp Object Error"类型匹配
 	type: function( obj ) {
+		//对 obj =null 的类型单独判断
 		if ( obj == null ) {
+			//obj有可能是null , undefined；String(obj) 转换成对应 字符串
 			return String( obj );
 		}
+		//如果 typeof obj 的结果既不是 object 也不是 function 则直接用 typeof 判断即可，否则：
+		//core_toString是上面定义的 {}.toString，这个函数能把传入的作用域的类型判断出来，如：
+		// {}.toString.call(new Date) == '[object Date]' 
+		// 1094行 把上面找出的对应类型存放在 class2type中，返回对应的类型 小写 date array 等
 		return typeof obj === "object" || typeof obj === "function" ?
 			class2type[ core_toString.call(obj) ] || "object" :
 			typeof obj;
 	},
 
+	//判断是否是对象自变量 即 { a: 1 } 或 new Object 类型
 	isPlainObject: function( obj ) {
 		var key;
 
 		// Must be an Object.
 		// Because of IE, we also have to check the presence of the constructor property.
 		// Make sure that DOM nodes and window objects don't pass through, as well
+		//如果obj 为 null undefined 0 "" 或 类型不为object 或 为DOM元素节点 或 为window对象 都不是对象自变量
+		//注意 如果 obj={};  boolean(obj) 是true
 		if ( !obj || jQuery.type(obj) !== "object" || obj.nodeType || jQuery.isWindow( obj ) ) {
 			return false;
 		}
 
+		//为什么用一个 try catch,因为在 FF 20之下，调用多次的constructor 会出现内存泄露的错误
 		try {
 			// Not own constructor property must be Object
+			//core_hasOwn 是 {}.hasOwnProperty 检测是否是自身和自身原型上的方法或属性（不检查原型链）
+			//isPrototypeOf是Object自身原型上的方法，是其他 Array  Function类型在Object 原型链上继承的方法
+			//所以用obj.constructor 相当于是 Object.prototype.hasOwnProperty("isPrototypeOf")，如果是Object类型 则true，其他 false
 			if ( obj.constructor &&
 				!core_hasOwn.call(obj, "constructor") &&
 				!core_hasOwn.call(obj.constructor.prototype, "isPrototypeOf") ) {
@@ -518,8 +625,10 @@ jQuery.extend({
 		return key === undefined || core_hasOwn.call( obj, key );
 	},
 
+	//是否为空对象，即没有自身的属性和方法，如 [] {} function(){} 
 	isEmptyObject: function( obj ) {
 		var name;
+		//因为 for只能循环自身属性和方法，如果有则为false  否则为true
 		for ( name in obj ) {
 			return false;
 		}
@@ -930,27 +1039,34 @@ jQuery.extend({
 
 jQuery.ready.promise = function( obj ) {
 	if ( !readyList ) {
-
+		//第一次能进来 readyList 赋值为 延迟对象
 		readyList = jQuery.Deferred();
 
 		// Catch cases where $(document).ready() is called after the browser event has already occurred.
 		// we once tried to use readyState "interactive" here, but it caused issues like the one
 		// discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
 		if ( document.readyState === "complete" ) {
+			//如果加载好 则执行 jQuery.ready ，为什么要用setTimeout?
+			//因为：IE有时候在DOM还差一点点加载好的时候就告诉你complete，所以，如果直接执行还是有错误
+			//所以 用setTimeout延迟执行
 			// Handle it asynchronously to allow scripts the opportunity to delay ready
 			setTimeout( jQuery.ready );
 
 		// Standards-based browsers support DOMContentLoaded
 		} else if ( document.addEventListener ) {
 			// Use the handy event callback
+			//如果还没有加载好，且是高级浏览器能识别 DOMContentLoaded事件，则绑定该事件
 			document.addEventListener( "DOMContentLoaded", completed, false );
 
 			// A fallback to window.onload, that will always work
+			//为什么要绑定 DOMContentedLoaded的同时还要绑定load 
+			//因为 有时候浏览器会有load缓存，所以哪个先执行 就先执行哪个，都是执行completed方法
 			window.addEventListener( "load", completed, false );
 
 		// If IE event model is used
 		} else {
 			// Ensure firing before onload, maybe late but safe also for iframes
+			//如果还没有加载好，且是IE低版本浏览器，则绑定onreadystatechange事件，完成执行completed
 			document.attachEvent( "onreadystatechange", completed );
 
 			// A fallback to window.onload, that will always work

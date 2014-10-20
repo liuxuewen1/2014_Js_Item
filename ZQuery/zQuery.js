@@ -317,4 +317,4 @@ function getByClass(obj,attr){
 		};
 		return arr;
 	}
-} 
+}

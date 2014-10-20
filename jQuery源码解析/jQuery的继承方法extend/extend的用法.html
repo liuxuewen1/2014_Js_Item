@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="../jquery.js"></script>
+	<script>
+
+	//1、$.extend	添加工具类的插件
+	$.extend({
+		aaa: function(){
+			alert(1);
+		}
+	})
+	//调用
+	$.aaa();
+
+	//2、$.fn.extend	添加jQuery实例插件
+	$.fn.extend({
+		aaa: function(){
+			alert(2)
+		}
+	})
+	//调用
+	$().aaa();
+
+	//思考：为什么这两种写法不一样，调用的方式也不一样
+	//因为：$.extend 相当于是在 jQuery.extend这个函数做的扩展，是静态方法
+	//$.fn = jQuery.prototype 是原型属性，extend是原型对象的方法，是实例方法需要实例化之后调用
+
+	//如果传入多个参数，可以做到浅复制和深复制
+	var obj={};
+	var arr=['arr1', 'arr2']
+	//浅复制
+	$.extend(obj, { bb: 'bb' }, {cc : arr})
+	console.log(obj);	//obj为 {bb: 'bb', cc: arr }
+	//为什么说是浅复制？因为：
+	obj.cc=['change1'];	//此时 arr中的值也发生改变
+
+	//深复制
+	$.extend(true, obj, { bb: 'bb' }, {cc : arr});
+	obj.cc=['change2'];
+	console.log(obj);
+	//如果改变 obj.cc 的值,也不会对 arr进行影响
+
+
+	</script>
+</head>
+<body>
+	
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="../jquery.js"></script>
+	<script>
+	/*jquery.js 中 180 - 184 行源码解释 */
+	/*
+	jQuery.merge(this, jQuery.parseHTML(
+		match[1],
+		context && context.nodeType ? context.ownerDocument || context : document,
+		true
+	))
+	*/
+
+	$(function(){
+		/*
+
+			//先看 jQuery.parseHTML用法：
+			var str="<li>111</li><li>222</li><script>alert(1);<\/script>";
+			//得到一个数组，数组里是每个新创建的html元素
+			//parseHTML默认第三个参数 false ：表示不会创建script元素;
+			//如果设置为true，如果str有script标签也会被创建
+			var arr = jQuery.parseHTML(str,document,true)
+			console.log(arr);
+
+		*/
+
+		/*
+			parseHTML源码：
+			parseHTML: function( data, context, keepScripts ) {
+				if ( !data || typeof data !== "string" ) {
+					return null;
+				}
+				if ( typeof context === "boolean" ) {
+					keepScripts = context;
+					context = false;
+				}
+				context = context || document;
+
+				var parsed = rsingleTag.exec( data ),
+					scripts = !keepScripts && [];
+
+				// Single tag
+				if ( parsed ) {
+					return [ context.createElement( parsed[1] ) ];
+				}
+
+				parsed = jQuery.buildFragment( [ data ], context, scripts );
+				if ( scripts ) {
+					jQuery( scripts ).remove();
+				}
+				return jQuery.merge( [], parsed.childNodes );
+			},
+		*/
+
+
+		//jQuery.merge的用法
+		var arr1=[4,3,2];
+		var arr2=[1,0];
+		var arr3 = jQuery.merge(arr1,arr2);
+		console.log(arr3)	//[4,3,2,1,0]
+
+		//jquery源码中的这个merge其实还可以这么用
+		var aLi=document.getElementsByTagName('li');
+		var json11={
+			0: aLi[0],
+			1: aLi[1],
+			2: aLi[2],
+			length: 3
+		}
+		var arr22 = $.parseHTML("<li>11</li><li>22</li>");
+		var obj = $.merge(json11, arr22);
+		console.log(obj)
+		//得到的结果类似于：
+		/*
+			{
+				0: aLi[0],
+				1: aLi[1],
+				2: aLi[2],
+				3: arr22[0],
+				4: arr22[1],
+				length: 5
+			}
+		*/
+	})
+
+	</script>
+</head>
+<body>
+	<ul>
+		<li>a</li>
+		<li>b</li>
+		<li>c</li>
+	</ul>
+</body>
+</html>

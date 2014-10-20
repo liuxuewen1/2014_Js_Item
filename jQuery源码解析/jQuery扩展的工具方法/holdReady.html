@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src='../jquery.js'></script>
+	<script>
+	//如果需要在执行DOM Ready之前加载进 1.js 2.js ，则需要用holdReady，让ready事件等该js加载进来后 再执行
+	//每个对应的加载都需要写 holdReady 
+	$.holdReady(true);
+	$.getScript("1.js",function(){
+		$.holdReady(false);
+	})
+
+	$.holdReady(true);
+	$.getScript("2.js",function(){
+		$.holdReady(false);
+	})
+
+
+	$(function(){
+		//会等1.js 2.js 加载完后执行这个alert
+		alert('执行了')
+	})
+	</script>
+</head>
+<body>
+	
+</body>
+</html>

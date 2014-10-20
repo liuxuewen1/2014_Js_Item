@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script>
+		var $ = 123;
+		var jQuery = 456;
+	</script>
+	<script src="../jquery.js"></script>
+	<script>
+	
+		var jq= $.noConflict(true);
+
+		alert($)
+		alert(jQuery)
+
+		//这里，jq相当于之前常用的 $  jQuery
+		jq(function(){
+			alert(jq().jquery)
+		})
+	</script>
+</head>
+<body>
+	
+</body>
+</html>
