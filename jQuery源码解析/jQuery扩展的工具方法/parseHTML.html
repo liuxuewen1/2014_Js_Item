@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script src="../jquery.js"></script>
+<script>
+$(function(){
+
+var str="<li>1</li><li>2</li><script><\/script>";
+
+//parseHTML 方法，将字符串节点转换成DOM节点
+//参数1：需要转换的字符串；参数2：上下文对象，可以传也可以不传，如果传也是document对象，或者其他iframe的document对象；
+//参数3：str中的script标签是否需要被创建，true 需要，默认为false
+var pNode= $.parseHTML(str, document, false);
+
+$("ul").append(pNode);
+
+});
+</script>
+</head>
+
+<body>
+<ul></ul>
+</body>
+</html>

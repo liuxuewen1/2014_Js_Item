@@ -634,7 +634,8 @@ jQuery.extend({
 		}
 		return true;
 	},
-
+	
+	//抛出异常
 	error: function( msg ) {
 		throw new Error( msg );
 	},
@@ -642,37 +643,54 @@ jQuery.extend({
 	// data: string of html
 	// context (optional): If specified, the fragment will be created in this context, defaults to document
 	// keepScripts (optional): If true, will include scripts passed in the html string
+	//将字符串节点转换成DOM节点
+	//参数1：需要转换的字符串；参数2：上下文对象，可以传也可以不传，如果传也是document对象，或者其他iframe的document对象；
+	//参数3：str中的script标签是否需要被创建，true 需要，默认
 	parseHTML: function( data, context, keepScripts ) {
+		//检测 必须是字符串类型
 		if ( !data || typeof data !== "string" ) {
 			return null;
 		}
+		//如果context的类型是boolean，则说明context没有传值
 		if ( typeof context === "boolean" ) {
+			//将第二个参数作为keepScripts，同时设置context为FALSE
 			keepScripts = context;
 			context = false;
 		}
+		//上下文对象，可以传也可以不传，如果传也是document对象，或者其他iframe的document对象
 		context = context || document;
-
+		
+		//rsingleTag匹配单标签的正则 <li> 或 <li></li>
 		var parsed = rsingleTag.exec( data ),
 			scripts = !keepScripts && [];
 
 		// Single tag
 		if ( parsed ) {
+			//如果是单标签，则直接通过document.createElement创建
 			return [ context.createElement( parsed[1] ) ];
 		}
-
+		
+		//如果不是单标签，通过文档碎片的方式来创建复杂节点
+		//scripts是[] ,由于是引用类型 在buildFragment中改变值以后 也会改变scripts，实际最后存的是
+		//[ script ] 如果里面有script节点存在的话
 		parsed = jQuery.buildFragment( [ data ], context, scripts );
 		if ( scripts ) {
+			//如果不需要script，则删除掉
 			jQuery( scripts ).remove();
 		}
+		//merge会把 节点变成数组形式 一个个放在数组中 然后返回
 		return jQuery.merge( [], parsed.childNodes );
 	},
 
+	//将字符串转换成JSON格式
 	parseJSON: function( data ) {
 		// Attempt to parse using the native JSON parser first
+		//如果能支持JSON.parse 则直接用JSON.parse就可以
+		//IE6 IE7 IE8 不支持JSON.parse，其余高版本IE和FF Chrome都支持
 		if ( window.JSON && window.JSON.parse ) {
 			return window.JSON.parse( data );
 		}
-
+		
 		if ( data === null ) {
 			return data;
 		}
@@ -688,7 +706,8 @@ jQuery.extend({
 				if ( rvalidchars.test( data.replace( rvalidescape, "@" )
 					.replace( rvalidtokens, "]" )
 					.replace( rvalidbraces, "")) ) {
-
+					
+					//通过正则来匹配JSON格式，如果正确 通过new Function 来执行返回正则
 					return ( new Function( "return " + data ) )();
 				}
 			}
@@ -698,29 +717,38 @@ jQuery.extend({
 	},
 
 	// Cross-browser xml parsing
+	//解析XML
 	parseXML: function( data ) {
 		var xml, tmp;
+		//参数必须是字符串类型
 		if ( !data || typeof data !== "string" ) {
 			return null;
 		}
 		try {
+			//IE9及以上 FF Chrome才支持 DOMParser
 			if ( window.DOMParser ) { // Standard
 				tmp = new DOMParser();
+				//转换成xml形式，如果data格式不正确，如 "<root><name>lxw<age>12</age></root>
+				//IE9 会直接报错，所以用try捕获，其他浏览器下会创建一个 <parsererror>错误信息的节点</parsererror>
 				xml = tmp.parseFromString( data , "text/xml" );
 			} else { // IE
+				//如果是IE9以下的低版本，需要用ActiveXObject来创建XML
 				xml = new ActiveXObject( "Microsoft.XMLDOM" );
 				xml.async = "false";
 				xml.loadXML( data );
 			}
 		} catch( e ) {
+			//如果抛出异常
 			xml = undefined;
 		}
 		if ( !xml || !xml.documentElement || xml.getElementsByTagName( "parsererror" ).length ) {
+			//如果xml=undefined 或 创建了 parsererror的节点，说明data的JSON格式出错，抛出异常
 			jQuery.error( "Invalid XML: " + data );
 		}
+		//返回
 		return xml;
 	},
-
+	//noop 创建一个空函数，没啥作用
 	noop: function() {},
 
 	// Evaluates a script in a global context
