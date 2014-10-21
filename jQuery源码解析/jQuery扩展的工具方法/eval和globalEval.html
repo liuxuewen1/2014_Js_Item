@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<script src="../jquery.js"></script>
+<script>
+//globalEval的用法
+function show(){
+	$.globalEval("var a=1");
+}
+show();
+console.log(a);
+
+//eval的用法
+function evalFn(){
+	eval("var b=2");
+}
+evalFn();
+console.log(b);	//报错
+
+function evalFn2(){
+	window.eval("var c=3");
+}
+evalFn2();
+console.log(c);	//3
+
+function evalFn3(){
+	var gEval=eval;
+	gEval("var d=4");
+}
+evalFn3();
+console.log(d);	//4
+
+//eval 用两种意思，一种是关键字eval，一种是window上的一个属性
+//如果 直接用eval()则认为是关键字eval，不会有全局的作用
+//反之 window.eval会认为是使用window上的属性eval 有全局的作用
+//如果将eval保存在变量上 也相当于是使用的window.eval 所以 evalFn2 evalFn3 都生成了全局变量
+
+//alert(window.execScript);
+</script>
+</head>
+
+<body>
+</body>
+</html>

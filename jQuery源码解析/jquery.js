@@ -754,11 +754,15 @@ jQuery.extend({
 	// Evaluates a script in a global context
 	// Workarounds based on findings by Jim Driscoll
 	// http://weblogs.java.net/blog/driscoll/archive/2009/09/08/eval-javascript-global-context
+	//将data的局部内容转换成全局的
 	globalEval: function( data ) {
 		if ( data && jQuery.trim( data ) ) {
 			// We use execScript on Internet Explorer
 			// We use an anonymous function so that context is window
 			// rather than jQuery in Firefox
+			//ie能识别 execScript方法，使用这个
+			//其他直接使用  window.eval(data) 这种形式 详见 eval和globalEval的用法.html
+			//在2.0以上的实现跟这个不太一样
 			( window.execScript || function( data ) {
 				window[ "eval" ].call( window, data );
 			} )( data );
