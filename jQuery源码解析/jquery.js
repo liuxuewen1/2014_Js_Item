@@ -780,11 +780,12 @@ jQuery.extend({
 	},
 
 	// args is for internal usage only
+	//args的参数是为JQ内部使用
 	each: function( obj, callback, args ) {
 		var value,
 			i = 0,
 			length = obj.length,
-			isArray = isArraylike( obj );
+			isArray = isArraylike( obj );	//判断obj是否是数组形式 Array arguments childNodes 等
 
 		if ( args ) {
 			if ( isArray ) {
@@ -808,14 +809,18 @@ jQuery.extend({
 		// A special, fast, case for the most common use of each
 		} else {
 			if ( isArray ) {
+				//如果是数组 则通过for循环
 				for ( ; i < length; i++ ) {
+					//i作为第一个参数，obj[i]作为第二个参数
 					value = callback.call( obj[ i ], i, obj[ i ] );
-
+					
+					//如果 callback 返回 false，会中断后面的循环
 					if ( value === false ) {
 						break;
 					}
 				}
 			} else {
+				//如果是Object对象 通过for in 
 				for ( i in obj ) {
 					value = callback.call( obj[ i ], i, obj[ i ] );
 
@@ -830,6 +835,7 @@ jQuery.extend({
 	},
 
 	// Use native String.trim function wherever possible
+	//去除空格 通过原生的 "".trim 
 	trim: core_trim && !core_trim.call("\uFEFF\xA0") ?
 		function( text ) {
 			return text == null ?
