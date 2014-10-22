@@ -890,16 +890,23 @@ jQuery.extend({
 		return -1;
 	},
 
+	//merge的几种可以成功的形式
+	//① $.merge([],[]);	//2个都是数组
+	//② $.merge([],{});	//第一个数组，第二个json，但是json的属性必须是 {0:'a',1:'b'} 可以没有length
+	//③ $.merge({},{});	//2个都是json，但是json的属性必须是 {0:'a',1:'b'} 且第一个必须有length 为整型 , 第二个可以没有
+	//④ $.merge({},[]);	//第一个json，第二个数组 但是json的属性必须是 {0:'a',1:'b'} 且必须有length 为整型 
 	merge: function( first, second ) {
 		var l = second.length,
 			i = first.length,
 			j = 0;
 
 		if ( typeof l === "number" ) {
+			//上述 ①、④能进入，如果②③有为整型的长度属性length 也能进入
 			for ( ; j < l; j++ ) {
 				first[ i++ ] = second[ j ];
 			}
 		} else {
+			//其余第二个参数为json格式且没有length属性或者length属性为字符串类型的进入此
 			while ( second[j] !== undefined ) {
 				first[ i++ ] = second[ j++ ];
 			}
