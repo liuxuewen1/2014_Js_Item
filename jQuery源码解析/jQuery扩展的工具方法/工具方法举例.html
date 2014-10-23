@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="../jquery.js"></script>
+	<script>
+	$(function(){
+		var arr=[11,22,33,44,55,33];
+		//inArray 是否在数组内，不在 -1 ，在 对应的index
+		// console.log($.inArray(33, arr));
+		//第三个参数表示 从第几个开始
+		// console.log($.inArray(33, arr, 3));	
+
+		//grep 对数组或类似于数组的JSON进行过滤，返回新的数组或类数组
+		console.log($.grep(arr, function(item, i){
+			return item>40;
+		}));	//[44,55]
+		
+		var arr2={0: 10, 1:20, 2:30, length:3}
+		console.log($.grep(arr2, function(item, i){
+			return item>15;
+		}));	//[20, 30]
+
+		//第三个参数如果为 true，则过滤的是与callback中相反的数据
+		console.log($.grep(arr2, function(item, i){
+			return item>15;
+		}, true));	//[10]
+
+		//map 对数组或类数组处理完毕后重新返回一个新数组
+		console.log("map:");
+		console.log($.map(arr,function(item, i){
+			return item>40? item+'_大于40': item;
+		}))
+		console.log($.map(arr2, function(item,i){
+			return item>15? item+'_大于15': item;
+		}))
+	})
+	</script>
+</head>
+<body>
+	
+</body>
+</html>

@@ -872,11 +872,15 @@ jQuery.extend({
 		var len;
 
 		if ( arr ) {
+			//如果支持 [].indexOf ，那么就用原生的方法
 			if ( core_indexOf ) {
 				return core_indexOf.call( arr, elem, i );
 			}
 
 			len = arr.length;
+			//i是否存在，不存在 默认从0开始；
+			//存在，是否小于0，不小于 则赋值i；
+			//小于，则在 0 和 len+i 中取最大的那个值，因为 要保证 len+i >0 ，否则取第负数个数 无意义
 			i = i ? i < 0 ? Math.max( 0, len + i ) : i : 0;
 
 			for ( ; i < len; i++ ) {
@@ -911,23 +915,29 @@ jQuery.extend({
 				first[ i++ ] = second[ j++ ];
 			}
 		}
-
+		//最后 将length赋值给first，如果是JSON格式 也能保证length准确
 		first.length = i;
 
 		return first;
 	},
 
+	//过滤数组或类数组，返回新的数组
 	grep: function( elems, callback, inv ) {
 		var retVal,
 			ret = [],
 			i = 0,
 			length = elems.length;
+		//为什么用 !!inv 可以将inv转换成true和false
 		inv = !!inv;
 
 		// Go through the array, only saving the items
 		// that pass the validator function
 		for ( ; i < length; i++ ) {
+			//调用callback回调函数，传入 当前的数 和 当前index
+			//返回的仍是 双感叹号转化之后的 true和false
 			retVal = !!callback( elems[ i ], i );
+			//如果inv没有传值，默认为false，则如果返回的结果也是false，则不可以push，只有返回true才会push
+			//如果inv传的为true，则返回结果为false时 才会push，所以 inv传递为true时 是过滤相反结果
 			if ( inv !== retVal ) {
 				ret.push( elems[ i ] );
 			}
@@ -937,6 +947,7 @@ jQuery.extend({
 	},
 
 	// arg is for internal usage only
+	//map 对数组或类数组处理完毕后重新返回一个新数组，arg参数是为内部调用准备的
 	map: function( elems, callback, arg ) {
 		var value,
 			i = 0,
@@ -946,9 +957,10 @@ jQuery.extend({
 
 		// Go through the array, translating each of the items to their
 		if ( isArray ) {
+			//如果是数组或类数组
 			for ( ; i < length; i++ ) {
 				value = callback( elems[ i ], i, arg );
-
+				//如果返回不为null undefined，则插入到ret
 				if ( value != null ) {
 					ret[ ret.length ] = value;
 				}
