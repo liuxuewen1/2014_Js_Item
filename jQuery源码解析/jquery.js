@@ -968,6 +968,7 @@ jQuery.extend({
 
 		// Go through every key on the object,
 		} else {
+			//非数组的形式，注：字符串也可以 通过 for in 循环
 			for ( i in elems ) {
 				value = callback( elems[ i ], i, arg );
 
@@ -978,6 +979,8 @@ jQuery.extend({
 		}
 
 		// Flatten any nested arrays
+		//为什么这边不是直接返回出ret呢？因为他怕你回调中返回数组，这样可能ret就会是 [[11],[22]]
+		//通过apply 跟空数组相连 会得到 [11,22]
 		return core_concat.apply( [], ret );
 	},
 
