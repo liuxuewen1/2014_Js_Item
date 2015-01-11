@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>test</title> 
+    <style>   
+    body{ font-family: "微软雅黑"}
+	#c1{ background:white;}
+	.wrap { width:400px; height: 400px; position: relative;}
+	.v-suggest{ width:60px; height: 60px; font-size:14px; color:#fff; position: absolute; text-align: center;}
+	.v-suggest strong{ font-size: 24px;}
+	.v0{ right:130px; top:100px;}
+	.v1{ right:80px; bottom:140px;}
+	.v2{ left:170px; bottom:80px;}
+	.v3{ left:80px; bottom:140px;}
+	.v4{ left:116px; top:100px;}
+    </style>
+	<!--[if IE]>
+		<script type="text/javascript" src="http://files.cnblogs.com/mytree/excanvas.js"  ></script>
+	<![endif]-->
+	<script> 
+	function getByClass(className){
+		if(document.getElementsByClassName){
+			return document.getElementsByClassName(className);
+		}else{
+			var arr=[];
+			var arrEle = document.getElementsByTagName("*");
+			var reg = new RegExp("\\b"+className+"\\b");
+			for (var i = 0; i < arrEle.length; i++) {
+				if(reg.test(arrEle[i].className)){
+					arr.push(arrEle[i]);
+				}
+			};
+			return arr;
+		}
+	}
+	window.onload = function(){
+		var aSuggest = getByClass("v-suggest");
+		var oC = document.getElementById("c1");
+		var oGC = oC.getContext("2d");
+
+		var aColor = ["#ffb528","#77b816","#15b9c3","#57a2e3","#ff6803"];
+		var aValue = [80, 80, 90, 60, 90];
+
+		for (var i = 0; i < aColor.length; i++) {
+			oGC.beginPath();
+			oGC.moveTo(200,200);
+			oGC.arc(200,200,aValue[i]*2,(-90+70*i+2*i)*Math.PI/180,(-90+70*(i+1)+2*i)*Math.PI/180,false);
+			oGC.fillStyle = oGC.strokeStyle = aColor[i];
+			oGC.fill();
+			oGC.stroke();
+			oGC.closePath();
+			aSuggest[i].getElementsByTagName("strong")[0].innerHTML = aValue[i];
+		};
+
+		oGC.beginPath();
+		oGC.moveTo(200,200);
+		oGC.arc(200,200,50,0,360*Math.PI/180,false);
+		oGC.fillStyle = oGC.strokeStyle = "#fff";
+		oGC.fill();
+		oGC.stroke();
+		oGC.closePath();
+	}
+	</script>
+</head>
+<body> 
+<div class="wrap">
+	<canvas id="c1" width="400" height="400"></canvas>
+	  <div class="v-suggest v0">
+	  	债偿保障<br/><strong>80</strong>
+	  </div>
+	  <div class="v-suggest v1">
+	  	还款能力<br/><strong>80</strong>
+	  </div>
+	  <div class="v-suggest v2">
+	  	信用质量<br/><strong>90</strong>
+	  </div>
+	  <div class="v-suggest v3">
+	  	资产实力<br/><strong>60</strong>
+	  </div>
+	  <div class="v-suggest v4">
+	  	稳定性<br/><strong>90</strong>
+	  </div>
+</div>
+  
+</body>
+</html>
